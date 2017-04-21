@@ -2,7 +2,7 @@ package Data
 
 import Common._
 
-class DataSetIterator(src: DataSource) extends SimpleIterator[DataSet] {
+class DataSetIterator(src: DataSource) extends SimpleIterator[Data] {
 
-  override def headOption(): Option[DataSet] = ???
+  override def headOption(): Option[Data] = ???
 }

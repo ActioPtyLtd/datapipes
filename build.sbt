@@ -11,9 +11,13 @@ lazy val model = project
   .dependsOn(common)
 
 lazy val datasources = project
+  .settings(libraryDependencies ++= Seq("org.apache.commons" % "commons-csv" % "1.4"))
   .dependsOn(model)
 
 
+lazy val application = project
+  .dependsOn(model, datasources, common)
+
 lazy val root =
   project.in( file(".") )
-    .aggregate(model, datasources, common)
+    .aggregate(application, model, datasources, common)

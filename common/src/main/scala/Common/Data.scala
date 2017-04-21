@@ -1,5 +1,12 @@
 package Common
 
+/**
+  * Created by maurice on 21/04/17.
+  */
+trait Data extends LinkedTree[Data] {
+
+}
+
 abstract class LinkedTree[D <: LinkedTree[D]] {
 
   def apply(ord: Int): D
