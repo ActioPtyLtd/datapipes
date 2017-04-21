@@ -1,5 +1,5 @@
 
-name := "pickleroot"
+name := "root"
 
 version := "1.0"
 

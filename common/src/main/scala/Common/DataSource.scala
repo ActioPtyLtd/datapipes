@@ -1,0 +1,5 @@
+package Common
+
+trait DataSource {
+
+}
