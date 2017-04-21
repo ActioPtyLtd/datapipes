@@ -1,0 +1,66 @@
+target/
+out/
+
+### Intellij ###
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
+
+*.iml
+
+
+## Directory-based project format:
+# if you remove the above rule, at least ignore the following:
+
+# User-specific stuff:
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/sbt.xml
+.idea/compiler.xml
+.idea/encodings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/scala_compiler.xml
+.idea/codeStyleSettings.xml
+.idea/scala_settings.xml
+.idea/vcs.xml
+.idea/.name
+
+# Sensitive or high-churn files:
+.idea/dataSources.ids
+.idea/dataSources.xml
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/uiDesigner.xml
+
+
+# Logback
+.idea/modules/log*.txt
+log*.txt
+
+# IntelliJ library config
+.idea/libraries/*.xml
+
+# Gradle:
+# .idea/gradle.xml
+# .idea/libraries
+
+# Mongo Explorer plugin:
+# .idea/mongoSettings.xml
+
+## File-based project format:
+*.ipr
+*.iws
+.history
+.idea/shelf/
+project/project/
+src/main/scala-2.11/
+src/test/
+/dist/
+.idea/modules/
+
+# Ensime
+.ensime
+.ensime_cache/
+
+# Data Set Dump Files
+*.ds
