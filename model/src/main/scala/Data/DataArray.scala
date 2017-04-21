@@ -1,6 +1,8 @@
 package Data
 
-case class DataArray(label: String, arrayElems: List[DataSet]) extends DataSet {
+import Common.DataSet
+
+case class DataArray(label: String, arrayElems: List[DataSet]) extends DataSetBase {
 
   override def apply(ord: Int): DataSet = arrayElems.lift(ord).getOrElse(DataNothing())
 

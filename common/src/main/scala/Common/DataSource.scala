@@ -1,5 +1,5 @@
 package Common
 
-trait DataSource {
+trait DataSource extends SimpleIterator[DataSet] {
 
 }

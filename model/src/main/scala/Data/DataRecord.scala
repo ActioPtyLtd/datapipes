@@ -1,6 +1,8 @@
 package Data
 
-case class DataRecord(label: String, fields: List[DataSet]) extends DataSet {
+import Common.DataSet
+
+case class DataRecord(label: String, fields: List[DataSet]) extends DataSetBase {
 
   lazy val mapFields: Map[String, DataSet] = fields.map(f => f.label -> f).toMap
 

@@ -1,4 +1,4 @@
-package Data
+package Common
 
 abstract class LinkedTree[D <: LinkedTree[D]] {
 

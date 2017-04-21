@@ -1,6 +1,6 @@
 package Data
 
-case class DataBoolean(label: String, bool: Boolean) extends DataSet {
+case class DataBoolean(label: String, bool: Boolean) extends DataSetBase {
 
   override def stringOption: Option[String] = Some(bool.toString)
 }

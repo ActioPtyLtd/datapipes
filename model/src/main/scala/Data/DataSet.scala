@@ -1,6 +1,8 @@
 package Data
 
-abstract class DataSet extends LinkedTree[DataSet]{
+import Common.DataSet
+
+abstract class DataSetBase extends DataSet {
 
   def apply(ord: Int): DataSet = DataNothing()
 

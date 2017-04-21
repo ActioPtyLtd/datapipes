@@ -1,6 +1,6 @@
 package Data
 
-case class DataNumeric(label: String, num: BigDecimal) extends DataSet {
+case class DataNumeric(label: String, num: BigDecimal) extends DataSetBase {
 
   override def stringOption: Option[String] = Some(num.toString())
 }

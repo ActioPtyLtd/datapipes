@@ -1,6 +1,6 @@
 package Data
 
-case class DataString(label: String, str: String) extends DataSet {
+case class DataString(label: String, str: String) extends DataSetBase {
 
   def this(_str: String) {
     this ("string",_str)
