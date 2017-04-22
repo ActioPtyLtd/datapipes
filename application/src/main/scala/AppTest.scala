@@ -9,9 +9,9 @@ import Common._
 
 object AppTest extends App {
 
-  val src = new FileDataSource()
+  val src = new CSVDataSource()
 
-  val ds = src.read(DataNothing())
+  val ds = src.execute("", DataNothing())
 
   val data = ds.data()
 

@@ -6,27 +6,19 @@ import java.io.FileReader
 import Data.{DataArray, DataRecord, DataString}
 import org.apache.commons.csv.{CSVFormat, CSVParser}
 
-class FileDataSource extends DataSource {
+class CSVDataSource extends DataSource {
 
   var fileName = "/home/maurice/gnm/frames_catalogue.csv"
   var parser: Option[CSVParser] = None
 
-  def batchSize: Int = 10
+  val batchSize: Int = 10
 
-  def execute(label: String, data: Data): DataSet = ???
-
-  def read(data: Data): DataSet = {
+  def execute(label: String, data: Data): DataSet = {
     val in = new FileReader(fileName)
     parser = Some(CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in))
 
     new DataSourceDataSet(this)
   }
-
-  def create(data: Data): DataSet = ???
-
-  def update(data: Data): DataSet = ???
-
-  def delete(data: Data): DataSet = ???
 
   def headOption(): Option[Data] = {
     import collection.JavaConverters._
@@ -38,7 +30,7 @@ class FileDataSource extends DataSource {
         Some(DataArray(it.next().map(r =>
           DataRecord(r.toMap.asScala.map(c => DataString(c._1, c._2)).toList)).toList))
       else {
-
+        // TODO: close the file reader
         None
       }
     }
