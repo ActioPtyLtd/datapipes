@@ -13,7 +13,7 @@ class CSVDataSource extends DataSource {
 
   val batchSize: Int = 10
 
-  def execute(label: String, data: Data): DataSet = {
+  def exec(parameters: Parameters): DataSet = {
     val in = new FileReader(fileName)
     parser = Some(CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in))
 

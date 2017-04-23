@@ -1,12 +1,9 @@
 package Engine
 
-import Common.{Data, DataSet}
-import Pipeline.Operation
+import Pipeline._
 
 object SimplePipelineExecuter {
 
-  def execute(data: Data, operation: Operation): List[DataSet] = {
-
-  }
+  def execute(operation: Operation): Unit = {}
 
 }
