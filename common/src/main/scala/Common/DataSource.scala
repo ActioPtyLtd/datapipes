@@ -1,6 +1,6 @@
 package Common
 
-trait DataSource extends IO {
+trait DataSource {
 
-  private[Common] def headOption(): Option[Data]
+  def exec(parameters: Parameters): DataSet
 }

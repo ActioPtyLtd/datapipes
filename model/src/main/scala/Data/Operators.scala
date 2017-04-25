@@ -1,0 +1,32 @@
+package Data
+
+import Common._
+
+object Operators {
+
+  def mergeLeft(l: Data, r: Data): Data = mergeLeft(l, r, r.label)
+
+  def mergeLeft(l: Data, r: Data, newLabel: String): Data = {
+
+    if(r.elems.isEmpty)
+      l
+    else {
+      val head = r.elems.head
+      val tail = r.elems.tail.toList
+      val findLabel = l.elems.find(f => f.label == head.label)
+
+      if(findLabel.isEmpty) {
+        mergeLeft(DataRecord(l.label, head :: l.elems.toList), DataRecord(r.label, tail), newLabel)
+      }
+      else {
+        (findLabel,head) match {
+          case (Some(f @ DataRecord(_,_)),DataRecord(_,_)) =>
+            mergeLeft(DataRecord(l.label, mergeLeft(f, head, newLabel)
+              :: l.elems.filterNot(f => f.label == head.label).toList), DataRecord(r.label, tail), newLabel)
+          case _ =>
+            mergeLeft(l, DataRecord(r.label, DataRecord(newLabel, List(head)) :: tail), newLabel)
+        }
+      }
+    }
+  }
+}

@@ -1,5 +1,3 @@
 package Common
 
-trait DataSet {
-  def data(): SimpleIterator[Data]
-}
+trait DataSet extends Observable[DataEnvelope]

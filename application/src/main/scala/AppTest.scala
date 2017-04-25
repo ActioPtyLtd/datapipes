@@ -2,31 +2,25 @@
   * Created by maurice on 21/04/17.
   */
 
-import Data.{DataNothing}
+import Data.{DataNothing, DataRecord, DataString}
 import DataSources._
 import Data.PrettyPrint._
 import Common._
 
 object AppTest extends App {
 
-  val src = new CSVDataSource()
+  val printer = new Observer[DataEnvelope] {
 
-  val ds = src.exec(DataNothing())
+    override def completed(): Unit = { println("done") }
 
-  val data = ds.data()
+    override def error(exception: Exception): Unit = ???
 
+    override def next(value: DataEnvelope): Unit = { println(value.success.print())}
+  }
 
-  var option: Option[Data] = None
+  val ds = new CSVDataSource().exec(DataRecord(DataString("filePath", "/home/maurice/gnm/frames_catalogue.csv")))
 
-  do {
-
-    option = data.headOption()
-
-    if(option.isDefined)
-      Console.println(option.get.print())
-
-  } while(option.isDefined)
-
+  ds.subscribe(printer)
 
 
 }
