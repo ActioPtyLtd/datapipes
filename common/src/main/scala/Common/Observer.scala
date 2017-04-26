@@ -1,7 +1,9 @@
 package Common
 
-trait Observer[T] {
-  def completed()
-  def error(exception: Exception);
-  def next(value: T);
+import scala.concurrent.Future
+
+trait Observer[-T] {
+  def completed(): Future[Unit]
+  def error(exception: Throwable): Future[Unit]
+  def next(value: T): Future[Unit]
 }
