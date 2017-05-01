@@ -9,7 +9,7 @@ import scala.xml.{Attribute, _}
 
 object PrettyPrint {
 
-  implicit class PrettyPrint(data: Data) {
+  implicit class PrettyPrint(data: DataSet) {
     def print(): String = data match {
       case DataString(l, s) => l + " -> \"" + s + "\""
 

@@ -1,8 +1,5 @@
-package Common.Data
+package Common
 
-/**
-  * Created by maurice on 1/05/17.
-  */
 abstract class LinkedTree[D <: LinkedTree[D]] {
 
   def apply(ord: Int): D

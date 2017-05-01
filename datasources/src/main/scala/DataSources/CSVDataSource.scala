@@ -10,13 +10,9 @@ import org.apache.commons.csv.{CSVFormat, CSVParser}
 
 class CSVDataSource extends DataSource {
 
-  def exec(parameters: Parameters): DataSet = new DataSet {
-    override def subscribe(observer: Observer[DataEnvelope]): Unit = {
-      // keep observer and parameters
-    }
-  }
+  def exec(parameters: Parameters): Observable[DataSet] = ???
 
-  def run(observer: Observer[DataEnvelope], parameters: Parameters): Future[Unit] = async {
+  def run(observer: Observer[DataSet], parameters: Parameters): Future[Unit] = async {
     import collection.JavaConverters._
 
     val filePath = parameters("filePath").stringOption.getOrElse("")
@@ -25,10 +21,12 @@ class CSVDataSource extends DataSource {
     val parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in)
     val it = parser.asScala.grouped(batchSize)
 
+    // need to loop here
+
     val i = it.next()
 
-      await { observer.next(DataEnvelope(DataArray(i.map(r =>
-        DataRecord(r.toMap.asScala.map(c => DataString(c._1, c._2)).toList)).toList), DataNothing(), DataNothing())) }
+    await { observer.next(DataArray(i.map(r =>
+      DataRecord(r.toMap.asScala.map(c => DataString(c._1, c._2)).toList)).toList)) }
 
     await { observer.completed() }
   }

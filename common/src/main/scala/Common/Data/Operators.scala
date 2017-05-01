@@ -4,9 +4,9 @@ import Common._
 
 object Operators {
 
-  def mergeLeft(l: Data, r: Data): Data = mergeLeft(l, r, r.label)
+  def mergeLeft(l: DataSet, r: DataSet): DataSet = mergeLeft(l, r, r.label)
 
-  def mergeLeft(l: Data, r: Data, newLabel: String): Data = {
+  def mergeLeft(l: DataSet, r: DataSet, newLabel: String): DataSet = {
 
     if(r.elems.isEmpty)
       l

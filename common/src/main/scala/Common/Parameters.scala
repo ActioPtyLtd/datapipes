@@ -1,7 +1,7 @@
-import Common.Data.Data
+import Common.DataSet
 
 package object Common {
 
-  type Parameters = Data
+  type Parameters = DataSet
 
 }

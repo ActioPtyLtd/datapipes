@@ -1,13 +1,12 @@
 package Common.Data
 
-/**
-  * Created by maurice on 21/04/17.
-  */
+import Common.DataSet
+
 case class DataNothing (label: String) extends DataBase
 
 object DataNothing {
 
   private val label = ""
 
-  def apply(): Data = DataNothing(label)
+  def apply(): DataSet = DataNothing(label)
 }

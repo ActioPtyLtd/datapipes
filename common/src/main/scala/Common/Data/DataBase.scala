@@ -1,18 +1,20 @@
 package Common.Data
 
-abstract class DataBase extends Data {
+import Common.DataSet
 
-  def apply(ord: Int): Data = DataNothing()
+abstract class DataBase extends DataSet {
 
-  def apply(field: String): Data = DataNothing()
+  def apply(ord: Int): DataSet = DataNothing()
 
-  override def elems: Seq[Data] = Seq.empty
+  def apply(field: String): DataSet = DataNothing()
 
-  override def toOption: Option[Data] = this match {
+  override def elems: Seq[DataSet] = Seq.empty
+
+  override def toOption: Option[DataSet] = this match {
     case DataNothing(_) => None
     case data => Some(data)
   }
 
-  def map[B](f:Data => B): Seq[B] = elems.map(f)
+  def map[B](f:DataSet => B): Seq[B] = elems.map(f)
 
 }
