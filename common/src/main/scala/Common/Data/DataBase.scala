@@ -1,6 +1,4 @@
-package Data
-
-import Common.Data
+package Common.Data
 
 abstract class DataBase extends Data {
 

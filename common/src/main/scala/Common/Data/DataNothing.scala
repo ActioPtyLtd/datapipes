@@ -1,6 +1,4 @@
-package Data
-
-import Common.Data
+package Common.Data
 
 /**
   * Created by maurice on 21/04/17.

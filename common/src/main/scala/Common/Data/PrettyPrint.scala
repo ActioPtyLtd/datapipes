@@ -1,4 +1,4 @@
-package Data
+package Common.Data
 
 import Common._
 import org.json4s._

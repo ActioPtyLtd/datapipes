@@ -1,3 +1,0 @@
-package Pipeline
-
-trait Lambda

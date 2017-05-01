@@ -1,6 +1,4 @@
-package Data
-
-import Common.Data
+package Common.Data
 
 case class DataArray(label: String, arrayElems: List[Data]) extends DataBase {
 

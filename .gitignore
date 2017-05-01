@@ -62,5 +62,5 @@ src/test/
 .ensime
 .ensime_cache/
 
-# Data Set Dump Files
+# Common.Data.Data Set Dump Files
 *.ds

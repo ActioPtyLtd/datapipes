@@ -1,4 +1,4 @@
-package Data
+package Common.Data
 
 case class DataBoolean(label: String, bool: Boolean) extends DataBase {
 

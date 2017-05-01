@@ -6,9 +6,9 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
-import Data.{DataNothing, DataRecord, DataString}
+import Common.Data.{DataNothing, DataRecord, DataString}
 import DataSources._
-import Data.PrettyPrint._
+import Common.Data.PrettyPrint._
 import Common._
 
 object AppTest extends App {

@@ -1,4 +1,4 @@
-package Data
+package Common.Data
 
 case class DataNumeric(label: String, num: BigDecimal) extends DataBase {
 

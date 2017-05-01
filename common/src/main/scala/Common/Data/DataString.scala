@@ -1,4 +1,4 @@
-package Data
+package Common.Data
 
 case class DataString(label: String, str: String) extends DataBase {
 

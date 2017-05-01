@@ -1,6 +1,4 @@
-package Data
-
-import Common.Data
+package Common.Data
 
 case class DataRecord(label: String, fields: List[Data]) extends DataBase {
 
