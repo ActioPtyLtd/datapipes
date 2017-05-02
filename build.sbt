@@ -20,10 +20,10 @@ lazy val pipeline = project
   .dependsOn(common)
 
 lazy val task = project
-  .dependsOn(common)
+  .dependsOn(common, datasources)
 
 lazy val application = project
-  .dependsOn(pipescript, datasources, common)
+  .dependsOn(pipescript, datasources, common, task)
 
 lazy val root =
   project.in( file(".") )

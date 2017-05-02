@@ -6,25 +6,28 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import Common.Data.{DataNothing, DataRecord, DataString}
-import DataSources.{CSVDataSource}
+import DataSources.{CSVDataSource, StdInDataSource}
 import Common.Data.PrettyPrint._
 import Common._
 
 object AppTest extends App {
 
-  val printer = new Observer[DataSet] {
+  val printer = new Observer[Dom] {
 
     override def completed(): Future[Unit]= Future { println("done") }
 
     override def error(exception: Throwable): Future[Unit] = ???
 
-    override def next(value: DataSet): Future[Unit] = Future { println(value.toXml) }
+    override def next(value: Dom): Future[Unit] = Future { println(value.success) }
   }
 
-  val src = new CSVDataSource()
-  src.subscribe(printer)
-  var f = src.exec(DataRecord(DataString("filePath", "/home/maurice/gnm/frames_catalogue.csv")))
+  val t = Task("TaskExtract")
 
-  Await.result(f, 1000 millis)
+  t.subscribe(printer)
+  //var f = src.exec(DataRecord(DataString("filePath", "/home/maurice/gnm/frames_catalogue.csv")))
+
+  var f = t.next(DataNothing())
+
+  Await.result(f, 100000 millis)
 
 }
