@@ -1,32 +1,18 @@
-/**
-  * Created by maurice on 21/04/17.
-  */
 
-import scala.concurrent.{Await, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Await}
 import scala.concurrent.duration._
-import Common.Data.{DataNothing, DataRecord, DataString}
-import DataSources.{CSVDataSource, StdInDataSource}
-import Common.Data.PrettyPrint._
+import Common.Data.{DataNothing}
+
 import Common._
+import Pipeline._
 
 object AppTest extends App {
 
-  val printer = new Observer[Dom] {
+  val p = Pipe("My Pipe", Task("My Extract Task", "TaskExtract", DataNothing()), Task("My Print", "TaskPrint", DataNothing()))
 
-    def completed(): Future[Unit]= Future { println("done") }
+  val runnable = SimpleExecutor.getRunnable(p)
 
-    def error(exception: Throwable): Future[Unit] = ???
-
-    def next(value: Dom): Future[Unit] = Future { println(value.success) }
-  }
-
-  val t = Task("TaskExtract")
-
-  t.subscribe(printer)
-  //var f = src.exec(DataRecord(DataString("filePath", "/home/maurice/gnm/frames_catalogue.csv")))
-
-  var f = t.next(DataNothing())
+  var f = runnable.next(Dom())
 
   Await.result(f, 100000 millis)
 

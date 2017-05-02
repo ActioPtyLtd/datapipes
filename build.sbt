@@ -17,13 +17,16 @@ lazy val datasources = project
   .dependsOn(pipescript)
 
 lazy val pipeline = project
+  .settings(libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-async" % "0.9.6"))
   .dependsOn(common)
+  .dependsOn(task)
+  .dependsOn(pipescript)
 
 lazy val task = project
   .dependsOn(common, datasources)
 
 lazy val application = project
-  .dependsOn(pipescript, datasources, common, task)
+  .dependsOn(pipescript, datasources, common, task, pipeline)
 
 lazy val root =
   project.in( file(".") )

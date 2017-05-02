@@ -1,17 +1,20 @@
+package Task
+
 import Common.Data.DataNothing
 import Common._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TaskExtract() extends Task {
+class TaskExtract(val name: String, val config: DataSet) extends Task {
 
-  val dataSource = DataSourceFactory.create(DataNothing())
+  val dataSource: DataSource = DataSource.create(config("dataSource"))
 
-  def completed(): Future[Unit] = ???
+  def completed(): Future[Unit] = Future { Unit }
 
   def error(exception: Throwable): Future[Unit] = ???
 
-  def next(value: DataSet): Future[Unit] = dataSource.exec(DataNothing())
+  def next(value: Dom): Future[Unit] = dataSource.exec(DataNothing())
 
   override def subscribe(observer: Observer[Dom]): Unit = {
     val dsObserver = new Observer[DataSet] {

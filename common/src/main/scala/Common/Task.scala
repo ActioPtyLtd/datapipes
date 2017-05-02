@@ -1,3 +1,3 @@
 package Common
 
-trait Task extends Observer[DataSet] with Observable[Dom]
+trait Task extends Observer[Dom] with Observable[Dom]
