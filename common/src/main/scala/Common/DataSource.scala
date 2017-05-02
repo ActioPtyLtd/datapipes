@@ -1,6 +1,8 @@
 package Common
 
-trait DataSource {
+import scala.concurrent.Future
 
-  def exec(parameters: Parameters): Observable[DataSet]
+trait DataSource extends Observable[DataSet] {
+
+  def exec(parameters: Parameters): Future[Unit]
 }
