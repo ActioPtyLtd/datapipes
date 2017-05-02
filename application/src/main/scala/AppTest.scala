@@ -14,11 +14,11 @@ object AppTest extends App {
 
   val printer = new Observer[Dom] {
 
-    override def completed(): Future[Unit]= Future { println("done") }
+    def completed(): Future[Unit]= Future { println("done") }
 
-    override def error(exception: Throwable): Future[Unit] = ???
+    def error(exception: Throwable): Future[Unit] = ???
 
-    override def next(value: Dom): Future[Unit] = Future { println(value.success) }
+    def next(value: Dom): Future[Unit] = Future { println(value.success) }
   }
 
   val t = Task("TaskExtract")

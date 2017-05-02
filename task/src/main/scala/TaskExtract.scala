@@ -7,19 +7,19 @@ class TaskExtract() extends Task {
 
   val dataSource = DataSourceFactory.create(DataNothing())
 
-  override def completed(): Future[Unit] = ???
+  def completed(): Future[Unit] = ???
 
-  override def error(exception: Throwable): Future[Unit] = ???
+  def error(exception: Throwable): Future[Unit] = ???
 
-  override def next(value: DataSet): Future[Unit] = dataSource.exec(DataNothing())
+  def next(value: DataSet): Future[Unit] = dataSource.exec(DataNothing())
 
   override def subscribe(observer: Observer[Dom]): Unit = {
     val dsObserver = new Observer[DataSet] {
-      override def completed(): Future[Unit] = observer.completed()
+      def completed(): Future[Unit] = observer.completed()
 
-      override def error(exception: Throwable): Future[Unit] = observer.error(exception)
+      def error(exception: Throwable): Future[Unit] = observer.error(exception)
 
-      override def next(value: DataSet): Future[Unit] =
+      def next(value: DataSet): Future[Unit] =
         observer.next(Dom("",null,null,value,DataNothing()))
 
     }
