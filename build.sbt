@@ -23,6 +23,9 @@ lazy val pipeline = project
   .dependsOn(pipescript)
 
 lazy val task = project
+  .settings(libraryDependencies ++= Seq("org.scalameta" %% "scalameta" % "1.0.0"))
+  .settings(libraryDependencies ++= Seq("ch.qos.logback" % "logback-classic" % "1.1.7"))
+  .settings(libraryDependencies ++= Seq("com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"))
   .dependsOn(common, datasources)
 
 lazy val application = project

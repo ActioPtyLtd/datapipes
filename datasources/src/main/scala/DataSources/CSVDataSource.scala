@@ -10,9 +10,9 @@ import org.apache.commons.csv.{CSVFormat, CSVParser}
 
 class CSVDataSource extends DataSource {
 
-  var _observer: Option[Observer[Parameters]] = None
+  var _observer: Option[Observer[DataSet]] = None
 
-  def subscribe(observer: Observer[Parameters]): Unit = _observer = Some(observer)
+  def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
 
   def exec(parameters: Parameters): Future[Unit] = async {
     import collection.JavaConverters._
