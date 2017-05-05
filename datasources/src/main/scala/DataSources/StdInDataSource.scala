@@ -15,7 +15,8 @@ class StdInDataSource extends DataSource {
 
     do {
       line = scala.io.StdIn.readLine()
-      await { _observer.get.next(DataString(line)) }
+      if(line != null)
+        await { _observer.get.next(DataString(line)) }
     } while(line != null)
 
     await { _observer.get.completed() }

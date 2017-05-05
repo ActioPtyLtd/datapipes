@@ -1,3 +1,5 @@
 package Pipeline
 
-trait Operation
+trait Operation {
+  def name: String
+}

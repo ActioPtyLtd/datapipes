@@ -5,11 +5,12 @@ import Common.{DataSet, Task}
 import scala.meta._
 
 object Task {
-  def apply(name: String, taskType: String, config: DataSet): Task =
-    if(taskType == "TaskExtract")
-      new TaskExtract(name, config)
-    else if(taskType == "TaskTerm")
-      new TaskTerm(name, config("term").stringOption.getOrElse("").parse[Term].get)
-    else
-      new TaskPrint(name)
+
+  private lazy val tasks =  Map(
+    "TaskExtract" -> ((name: String, config: DataSet) => new TaskExtract(name, config)),
+    "TaskTerm" -> ((name: String, config: DataSet) => new TaskTerm(name, config("term").stringOption.getOrElse("").parse[Term].get)),
+    "TaskBatch" -> ((name: String, config: DataSet) => new TaskBatch(name, config("size").stringOption.map(m => m.toInt).getOrElse(100))),
+    "TaskPrint" -> ((name: String, config: DataSet) => new TaskPrint(name)))
+
+  def apply(name: String, taskType: String, config: DataSet): Task = tasks(taskType)(name, config)
 }

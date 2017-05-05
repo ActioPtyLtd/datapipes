@@ -14,7 +14,10 @@ class TaskTerm(val name: String, val term: Term) extends Task {
 
   var _observer: Option[Observer[Dom]] = None
 
-  def completed(): Future[Unit] = Future { Unit }
+  def completed(): Future[Unit] = async {
+    if(_observer.isDefined)
+      await { _observer.get.completed() }
+  }
 
   def error(exception: Throwable): Future[Unit] = ???
 
@@ -22,10 +25,11 @@ class TaskTerm(val name: String, val term: Term) extends Task {
 
     val nds = TermExecutor.eval(value.success, term)
 
-    await { _observer.get.next(Dom("",null,null,nds,DataNothing())) }
+    if(_observer.isDefined)
+      await { _observer.get.next(Dom("",null,null,nds,DataNothing())) }
   }
 
-  override def subscribe(observer: Observer[Dom]): Unit = {
+  def subscribe(observer: Observer[Dom]): Unit = {
     _observer = Some(observer)
   }
 

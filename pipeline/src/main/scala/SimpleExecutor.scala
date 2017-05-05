@@ -21,7 +21,7 @@ object SimpleExecutor {
 
       def next(value: Dom): Future[Unit] = { println(s"=== Task ${t.name} received Dom ==="); myTask.next(value) }
 
-      def completed(): Future[Unit] = myTask.completed()
+      def completed(): Future[Unit] = { println(s"=== Operation ${operation.name} completed ==="); myTask.completed() }
 
       def error(exception: Throwable): Future[Unit] = myTask.error(exception)
 
@@ -38,6 +38,7 @@ object SimpleExecutor {
       def next(value: Dom): Future[Unit] = { println(s"=== Pipe ${p.name} received Dom ==="); l.next(value) }
 
       def completed(): Future[Unit] = async {
+        println(s"=== Operation ${operation.name} completed ===")
         await { l.completed() }
         await { r.completed() }
       }
