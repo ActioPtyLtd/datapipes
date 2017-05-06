@@ -34,3 +34,7 @@ lazy val application = project
 lazy val root =
   project.in( file(".") )
     .aggregate(application, pipescript, datasources, common, pipeline, task)
+
+lazy val test = project
+  .settings(libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test")
+  .dependsOn(pipescript, datasources, common, task, pipeline)
