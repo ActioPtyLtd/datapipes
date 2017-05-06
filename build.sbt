@@ -9,6 +9,7 @@ lazy val common = project
   .settings(libraryDependencies ++= Seq("org.json4s" %% "json4s-native" % "3.5.1"))
 
 lazy val pipescript = project
+  .settings(libraryDependencies += "com.typesafe" % "config" % "1.3.1")
   .dependsOn(common)
 
 lazy val datasources = project

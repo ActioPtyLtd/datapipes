@@ -1,4 +1,4 @@
-import Common.Data.{DataNothing, DataRecord, DataString}
+import Common.Data.{DataNothing, DataString}
 import Common.Dom
 import org.scalatest.FunSuite
 
