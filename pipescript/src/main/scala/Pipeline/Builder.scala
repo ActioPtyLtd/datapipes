@@ -11,5 +11,7 @@ object Builder {
         .map(s => s.split("|").map(_.trim))
 
     val tasks = ds("script")("tasks")
+
+    new Task("","",ds)
   }
 }
