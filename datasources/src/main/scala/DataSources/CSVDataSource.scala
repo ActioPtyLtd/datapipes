@@ -18,19 +18,20 @@ class CSVDataSource extends DataSource {
     import collection.JavaConverters._
 
     val filePath = parameters("filePath").stringOption.getOrElse("")
-    val batchSize: Int = 10
+
     val in = new FileReader(filePath)
     val parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in)
-    val it = parser.asScala.grouped(batchSize)
+    val it = parser.iterator()
 
     while (it.hasNext) {
       val i = it.next()
 
       await {
-        _observer.get.next(DataArray(i.map(r =>
-          DataRecord(r.toMap.asScala.map(c => DataString(c._1, c._2)).toList)).toList))
+        _observer.get.next(DataRecord(i.toMap.asScala.map(c => DataString(c._1, c._2)).toList))
       }
     }
+
+    in.close()
 
     await { _observer.get.completed() }
   }

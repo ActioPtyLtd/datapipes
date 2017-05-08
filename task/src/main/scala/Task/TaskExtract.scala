@@ -8,7 +8,7 @@ import scala.concurrent.Future
 
 class TaskExtract(val name: String, val config: DataSet) extends Task {
 
-  val dataSource: DataSource = DataSource.create(config("dataSource"))
+  val dataSource: DataSource = DataSource(config("dataSource"))
 
   def completed(): Future[Unit] = Future { Unit }
 
