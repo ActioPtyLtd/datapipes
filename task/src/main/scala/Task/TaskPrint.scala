@@ -1,6 +1,5 @@
 package Task
 
-import Common.Data.DataNothing
 import Common.{Dom, Observer}
 import Common.Data.PrettyPrint.PrettyPrint
 
@@ -20,10 +19,10 @@ class TaskPrint(val name: String) extends Common.Task {
 
   def next(value: Dom): Future[Unit] = async {
 
-    println(value.success.print())
+    println(value.headOption.get.success.print())
 
     if(_observer.isDefined)
-      await { _observer.get.next(Dom("", null, null, value.success, DataNothing())) }
+      await { _observer.get.next(value) }
   }
 
   def subscribe(observer: Observer[Dom]): Unit = {

@@ -11,6 +11,6 @@ object AppTest extends App {
 
   val run = SimpleExecutor.getRunnable(pf.get).start()
 
-  Await.result(run, 100000 millis)
+  Await.result(run, 1000000 millis)
 
 }

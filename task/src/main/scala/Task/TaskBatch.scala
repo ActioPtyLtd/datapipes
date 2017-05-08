@@ -18,7 +18,7 @@ class TaskBatch(val name: String, config: DataSet) extends Task {
   def completed(): Future[Unit] = async {
     if(buffer.nonEmpty && _observer.isDefined) {
       await {
-        _observer.get.next(Dom("", null, null, DataArray(buffer.toList), DataNothing()))
+        _observer.get.next(Dom("", null, List(), DataArray(buffer.toList), DataNothing()))
       }
       await {
         _observer.get.completed()
@@ -31,11 +31,11 @@ class TaskBatch(val name: String, config: DataSet) extends Task {
 
   def next(value: Dom): Future[Unit] = async {
 
-    buffer = buffer.enqueue(value.success)
+    buffer = buffer.enqueue(value.headOption.get.success) //TODO fix this
 
     if(buffer.size == size && _observer.isDefined) {
       await {
-        _observer.get.next(Dom("", null, null, DataArray(buffer.toList), DataNothing()))
+        _observer.get.next(value ~ Dom(name, null, List(), DataArray(buffer.toList), DataNothing()))
       }
       buffer = Queue()
     }

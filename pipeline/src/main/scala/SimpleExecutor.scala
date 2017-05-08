@@ -1,6 +1,6 @@
 import Common.{Dom, Observable, Observer}
 import Pipeline.Operation
-import Task.Task
+import Task._
 
 import scala.concurrent.Future
 import scala.async.Async.{async, await}
@@ -35,7 +35,11 @@ object SimpleExecutor {
 
       l.subscribe(r)
 
-      def next(value: Dom): Future[Unit] = { println(s"=== Pipe ${p.name} received Dom ==="); l.next(value) }
+      def next(value: Dom): Future[Unit] = async {
+        println(s"=== Pipe ${p.name} received Dom ===")
+        await { l.next(value) }
+
+      }
 
       def completed(): Future[Unit] = async {
         println(s"=== Operation ${operation.name} completed ===")

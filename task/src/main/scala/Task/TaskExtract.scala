@@ -23,7 +23,7 @@ class TaskExtract(val name: String, val config: DataSet) extends Task {
       def error(exception: Throwable): Future[Unit] = observer.error(exception)
 
       def next(value: DataSet): Future[Unit] =
-        observer.next(Dom("",null,null,value,DataNothing()))
+        observer.next(Dom() ~ Dom(name,null,Nil,value,DataNothing()))
 
     }
     dataSource.subscribe(dsObserver)

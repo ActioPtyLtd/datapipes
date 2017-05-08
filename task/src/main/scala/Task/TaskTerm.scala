@@ -23,10 +23,10 @@ class TaskTerm(val name: String, val term: Term) extends Task {
 
   def next(value: Dom): Future[Unit] = async {
 
-    val nds = TermExecutor.eval(value.success, term)
+    val nds = TermExecutor.eval(value, term)
 
     if(_observer.isDefined)
-      await { _observer.get.next(Dom("",null,null,nds,DataNothing())) }
+      await { _observer.get.next(value ~ Dom(name,null,List(),nds,DataNothing())) }
   }
 
   def subscribe(observer: Observer[Dom]): Unit = {
