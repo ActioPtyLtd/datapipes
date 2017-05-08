@@ -1,20 +1,23 @@
 package Term
 
-import Common.Data._
-import Common.DataSet
+import java.lang._
 
 object Functions {
 
-  def toUpperCase(str: String): DataSet = DataString(str.toUpperCase)
-  def toLowerCase(str: String): DataSet = DataString(str.toLowerCase)
-  def trim(str: String): DataSet = DataString(str.trim)
+  def toUpperCase(str: String): String = str.toUpperCase
+  def toLowerCase(str: String): String = str.toLowerCase
+  def trim(str: String): String = str.trim
 
-  def substring(str: String, start: Int): DataSet =
+  def substring(str: String, start: Int): String =
     if (start < str.length)
-      DataString(str.substring(start))
+      str.substring(start)
     else
-      DataString("")
+      ""
 
-  def contains(str: String, targetStr: String): DataSet = DataBoolean(if(str == null || targetStr == null) false else str.contains(targetStr))
+  def contains(str: String, targetStr: String): Boolean =
+    if(str == null || targetStr == null)
+      false
+    else
+      str.contains(targetStr)
 
 }

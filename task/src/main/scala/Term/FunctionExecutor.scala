@@ -4,6 +4,7 @@ import java.lang.reflect.Parameter
 
 import Common.Data._
 import Common.DataSet
+import Common.Data.ImplicitCasts._
 
 import scala.annotation.tailrec
 import scala.util.Try
@@ -19,6 +20,8 @@ object FunctionExecutor {
       .flatMap(i =>
         i._1.invoke(null, i._2.get.map(_.asInstanceOf[Object]): _*) match {
           case r: DataSet => Some(r)
+          case str: String => Some(str: DataSet)
+          case bool: java.lang.Boolean => Some(bool: DataSet)
           case _ => None
         })
       .getOrElse(DataNothing())

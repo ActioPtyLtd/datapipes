@@ -21,7 +21,7 @@ object ConfigReader {
       case cl: ConfigList => DataArray(label, cl.map(o => convert("item", o)).toList)
       case cv => config.unwrapped() match {
         case str: String => DataString(label,str)
-        case int: Integer => DataNumeric(int)
+        case int: Integer => DataNumeric(label, int)
       }
     }
 

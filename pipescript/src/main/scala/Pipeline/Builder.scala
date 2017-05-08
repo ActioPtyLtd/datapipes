@@ -4,14 +4,30 @@ import Common.DataSet
 
 object Builder {
 
-  def build(ds: DataSet, pipeName: String): Operation = {
-    val pipeTasks =
-      ds("script")("pipelines")(pipeName)("pipe")
-        .stringOption
-        .map(s => s.split("|").map(_.trim))
+  def build(ds: DataSet): Option[Operation] = {
 
-    val tasks = ds("script")("tasks")
+    val startup = "startup"
+    val exec = "exec"
+    val script = "script"
+    val taskList = "tasks"
+    val taskType = "type"
+    val pipe = "pipe"
+    val pipelines = "pipelines"
 
-    new Task("","",ds)
+    val pipeName = ds(script)(startup)(exec).stringOption.getOrElse("")
+
+    val tasks = ds(script)(taskList).
+      elems
+      .map(t => t.label -> Task(t.label, t(taskType).stringOption.getOrElse(""), t))
+      .toMap
+
+    ds(script)(pipelines)(pipeName)(pipe)
+      .stringOption
+      .map(s => s.split("\\|")
+        .map(m => tasks(m.replace(" ", "")).asInstanceOf[Operation])
+        .reduceLeft((a,b) => Pipe(pipeName, a, b))
+ )
+
+
   }
 }

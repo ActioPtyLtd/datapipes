@@ -7,9 +7,11 @@ import scala.async.Async.{async, await}
 import scala.collection.immutable.Queue
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
 
-class TaskBatch(val name: String, val size: Int) extends Task {
+class TaskBatch(val name: String, config: DataSet) extends Task {
 
+  val size: Int = config("size").stringOption.flatMap(m => Try(m.toInt).toOption).getOrElse(100)
   var _observer: Option[Observer[Dom]] = None
   var buffer: Queue[DataSet] = Queue()
 

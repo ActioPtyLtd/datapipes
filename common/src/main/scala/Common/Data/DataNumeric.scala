@@ -11,5 +11,6 @@ object DataNumeric {
 
   def apply(num: BigDecimal): DataNumeric = DataNumeric(name, num)
 
+  def apply(label: String, num: Int): DataNumeric = DataNumeric(label, BigDecimal(num))
   def apply(num: Int): DataNumeric = DataNumeric(name, BigDecimal(num))
 }
