@@ -1,0 +1,17 @@
+@startuml
+
+interface Operation
+class Pipe
+class Task
+class Builder
+
+Pipe --|> Operation
+Task --|> Operation
+
+Pipe "left" --* Operation
+Pipe "right" --* Operation
+
+Builder "create" .. Operation
+
+
+@enduml

@@ -11,6 +11,8 @@ object Task {
       new TaskExtract(name, config)),
     "term" -> ((name: String, config: DataSet) =>
       new TaskTerm(name, config("term").stringOption.getOrElse("").parse[Term].get)),
+    "template" -> ((name: String, config: DataSet) =>
+      new TaskTemplate(name, config)),
     "batch" -> ((name: String, config: DataSet) =>
       new TaskBatch(name, config)),
     "print" -> ((name: String, config: DataSet) =>

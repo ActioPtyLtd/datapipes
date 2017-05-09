@@ -1,0 +1,66 @@
+package DataSources
+
+import java.io.{File, FileInputStream}
+
+import Common.Data._
+import Common.{DataSet, DataSource, Observer, Parameters}
+import com.linuxense.javadbf._
+
+import scala.async.Async.{async, await}
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+class DBFDataSource extends DataSource {
+
+  var _observer: Option[Observer[DataSet]] = None
+
+  def exec(parameters: Parameters): Future[Unit] = async {
+
+    val fileName = parameters("filePath").stringOption.getOrElse("")
+    val fis = new FileInputStream(new File(fileName))
+    val stream = new DBFReader(fis)
+    val fields = (0 until stream.getFieldCount).map(stream.getField).toList
+
+    var row = stream.nextRecord()
+
+    while (row != null) {
+      val ds = DBFDataSource.field2ds(row, fields)
+
+      if(_observer.isDefined)
+        await { _observer.get.next(ds) }
+
+      row = stream.nextRecord()
+    }
+
+    if(_observer.isDefined)
+      await { _observer.get.completed() }
+
+    stream.close()
+    fis.close()
+
+  }
+
+  def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
+}
+
+object DBFDataSource {
+
+  def field2ds(row: Array[Object], fields: List[DBFField]): DataSet =
+    DataRecord("row", fields.zipWithIndex.map(f => {
+      val t = f._1.getType
+
+      if (Option(row(f._2)).isDefined) {
+        if (t == DBFDataType.NUMERIC || t == DBFDataType.FLOATING_POINT || t == DBFDataType.LONG || t == DBFDataType.CURRENCY) {
+          DataNumeric(f._1.getName, BigDecimal(BigDecimal(row(f._2).toString).underlying()
+            .stripTrailingZeros()
+            .toPlainString))
+        } else if (t == DBFDataType.DATE || t == DBFDataType.TIMESTAMP) {
+          DataDate(f._1.getName, row(f._2).asInstanceOf[java.util.Date])
+        } else {
+          DataString(f._1.getName, row(f._2).toString.trim())
+        }
+      } else {
+        DataNothing(f._1.getName)
+      }
+    }))
+}

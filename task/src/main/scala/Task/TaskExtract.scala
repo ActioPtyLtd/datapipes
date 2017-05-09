@@ -14,7 +14,7 @@ class TaskExtract(val name: String, val config: DataSet) extends Task {
 
   def error(exception: Throwable): Future[Unit] = ???
 
-  def next(value: Dom): Future[Unit] = dataSource.exec(DataNothing())
+  def next(value: Dom): Future[Unit] = dataSource.exec(config("dataSource"))
 
   def subscribe(observer: Observer[Dom]): Unit = {
 

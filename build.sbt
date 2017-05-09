@@ -6,27 +6,30 @@ version := "1.0"
 scalaVersion := "2.11.1"
 
 lazy val common = project
-  .settings(libraryDependencies ++= Seq("org.json4s" %% "json4s-native" % "3.5.1"))
+  .settings(libraryDependencies += "org.json4s" %% "json4s-native" % "3.5.1")
 
 lazy val pipescript = project
   .settings(libraryDependencies += "com.typesafe" % "config" % "1.3.1")
   .dependsOn(common)
 
 lazy val datasources = project
-  .settings(libraryDependencies ++= Seq("org.apache.commons" % "commons-csv" % "1.4"))
-  .settings(libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-async" % "0.9.6"))
+  .settings(libraryDependencies ++= Seq(
+    "org.apache.commons" % "commons-csv" % "1.4",
+    "org.scala-lang.modules" %% "scala-async" % "0.9.6",
+    "com.github.albfernandez" % "javadbf" % "1.2.1"))
   .dependsOn(pipescript)
 
 lazy val pipeline = project
-  .settings(libraryDependencies ++= Seq("org.scala-lang.modules" %% "scala-async" % "0.9.6"))
+  .settings(libraryDependencies += "org.scala-lang.modules" %% "scala-async" % "0.9.6")
   .dependsOn(common)
   .dependsOn(task)
   .dependsOn(pipescript)
 
 lazy val task = project
-  .settings(libraryDependencies ++= Seq("org.scalameta" %% "scalameta" % "1.0.0"))
-  .settings(libraryDependencies ++= Seq("ch.qos.logback" % "logback-classic" % "1.1.7"))
-  .settings(libraryDependencies ++= Seq("com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"))
+  .settings(libraryDependencies ++= Seq(
+    "org.scalameta" %% "scalameta" % "1.0.0",
+    "ch.qos.logback" % "logback-classic" % "1.1.7",
+    "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0"))
   .dependsOn(common, datasources)
 
 lazy val application = project

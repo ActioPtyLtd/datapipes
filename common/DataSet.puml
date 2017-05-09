@@ -1,0 +1,41 @@
+@startuml
+
+interface Serializable
+interface LinkedTree<T> {
+    label: String
+    apply(label: String): LinkedTree
+    apply(index: Int): LinkedTree
+}
+
+LinkedTree --|> Serializable
+
+abstract class DataSet
+
+class DataString
+class DataNumeric
+class DataDate
+class DataBoolean
+class DataNothing
+class DataArray
+class DataRecord
+
+abstract class Dom
+
+DataSet --|> LinkedTree
+DataArray --|> DataSet
+DataRecord --|> DataSet
+DataString --|> DataSet
+DataNumeric --|> DataSet
+DataDate --|> DataSet
+DataBoolean --|> DataSet
+DataNothing --|> DataSet
+
+Dom --|> LinkedTree
+Dom "success" --* DataSet
+Dom "error" --* DataSet
+Dom "children" --* "n" Dom
+
+DataArray "items" --* "n" DataSet
+DataRecord "fields" --* "n" DataSet
+
+@enduml
