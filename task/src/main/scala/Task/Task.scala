@@ -14,7 +14,7 @@ object Task {
     "batch" -> ((name: String, config: DataSet) =>
       new TaskBatch(name, config)),
     "print" -> ((name: String, config: DataSet) =>
-      new TaskPrint(name)))
+      new TaskPrint(name, config)))
 
   def apply(name: String, taskType: String, config: DataSet): Task = tasks(taskType)(name, config)
 }

@@ -16,8 +16,8 @@ object Builder {
 
     val pipeName = ds(script)(startup)(exec).stringOption.getOrElse("")
 
-    val tasks = ds(script)(taskList).
-      elems
+    val tasks = ds(script)(taskList)
+      .elems
       .map(t => t.label -> Task(t.label, t(taskType).stringOption.getOrElse(""), t))
       .toMap
 

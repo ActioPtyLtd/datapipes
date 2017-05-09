@@ -16,7 +16,8 @@ class TaskExtract(val name: String, val config: DataSet) extends Task {
 
   def next(value: Dom): Future[Unit] = dataSource.exec(DataNothing())
 
-  override def subscribe(observer: Observer[Dom]): Unit = {
+  def subscribe(observer: Observer[Dom]): Unit = {
+
     val dsObserver = new Observer[DataSet] {
       def completed(): Future[Unit] = observer.completed()
 
@@ -24,8 +25,8 @@ class TaskExtract(val name: String, val config: DataSet) extends Task {
 
       def next(value: DataSet): Future[Unit] =
         observer.next(Dom() ~ Dom(name,null,Nil,value,DataNothing()))
-
     }
+
     dataSource.subscribe(dsObserver)
   }
 

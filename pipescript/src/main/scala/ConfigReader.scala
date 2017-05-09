@@ -19,7 +19,7 @@ object ConfigReader {
     config match {
       case co: ConfigObject => DataRecord(label,co.map(o => convert(o._1, o._2)).toList)
       case cl: ConfigList => DataArray(label, cl.map(o => convert("item", o)).toList)
-      case cv => config.unwrapped() match {
+      case _ => config.unwrapped() match {
         case str: String => DataString(label,str)
         case int: Integer => DataNumeric(label, int)
       }
