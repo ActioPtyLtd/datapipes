@@ -8,5 +8,6 @@ object ImplicitCasts {
   implicit def bool2ds(bool: java.lang.Boolean): DataSet = DataBoolean(bool)
   implicit def bool2ds(bool: Boolean): DataSet = DataBoolean(bool)
   implicit def bigDecimal2ds(num: BigDecimal): DataSet = DataNumeric(num)
+  implicit def date2ds(date: java.util.Date): DataSet = DataDate(date)
 
 }

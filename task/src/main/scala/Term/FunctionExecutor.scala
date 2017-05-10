@@ -26,6 +26,7 @@ object FunctionExecutor {
           case str: String => Some(str: DataSet)
           case bool: java.lang.Boolean => Some(bool: DataSet)
           case num: BigDecimal => Some(num: DataSet)
+          case date: java.util.Date => Some(date: DataSet)
           case _ => None
         })
       .getOrElse(DataNothing())

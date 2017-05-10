@@ -19,7 +19,12 @@ class DBFDataSource extends DataSource {
     val fileName = parameters("filePath").stringOption.getOrElse("")
     val fis = new FileInputStream(new File(fileName))
     val stream = new DBFReader(fis)
-    val fields = (0 until stream.getFieldCount).map(stream.getField).toList
+    val selectFields = parameters("fields").elems.map(s => s.stringOption.getOrElse(""))
+
+    val fields = (0 until stream.getFieldCount)
+      .map(i => (stream.getField(i),i))
+      .filter(f => selectFields.isEmpty || selectFields.contains(f._1.getName))
+      .toList
 
     var row = stream.nextRecord()
 
@@ -45,8 +50,8 @@ class DBFDataSource extends DataSource {
 
 object DBFDataSource {
 
-  def field2ds(row: Array[Object], fields: List[DBFField]): DataSet =
-    DataRecord("row", fields.zipWithIndex.map(f => {
+  def field2ds(row: Array[Object], fields: List[(DBFField,Int)]): DataSet =
+    DataRecord("row", fields.map(f => {
       val t = f._1.getType
 
       if (Option(row(f._2)).isDefined) {
