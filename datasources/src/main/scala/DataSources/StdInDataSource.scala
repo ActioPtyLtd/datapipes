@@ -1,7 +1,7 @@
 package DataSources
 
-import Common.Data.DataString
-import Common.{DataSet, DataSource, Observer, Parameters}
+import DataPipes.Common.Data._
+import DataPipes.Common._
 import scala.concurrent.Future
 import scala.async.Async.{async, await}
 import scala.concurrent.ExecutionContext.Implicits.global

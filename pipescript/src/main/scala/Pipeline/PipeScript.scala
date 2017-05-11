@@ -1,5 +1,5 @@
 package Pipeline
 
-import Common.DataSet
+import DataPipes.Common.Data._
 
 case class PipeScript(settings: DataSet, tasks: List[Operation], pipeline: Operation)

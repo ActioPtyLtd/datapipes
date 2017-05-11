@@ -1,4 +1,4 @@
-import Common.{Dom, Observable, Observer}
+import DataPipes.Common._
 import Pipeline.Operation
 import Task._
 

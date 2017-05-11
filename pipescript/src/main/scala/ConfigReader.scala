@@ -1,7 +1,6 @@
 import java.io.File
 
-import Common.Data._
-import Common.DataSet
+import DataPipes.Common.Data.{DataSet, _}
 import com.typesafe.config._
 
 import scala.collection.JavaConversions._

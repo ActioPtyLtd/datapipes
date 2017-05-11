@@ -1,6 +1,4 @@
-package Common.Data
-
-import Common._
+package DataPipes.Common.Data
 
 object Operators {
 

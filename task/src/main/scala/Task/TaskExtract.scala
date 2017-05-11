@@ -1,7 +1,7 @@
 package Task
 
-import Common.Data.DataNothing
-import Common._
+import DataPipes.Common._
+import DataPipes.Common.Data._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

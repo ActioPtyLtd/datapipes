@@ -1,5 +1,5 @@
-import Common.Data.{DataNothing, DataString}
-import Common.Dom
+import DataPipes.Common._
+import DataPipes.Common.Data._
 import org.scalatest.FunSuite
 
 class DomTest extends FunSuite {

@@ -1,8 +1,8 @@
 package Task
 
 
-import Common.Data.DataNothing
-import Common._
+import DataPipes.Common._
+import DataPipes.Common.Data._
 import Term.TermExecutor
 import scala.meta._
 

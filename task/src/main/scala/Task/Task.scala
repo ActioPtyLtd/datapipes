@@ -1,12 +1,10 @@
 package Task
 
-import Common.{DataSet, Task}
-
-
+import DataPipes.Common.Data.DataSet
 
 object Task {
 
-  private lazy val tasks =  Map[String,(String,DataSet) => Task](
+  private lazy val tasks =  Map[String,(String,DataSet) => DataPipes.Common.Task](
     "extract" -> ((name, config) =>
       new TaskExtract(name, config)),
     "term" -> ((name, config) =>
@@ -18,5 +16,5 @@ object Task {
     "print" -> ((name,config) =>
       new TaskPrint(name, config)))
 
-  def apply(name: String, taskType: String, config: DataSet): Task = tasks(taskType)(name, config)
+  def apply(name: String, taskType: String, config: DataSet): DataPipes.Common.Task = tasks(taskType)(name, config)
 }

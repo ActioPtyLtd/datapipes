@@ -2,9 +2,9 @@ package Term
 
 import java.lang.reflect.Parameter
 
-import Common.Data._
-import Common.DataSet
-import Common.Data.ImplicitCasts._
+import DataPipes.Common._
+import DataPipes.Common.Data._
+import DataPipes.Common.Data.ImplicitCasts._
 
 import scala.annotation.tailrec
 import scala.util.Try

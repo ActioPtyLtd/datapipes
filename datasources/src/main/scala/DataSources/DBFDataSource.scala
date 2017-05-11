@@ -2,8 +2,8 @@ package DataSources
 
 import java.io.{File, FileInputStream}
 
-import Common.Data._
-import Common.{DataSet, DataSource, Observer, Parameters}
+import DataPipes.Common._
+import DataPipes.Common.Data._
 import com.linuxense.javadbf._
 
 import scala.async.Async.{async, await}

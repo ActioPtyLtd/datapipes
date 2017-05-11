@@ -1,7 +1,7 @@
 package Task
 
-import Common.Data.{DataArray, DataNothing}
-import Common._
+import DataPipes.Common._
+import DataPipes.Common.Data._
 
 import scala.async.Async.{async, await}
 import scala.collection.immutable.Queue

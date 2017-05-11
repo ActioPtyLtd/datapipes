@@ -1,4 +1,6 @@
-import Common.DataSet
+package DataPipes
+
+import DataPipes.Common.Data.DataSet
 
 package object Common {
 

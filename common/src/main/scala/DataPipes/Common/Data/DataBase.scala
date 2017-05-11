@@ -1,6 +1,4 @@
-package Common.Data
-
-import Common.DataSet
+package DataPipes.Common.Data
 
 abstract class DataBase extends DataSet {
 

@@ -1,4 +1,4 @@
-package Common.Data
+package DataPipes.Common.Data
 
 case class DataBoolean(label: String, bool: Boolean) extends DataBase {
 

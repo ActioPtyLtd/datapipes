@@ -1,7 +1,6 @@
 package Term.Legacy
 
-import Common.Data.{DataNothing, DataString}
-import Common.DataSet
+import DataPipes.Common.Data._
 
 case class DataSetHttpResponse(label: String, uri: String, statusCode: Int, headers: Map[String, String], body: DataSet) extends DataSet {
 

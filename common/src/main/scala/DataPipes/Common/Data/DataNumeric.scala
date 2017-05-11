@@ -1,4 +1,4 @@
-package Common.Data
+package DataPipes.Common.Data
 
 case class DataNumeric(label: String, num: BigDecimal) extends DataBase {
 

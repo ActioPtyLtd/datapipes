@@ -1,4 +1,4 @@
-package Common
+package DataPipes.Common
 
 abstract class LinkedTree[D <: LinkedTree[D]] {
 

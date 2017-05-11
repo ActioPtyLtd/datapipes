@@ -1,7 +1,7 @@
 package Task
 
-import Common.Data.DataNothing
-import Common.{DataSet, Dom, Observer, Task}
+import DataPipes.Common._
+import DataPipes.Common.Data._
 
 import scala.async.Async.{async, await}
 import scala.concurrent.ExecutionContext.Implicits.global

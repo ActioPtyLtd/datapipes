@@ -1,11 +1,11 @@
 package DataSources
 
-import Common._
+import DataPipes.Common.Data._
+import DataPipes.Common._
 import java.io.FileReader
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.async.Async.{async, await}
-import Common.Data.{DataArray, DataNothing, DataRecord, DataString}
 import org.apache.commons.csv.{CSVFormat, CSVParser}
 
 class CSVDataSource extends DataSource {

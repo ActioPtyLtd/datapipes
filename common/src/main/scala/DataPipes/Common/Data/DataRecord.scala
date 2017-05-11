@@ -1,6 +1,4 @@
-package Common.Data
-
-import Common.DataSet
+package DataPipes.Common.Data
 
 case class DataRecord(label: String, fields: List[DataSet]) extends DataBase {
 

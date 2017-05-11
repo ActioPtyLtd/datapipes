@@ -1,6 +1,4 @@
-package Common.Data
-
-import Common.DataSet
+package DataPipes.Common.Data
 
 case class DataNothing (label: String) extends DataBase
 

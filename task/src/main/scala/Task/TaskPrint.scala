@@ -1,13 +1,14 @@
 package Task
 
-import Common.{DataSet, Dom, Observer}
-import Common.Data.PrettyPrint.PrettyPrint
+import DataPipes.Common._
+import DataPipes.Common.Data._
+import DataPipes.Common.Data.PrettyPrint.PrettyPrint
 
 import scala.async.Async.{async, await}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class TaskPrint(val name: String, config: DataSet) extends Common.Task {
+class TaskPrint(val name: String, config: DataSet) extends DataPipes.Common.Task {
   var _observer: Option[Observer[Dom]] = None
 
   val formatLookup: Map[String,(DataSet => String)] = Map(

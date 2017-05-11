@@ -1,7 +1,7 @@
 package Term
 
-import Common.Data._
-import Common.DataSet
+import DataPipes.Common._
+import DataPipes.Common.Data._
 import com.typesafe.scalalogging.Logger
 
 import scala.meta.Term.Arg.Repeated

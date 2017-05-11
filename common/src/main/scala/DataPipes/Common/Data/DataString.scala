@@ -1,4 +1,4 @@
-package Common.Data
+package DataPipes.Common.Data
 
 case class DataString(label: String, str: String) extends DataBase {
 

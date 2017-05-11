@@ -1,7 +1,7 @@
 package Task
 
-import Common.Data.{DataNothing, DataRecord, DataString, Operators}
-import Common.{DataSet, Dom, Parameters}
+import DataPipes.Common._
+import DataPipes.Common.Data._
 
 import scala.meta.Term
 import scala.meta._

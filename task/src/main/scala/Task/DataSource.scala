@@ -1,6 +1,6 @@
 package Task
 
-import Common.{DataSet, Parameters}
+import DataPipes.Common.Data._
 import DataSources.{CSVDataSource, DBFDataSource, StdInDataSource}
 
 object DataSource {
@@ -15,6 +15,6 @@ object DataSource {
   )
 
 
-  def apply(parameters: DataSet): Common.DataSource = sources(parameters("type").stringOption.get)(parameters)
+  def apply(parameters: DataSet): DataPipes.Common.DataSource = sources(parameters("type").stringOption.get)(parameters)
 
 }

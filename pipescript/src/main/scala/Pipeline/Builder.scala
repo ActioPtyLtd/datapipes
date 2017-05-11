@@ -1,7 +1,6 @@
 package Pipeline
 
-import Common.Data.{DataRecord, Operators}
-import Common.DataSet
+import DataPipes.Common.Data._
 
 object Builder {
 

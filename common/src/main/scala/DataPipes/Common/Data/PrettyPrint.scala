@@ -1,6 +1,5 @@
-package Common.Data
+package DataPipes.Common.Data
 
-import Common._
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.Xml.{toJson, toXml}
