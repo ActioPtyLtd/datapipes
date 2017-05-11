@@ -1,6 +1,7 @@
 package Task
 
 import DataPipes.Common.Data.DataSet
+import Legacy._
 
 object Task {
 
@@ -9,6 +10,8 @@ object Task {
       new TaskExtract(name, config)),
     "term" -> ((name, config) =>
       new TaskTerm(name, config)),
+    "transform" -> ((name, config) =>
+      new TaskFunctionFold(name, config)),
     "template" -> ((name, config) =>
       new TaskTemplate(name, config)),
     "batch" -> ((name, config) =>

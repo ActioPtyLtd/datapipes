@@ -1,7 +1,7 @@
 package Task
 
 import DataPipes.Common.Data._
-import DataSources.{CSVDataSource, DBFDataSource, StdInDataSource}
+import DataSources.{CSVDataSource, DBFDataSource, JDBCDataSource, StdInDataSource}
 
 object DataSource {
 
@@ -11,7 +11,9 @@ object DataSource {
     "csv" -> ((_: DataSet) =>
       new CSVDataSource()),
     "dbf" -> ((_: DataSet) =>
-      new DBFDataSource())
+      new DBFDataSource()),
+    "jdbc" -> ((_: DataSet) =>
+      new JDBCDataSource())
   )
 
 
