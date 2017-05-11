@@ -1,5 +1,17 @@
 package Term.Legacy
 
+import java.text.{DecimalFormat, SimpleDateFormat}
+import java.time.{LocalDate, LocalDateTime}
+import java.time.format.DateTimeFormatter
+import java.util.Date
+
+import Common.Data._
+import Common.DataSet
+import org.apache.commons.lang.time.DateUtils
+
+import scala.annotation.tailrec
+import scala.util.Try
+
 object FunctionsLegacy {
 
   /**
@@ -14,7 +26,7 @@ object FunctionsLegacy {
     */
 
 
-  /*
+
   def orderBy(ds: DataSet, property: String, dataType: String, dataFormat: String,  direction: String): DataSet = {
     orderByRE(ds, property, dataType, dataFormat, direction, 0)
   }
@@ -28,7 +40,7 @@ object FunctionsLegacy {
     val elementCount = ds.elems.length
     if(elementCount > 1)
     {
-      if(ds.elems.forall(x => x.value(property).toOption.isDefined)) {
+      if(ds.elems.forall(x => x(property).toOption.isDefined)) {
         orderedSet = ds match {
           case DataArray(label, arrayElems) => dataType.toLowerCase() match {
             case "date" =>
@@ -44,7 +56,7 @@ object FunctionsLegacy {
                 DataRecord(label, sortByDate(elements, property, dataFormatOption.get, direction))
               else
                 ds
-            case _ => var sortedElements = elements.sortBy(x => x.value(property).stringOption)
+            case _ => var sortedElements = elements.sortBy(x => x(property).stringOption)
               if (direction.equalsIgnoreCase("desc"))
                 sortedElements = sortedElements.reverse
               DataArray(label, sortedElements)
@@ -60,10 +72,10 @@ object FunctionsLegacy {
         if (level == 0) {
           orderedSet = ds match {
             case DataArray(label, _) => DataArray(label, List[DataSet] {
-              orderByRE(ds.elems.next(), property, dataType, dataFormat, direction, (level + 1))
+              orderByRE(ds.headOption.get, property, dataType, dataFormat, direction, (level + 1))
             })
             case DataRecord(label, _) => DataRecord(label, List[DataSet] {
-              orderByRE(ds.elems.next(), property, dataType, dataFormat, direction, (level + 1))
+              orderByRE(ds.headOption.get, property, dataType, dataFormat, direction, (level + 1))
             })
             case DataSetHttpResponse(label, _, _, _, body) => DataRecord(label, List[DataSet] {
               orderByRE(body, property, dataType, dataFormat, direction, (level + 1))
@@ -79,14 +91,18 @@ object FunctionsLegacy {
       orderedSet
   }
 
+
+
   def sortByDate(items: List[DataSet], property: String, dateFormat: String, direction: String): List[DataSet] = {
     implicit val localDateOrdering: Ordering[LocalDate] = Ordering.by(_.toEpochDay)
-    val sortedItems = items.sortBy(x => LocalDate.parse(x.value(property).stringOption.getOrElse(""), DateTimeFormatter.ofPattern(dateFormat)).toEpochDay)(Ordering[Long])
+    val sortedItems = items.sortBy(x => LocalDate.parse(x(property).stringOption.getOrElse(""), DateTimeFormatter.ofPattern(dateFormat)).toEpochDay)(Ordering[Long])
     if(direction.equalsIgnoreCase("desc"))
       sortedItems.reverse
     else
       sortedItems
   }
+
+
 
   def take(ds: DataSet, numberOfItems: Int): DataSet = {
     val elementCount = ds.elems.length
@@ -107,6 +123,8 @@ object FunctionsLegacy {
     DataRecord("take", List[DataSet]{takenSet})
   }
 
+
+
   def chunk(ds: DataSet, numberOfItemsPerChunk: Int): DataSet = {
     DataRecord("chunk", ds.elems.grouped(numberOfItemsPerChunk).map(p => DataArray("piece", p.toList )).toList)
   }
@@ -122,13 +140,13 @@ object FunctionsLegacy {
         itemsToReturn = itemsToReturn:::l
       }
       else
-        itemsToReturn = itemsToReturn:+ds.value(nextItemInHierarchy)
+        itemsToReturn = itemsToReturn:+ds(nextItemInHierarchy)
     }
     else {
       if(nextItemInHierarchy.equals("_"))
         itemsToReturn = itemsToReturn:::ds.elems.foldLeft(List[DataSet]()) { (z:List[DataSet], f:DataSet) => z:::getDataSetWithHierarchy(f, hierarchyPath.tail) }
       else
-        itemsToReturn = itemsToReturn:::getDataSetWithHierarchy(ds.value(nextItemInHierarchy), hierarchyPath.tail)
+        itemsToReturn = itemsToReturn:::getDataSetWithHierarchy(ds(nextItemInHierarchy), hierarchyPath.tail)
     }
     itemsToReturn
   }
@@ -157,36 +175,6 @@ object FunctionsLegacy {
       flattenedList = flattenedList.map(x => DataRecord(x.label,x.elems.toList:::dataSetToInclude))
     }
     DataRecord("flatternedList", List[DataSet](DataArray("item",flattenedList)))
-  }
-
-  /**
-    * Attempts to map the DataSet to DataSetTableScala with custom sub DataSets
-    *
-    * @param ds DataSet to map
-    * @return   DataSetTableScala
-    */
-  def mapToDataSetTableScala(ds: DataSet): DataSetTableScala = {
-    ds match {
-      case DataSetHttpResponse(_,_,_,_,body) => body.schema match {
-        case SchemaRecord(_, fields) =>
-          if (fields.head.label.isEmpty())
-            DataSetTableScala(SchemaArray("", fields.head), body)
-          else
-            DataSetTableScala(SchemaArray("", body.schema), body)
-        case _ => DataSetTableScala(body.schema, ds.headOption.get)
-      }
-      case DataArray(_,arrayElems) => ds.schema match {
-        case SchemaRecord(_, fields) =>
-          if (fields.head.label.isEmpty())
-            DataSetTableScala(SchemaArray("", fields.head), ds)
-          else
-            DataSetTableScala(SchemaArray("", arrayElems.head.schema), ds)
-        case _ => DataSetTableScala(ds.schema, ds)
-      }
-      case DataRecord(_, fields) => DataSetTableScala(SchemaArray("",ds.headOption.get.schema), ds)
-      case _ => DataSetTableScala(SchemaArray("",ds.schema), ds)//DataSetTableScala(ds)
-    }
-
   }
 
   def dateFormat(ds: DataSet, format: String): DataSet = {
@@ -320,27 +308,34 @@ object FunctionsLegacy {
 
   def orElse(ds: DataSet, or: DataSet): DataSet = ds.toOption.getOrElse(or)
 
-  def md5(ls: List[DataSet]) = {
-    val str = ls map (_.stringOption.getOrElse("")) mkString ""
-    val m = MessageDigest.getInstance("MD5")
-
-    m.update(str.getBytes(),0,str.length)
-    DataString(Hex.encodeHexString(m.digest))
-  }
-
   def maprecord(ds: DataSet): DataSet = DataArray(ds.elems.map(e => DataRecord(e)).toList)
 
   /* below will need to be replaced when I have time */
 
-  def toJsonStr(ds: DataSet): DataSet = DataString("jsonstr", Data2Json.toJsonString(ds))
+  def toJsonStr(ds: DataSet): DataSet = DataString("jsonstr", toJsonString(ds))
 
-  // tabular functions, to be refactored
+  def toJsonString(data: DataSet): String =
+    data match {
+      case DataString(_, s) => "\"" + s + "\""
+      //  case DataString(l , s) => "\"" +l + "\" :  \"" + s + "\""
+      case DataRecord(key, fs) =>
+        toField(key) +
+          "{" + fs.map(f =>
+          (if (!f.isInstanceOf[DataRecord] && !f.isInstanceOf[DataArray]) toField(f.label) else "")
+            + toJsonString(f)).mkString(",") +
+          "}"
+      case DataArray(key, ds) =>
+        toField(key) +
+          "[" + ds.map(d => "{"+ toJsonString(d) + "}").mkString(",") + "]"
+      case DataNothing(_) => "null"
+      case DataNumeric(_, num) => num.setScale(2, BigDecimal.RoundingMode.HALF_UP).underlying().stripTrailingZeros().toPlainString
+      case DataBoolean(_, bool) => bool.toString
+      case DataDate(_, date) => date.toString
+      case e => toField(e.label) +
+        "{" + e.elems.map(toJsonString).mkString(",") + "}"
+    }
 
-  def sum(ds: DataSetTableScala, cols: List[String]) = rowFunc(ds, ds.getNextAvailableColumnName("sum"), r => (cols map (c => scala.math.BigDecimal(ds.getValue(r, c)))).sum.toString)
-
-  def rowFunc(ds: DataSetTableScala, columnName: String, rowFunc: List[String] => String) = DataSetTableScala(columnName :: ds.header, ds.rows map (r => rowFunc(r) :: r))
-
-  def concat(ds: DataSetTableScala, cols: List[String], delim: String): DataSet = rowFunc(ds, ds.getNextAvailableColumnName("concat"), r => cols map (ds.getValue(r, _)) mkString delim)
+  def toField(name: String): String = if (name.isEmpty) "" else "\"" + name + "\": "
 
   def convDateValue(value: String, in: String, out: String) =
     try {
@@ -353,8 +348,6 @@ object FunctionsLegacy {
       case _: Exception => "1900-01-01 00:00:00.0"
     }
 
-  def trim(ds: DataSetTableScala, cols: List[String]) = cols.foldLeft(ds)((d, c) => valueFunc(d, c, v => v.trim))
-
   def trimValue(value: String) = DataString(Option(value).getOrElse("").trim)
 
   def mapOrElse(v: String, colPairs: List[DataSet], orElse: String) = {
@@ -362,22 +355,12 @@ object FunctionsLegacy {
     DataString(pairMap.getOrElse(v, orElse))
   }
 
-  def valueFunc(ds: DataSetTableScala, col: String, f: String => String) = rowFunc(ds, ds.getNextAvailableColumnName(col), r => f(ds.getValue(r, col)))
-
   def mapOrElseValue(value: String, colPairs: Map[String, String], orElse: String) = colPairs.getOrElse(value, orElse)
 
   def coalesce(vals: List[DataSet]) = vals.find(v => v.toOption.isDefined).getOrElse(DataNothing())
 
-  def deDup(ds: DataSetTableScala, col: String): DataSetTableScala = {
-
-    // col is the label
-    var hdr: List[String] = ds.header
-    var rows: List[List[String]] = ds.rows
-    var colIdx: Int = hdr.indexOf(col)
-    var colln = rows.groupBy((f: List[String]) => f(colIdx)).map(_._2.head).toList
-
-    return DataSetTableScala(hdr, colln)
-  }
+  def deDup(ds: DataSet, col: String): DataSet =
+    DataArray(ds.elems.groupBy(e => e(col).stringOption.getOrElse("")).map(_._2.head).toList)
 
   def distinct(ds: DataSet, col: String) = {
     DataRecord(DataArray(ds.label, ds.elems.toList.groupBy((row: DataSet) => row(col)).map(_._2.head).toList))
@@ -434,5 +417,5 @@ object FunctionsLegacy {
 
     DataString(outstr)
   }
-*/
+
 }

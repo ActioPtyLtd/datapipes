@@ -6,7 +6,6 @@ trait DomTrait extends LinkedTree[DomTrait] {
   def success: DataSet
   def error: DataSet
 
-  def headOption: Option[Dom]
 }
 
 case class Dom(label: String, parent: Dom, children: List[Dom], success: DataSet, error: DataSet) extends DomTrait {
@@ -25,7 +24,6 @@ case class Dom(label: String, parent: Dom, children: List[Dom], success: DataSet
     Dom(label, null, other :: this.children, success, error)
   }
 
-  def headOption: Option[Dom] = children.headOption
 }
 
 object Dom {

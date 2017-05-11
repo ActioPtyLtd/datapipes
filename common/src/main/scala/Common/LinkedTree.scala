@@ -13,4 +13,6 @@ abstract class LinkedTree[D <: LinkedTree[D]] {
   def label: String
 
   def stringOption: Option[String] = None
+
+  def headOption: Option[D] = elems.headOption
 }
