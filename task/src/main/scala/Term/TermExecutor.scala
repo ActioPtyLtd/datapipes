@@ -7,7 +7,7 @@ import com.typesafe.scalalogging.Logger
 import scala.meta.Term.Arg.Repeated
 import scala.meta._
 
-object TermExecutor {
+class TermExecutor(nameSpace: String) {
 
   val logger = Logger("Meta")
 
@@ -124,7 +124,7 @@ object TermExecutor {
     // dynamically call function, evaluating parameters before execution
     case Term.Apply(Term.Name(fName), args)
       if !scope.contains(fName) =>
-        FunctionExecutor.execute(fName, args.map(eval(_, scope)).toList)
+        FunctionExecutor.execute(nameSpace, fName, args.map(eval(_, scope)).toList)
 
     // get DataSet by ordinal
     case Term.Apply(q, Seq(Lit(num: Int))) => eval(q, scope)(num)

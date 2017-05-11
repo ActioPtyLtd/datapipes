@@ -11,11 +11,11 @@ import scala.util.Try
 
 object FunctionExecutor {
 
-  def execute(methodName: String, params: List[DataSet]): DataSet =
+  def execute(nameSpace: String, methodName: String, params: List[DataSet]): DataSet =
 
     // Tries to invoke the best possible implementation of a function based on name, input types and parameter length
     // Also casts the return type to a DataSet
-    Class.forName("Term.Functions")
+    Class.forName(nameSpace)
       .getDeclaredMethods
       .filter(f => f.getName.equalsIgnoreCase(methodName) && params.size >= f.getParameterCount)
       .map(m => (m,getParamValues(m.getParameters.toList zip params, Nil)))

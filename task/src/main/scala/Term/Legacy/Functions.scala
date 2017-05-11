@@ -12,7 +12,7 @@ import org.apache.commons.lang.time.DateUtils
 import scala.annotation.tailrec
 import scala.util.Try
 
-object FunctionsLegacy {
+object Functions {
 
   /**
     * Sorts the DataSet by a specified property - Currently only supports dates

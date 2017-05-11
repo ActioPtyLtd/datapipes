@@ -1,10 +1,11 @@
 package Pipeline
 
+import Common.Data.{DataRecord, Operators}
 import Common.DataSet
 
 object Builder {
 
-  def build(ds: DataSet): Option[Operation] = {
+  def build(ds: DataSet): Option[PipeScript] = {
 
     val startup = "startup"
     val exec = "exec"
@@ -13,21 +14,22 @@ object Builder {
     val taskType = "type"
     val pipe = "pipe"
     val pipelines = "pipelines"
+    val settings = "settings"
 
     val pipeName = ds(script)(startup)(exec).stringOption.getOrElse("")
 
     val tasks = ds(script)(taskList)
       .elems
-      .map(t => t.label -> Task(t.label, t(taskType).stringOption.getOrElse(""), t))
+      .map(t => t.label -> Task(t.label, t(taskType).stringOption.getOrElse(""), Operators.mergeLeft(t, ds(script)(settings))))
       .toMap
 
-    ds(script)(pipelines)(pipeName)(pipe)
+    val pipeExec = ds(script)(pipelines)(pipeName)(pipe)
       .stringOption
       .map(s => s.split("\\|")
         .map(m => tasks(m.replace(" ", "")).asInstanceOf[Operation])
-        .reduceLeft((a,b) => Pipe(pipeName, a, b))
- )
+        .reduceLeft((a,b) => Pipe(pipeName, a, b)))
 
+    pipeExec.map(p => PipeScript(ds(script)(settings), tasks.values.toList, p))
 
   }
 }

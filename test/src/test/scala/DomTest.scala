@@ -31,10 +31,10 @@ class DomTest extends FunSuite {
     val result = Dom() ~ dom1 ~ dom2 ~ dom3
 
     assert(
-      Term.TermExecutor.eval(result, "dom => dom.dom2.str2").stringOption.contains("val2")
+      new Term.TermExecutor("").eval(result, "dom => dom.dom2.str2").stringOption.contains("val2")
     )
     assert(
-      Term.TermExecutor.eval(result, "dom => dom.dom3.str3").stringOption.contains("val3")
+      new Term.TermExecutor("").eval(result, "dom => dom.dom3.str3").stringOption.contains("val3")
     )
   }
 

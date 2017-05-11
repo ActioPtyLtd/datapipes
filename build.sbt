@@ -5,6 +5,8 @@ version := "1.0"
 
 scalaVersion := "2.11.1"
 
+publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath+"/lib/")))
+
 lazy val common = project
   .settings(libraryDependencies += "org.json4s" %% "json4s-native" % "3.5.1")
 
