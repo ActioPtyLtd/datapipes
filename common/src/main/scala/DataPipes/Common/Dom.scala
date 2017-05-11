@@ -4,6 +4,7 @@ import DataPipes.Common.Data.{DataNothing, DataRecord, DataSet}
 
 trait DomTrait extends LinkedTree[DomTrait] {
   def success: DataSet
+
   def error: DataSet
 
 }
@@ -28,7 +29,7 @@ case class Dom(label: String, parent: Dom, children: List[Dom], success: DataSet
 
 object Dom {
 
-  def apply() = new Dom("",null, List(), DataNothing(), DataNothing())
+  def apply() = new Dom("", null, List(), DataNothing(), DataNothing())
 
   import scala.language.implicitConversions
 

@@ -7,5 +7,5 @@ case class DataString(label: String, str: String) extends DataBase {
 
 object DataString {
 
-  def apply(str: String) = new DataString("string",str)
+  def apply(str: String) = new DataString("string", str)
 }

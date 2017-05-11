@@ -33,6 +33,8 @@ class CSVDataSource extends DataSource {
 
     in.close()
 
-    await { _observer.get.completed() }
+    await {
+      _observer.get.completed()
+    }
   }
 }

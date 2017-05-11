@@ -1,6 +1,6 @@
 package DataPipes.Common.Data
 
-case class DataNothing (label: String) extends DataBase
+case class DataNothing(label: String) extends DataBase
 
 object DataNothing {
 

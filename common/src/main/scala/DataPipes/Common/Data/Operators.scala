@@ -6,19 +6,19 @@ object Operators {
 
   def mergeLeft(l: DataSet, r: DataSet, newLabel: String): DataSet = {
 
-    if(r.elems.isEmpty)
+    if (r.elems.isEmpty)
       l
     else {
       val head = r.elems.head
       val tail = r.elems.tail.toList
       val findLabel = l.elems.find(f => f.label == head.label)
 
-      if(findLabel.isEmpty) {
+      if (findLabel.isEmpty) {
         mergeLeft(DataRecord(l.label, head :: l.elems.toList), DataRecord(r.label, tail), newLabel)
       }
       else {
-        (findLabel,head) match {
-          case (Some(f @ DataRecord(_,_)),DataRecord(_,_)) =>
+        (findLabel, head) match {
+          case (Some(f@DataRecord(_, _)), DataRecord(_, _)) =>
             mergeLeft(DataRecord(l.label, mergeLeft(f, head, newLabel)
               :: l.elems.filterNot(f => f.label == head.label).toList), DataRecord(r.label, tail), newLabel)
           case _ =>

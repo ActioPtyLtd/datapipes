@@ -16,6 +16,8 @@ object DataRecord {
   private val label = "record"
 
   def apply(fields: List[DataSet]): DataRecord = new DataRecord(label, fields)
+
   def apply(fields: DataSet*): DataRecord = new DataRecord(label, fields.toList)
+
   def apply(label: String, fields: DataSet*): DataRecord = new DataRecord(label, fields.toList)
 }

@@ -40,10 +40,10 @@ object PrettyPrint {
 
     def toXmlAST: Node = data match {
       case DataString(l, s) => Elem(null, l, Null, TopScope, false, Text(s))
-      case r @ DataRecord(l, fs) if fs.map(_.label).contains("attributes") =>
-        Elem(null, l, r("attributes").elems.collect { case ds: DataString => ds }.toList.foldLeft(Null: MetaData)((a: MetaData,b: DataString) =>  a.append(Attribute(None, b.label, Text(b.str), Null))), TopScope, false, fs.filterNot(w => w.label == "attributes")map(f => f.toXmlAST) :_*)
-      case DataRecord(l, fs) => Elem(null, l, Null, TopScope, false, fs.map(f => f.toXmlAST) :_*)
-      case DataArray(l, fs) => Elem(null, l, Null, TopScope, false, fs.map(f => f.toXmlAST) :_*)
+      case r@DataRecord(l, fs) if fs.map(_.label).contains("attributes") =>
+        Elem(null, l, r("attributes").elems.collect { case ds: DataString => ds }.toList.foldLeft(Null: MetaData)((a: MetaData, b: DataString) => a.append(Attribute(None, b.label, Text(b.str), Null))), TopScope, false, fs.filterNot(w => w.label == "attributes") map (f => f.toXmlAST): _*)
+      case DataRecord(l, fs) => Elem(null, l, Null, TopScope, false, fs.map(f => f.toXmlAST): _*)
+      case DataArray(l, fs) => Elem(null, l, Null, TopScope, false, fs.map(f => f.toXmlAST): _*)
       case DataNumeric(l, num) => Elem(null, l, Null, TopScope, false, Text(num.toDouble.toString))
       case DataBoolean(l, bool) => Elem(null, l, Null, TopScope, false, Text(bool.toString))
       case DataDate(l, date) => Elem(null, l, Null, TopScope, false, Text(date.toString))

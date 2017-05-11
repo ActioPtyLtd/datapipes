@@ -15,11 +15,15 @@ class StdInDataSource extends DataSource {
 
     do {
       line = scala.io.StdIn.readLine()
-      if(line != null)
-        await { _observer.get.next(DataString(line)) }
-    } while(line != null)
+      if (line != null)
+        await {
+          _observer.get.next(DataString(line))
+        }
+    } while (line != null)
 
-    await { _observer.get.completed() }
+    await {
+      _observer.get.completed()
+    }
   }
 
   def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
