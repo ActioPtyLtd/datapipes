@@ -16,9 +16,6 @@ class JDBCDataSource extends DataSource {
 
   val logger = Logger("JDBCDataSource")
 
-
-
-
   def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
 
   def exec(parameters: Parameters): Future[Unit] = async {
@@ -28,7 +25,7 @@ class JDBCDataSource extends DataSource {
 
     val cn = DriverManager.getConnection(connectionString)
 
-    logger.info("Connected")
+    logger.info("Connected...")
 
     val statement = parameters("query")("read").stringOption.getOrElse("")
 
@@ -41,17 +38,19 @@ class JDBCDataSource extends DataSource {
 
     val metaData = rs.getMetaData
     val ordinals = 1 to metaData.getColumnCount
-    val header = ordinals.map(o => (metaData.getColumnType(o),metaData.getColumnName(o))).toList
+    val header = ordinals.map(o => (metaData.getColumnType(o), metaData.getColumnName(o))).toList
 
-    while(rs.next()) {
+    while (rs.next()) {
 
-        await {
-          _observer.get.next(DataRecord("row", header.map(v =>
-            JDBCDataSource.typeMap.get(v._1).map(m => m(v._2, rs)).getOrElse(DataString(v._2, rs.getObject(v._2).toString)))))
-        }
+      await {
+        _observer.get.next(DataRecord("row", header.map(v =>
+          JDBCDataSource.typeMap.get(v._1).map(m => m(v._2, rs)).getOrElse(DataString(v._2, rs.getObject(v._2).toString)))))
+      }
     }
 
-    await { _observer.get.completed() }
+    await {
+      _observer.get.completed()
+    }
 
     logger.info("Successfully executed statement.")
 
@@ -65,7 +64,7 @@ object JDBCDataSource {
   lazy val typeMap = List(
 
     (List(Types.BIGINT, Types.DECIMAL, Types.DOUBLE, Types.FLOAT, Types.INTEGER, Types.NUMERIC),
-      (name:String, rs: ResultSet) =>
+      (name: String, rs: ResultSet) =>
         DataNumeric(name,
           BigDecimal(BigDecimal(rs.getObject(name).toString)
             .underlying()
@@ -73,7 +72,7 @@ object JDBCDataSource {
             .toPlainString))),
 
     (List(Types.DATE, Types.TIME, Types.TIMESTAMP),
-      (name:String, rs: ResultSet) =>
+      (name: String, rs: ResultSet) =>
         DataDate(name, rs.getDate(name)))
 
   ).flatMap(t => t._1.map(s => s -> t._2)).toMap

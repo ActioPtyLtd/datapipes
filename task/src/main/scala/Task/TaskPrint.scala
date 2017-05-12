@@ -2,7 +2,7 @@ package Task
 
 import DataPipes.Common._
 import DataPipes.Common.Data._
-import DataPipes.Common.Data.PrettyPrint.PrettyPrint
+import DataPipes.Common.Data.JsonXmlDataSet.Extend
 
 import scala.async.Async.{async, await}
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -6,9 +6,9 @@ import org.json4s.Xml.{toJson, toXml}
 
 import scala.xml.{Attribute, _}
 
-object PrettyPrint {
+object JsonXmlDataSet {
 
-  implicit class PrettyPrint(data: DataSet) {
+  implicit class Extend(data: DataSet) {
     def print(): String = data match {
       case DataString(l, s) => l + " -> \"" + s + "\""
 
@@ -41,7 +41,12 @@ object PrettyPrint {
     def toXmlAST: Node = data match {
       case DataString(l, s) => Elem(null, l, Null, TopScope, false, Text(s))
       case r@DataRecord(l, fs) if fs.map(_.label).contains("attributes") =>
-        Elem(null, l, r("attributes").elems.collect { case ds: DataString => ds }.toList.foldLeft(Null: MetaData)((a: MetaData, b: DataString) => a.append(Attribute(None, b.label, Text(b.str), Null))), TopScope, false, fs.filterNot(w => w.label == "attributes") map (f => f.toXmlAST): _*)
+        Elem(null, l, r("attributes")
+          .elems
+          .collect { case ds: DataString => ds }
+          .toList
+          .foldLeft(Null: MetaData)((a: MetaData, b: DataString) =>
+            a.append(Attribute(None, b.label, Text(b.str), Null))), TopScope, false, fs.filterNot(w => w.label == "attributes") map (f => f.toXmlAST): _*)
       case DataRecord(l, fs) => Elem(null, l, Null, TopScope, false, fs.map(f => f.toXmlAST): _*)
       case DataArray(l, fs) => Elem(null, l, Null, TopScope, false, fs.map(f => f.toXmlAST): _*)
       case DataNumeric(l, num) => Elem(null, l, Null, TopScope, false, Text(num.toDouble.toString))
@@ -52,5 +57,19 @@ object PrettyPrint {
 
     def toXml: String = toXmlAST.toString()
   }
+
+  def fromJson(str: String): DataSet = json2dsHelper("", parse(str))
+
+  def json2dsHelper(label: String, jValue: JValue): DataSet =
+    jValue match {
+      case (js: JString) => DataString(label, js.s)
+      case (ji: JInt) => DataNumeric(label, BigDecimal(ji.num))
+      case (jDecimal: JDecimal) => DataNumeric(label, jDecimal.num)
+      case (jDouble: JDouble) => DataNumeric(label, jDouble.num)
+      case (jb: JBool) => DataBoolean(label, jb.value)
+      case (ja: JArray) => DataArray(label, ja.arr.map(a => json2dsHelper("item", a)))
+      case (jo: JObject) => DataRecord(label, jo.obj.map(o => json2dsHelper(o._1, o._2)))
+      case _ => DataNothing(label)
+    }
 
 }
