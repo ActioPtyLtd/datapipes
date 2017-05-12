@@ -29,7 +29,7 @@ object JsonXmlDataSet {
     def toJsonAST: JValue = data match {
       case DataString(_, s) => JString(s)
       case DataRecord(_, fs) => JObject(fs.map(f => (f.label, f.toJsonAST)))
-      case DataNumeric(_, num) => JDouble(num.toDouble)
+      case DataNumeric(_, num) => if(num.isValidInt) JInt(num.toInt) else JDouble(num.toDouble)
       case DataBoolean(_, bool) => JBool(bool)
       case DataDate(_, date) => JString(date.toString)
       case DataArray(_, fs) => JArray(fs.map(f => f.toJsonAST))

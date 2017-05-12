@@ -16,6 +16,8 @@ object Task {
       new TaskTemplate(name, config)),
     "batch" -> ((name, config) =>
       new TaskBatch(name, config)),
+    "each" -> ((name, config) =>
+      new TaskEach(name, config)),
     "print" -> ((name, config) =>
       new TaskPrint(name, config)))
 

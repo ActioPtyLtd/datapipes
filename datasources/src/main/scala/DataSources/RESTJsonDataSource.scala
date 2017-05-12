@@ -59,12 +59,12 @@ class RESTJsonDataSource extends DataSource {
 
     if(uri.isDefined) {
 
-      val user = ds("credentials")("user").stringOption
-      val password = ds("credentials")("password").stringOption
+      val userOption = ds("credential")("username").stringOption
+      val passwordOption = ds("credential")("password").stringOption
 
       val authHeader = for {
-        u <- user
-        p <- password } yield new BasicHeader(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1")))))
+        u <- userOption
+        p <- passwordOption } yield new BasicHeader(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encodeBase64((u + ":" + p).getBytes(Charset.forName("ISO-8859-1")))))
 
       val otherHeaders = ds("headers").elems.map(h => new BasicHeader(h.label, h.stringOption.getOrElse(""))).toList
 
@@ -97,7 +97,7 @@ class RESTJsonDataSource extends DataSource {
   private def createRequest(body: Option[String], verb: => HttpRequestBase, uri: String, headers: Seq[Header]): HttpRequestBase = {
     val request = verb
     request.setURI(URI.create(uri))
-    headers.foreach(h => request.setHeader(h))
+    headers.foreach(h => request.setHeader(h.getName, h.getValue))
 
     if (body.isDefined) {
 
