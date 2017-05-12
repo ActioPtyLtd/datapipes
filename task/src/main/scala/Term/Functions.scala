@@ -8,6 +8,8 @@ import scala.util.Try
 
 object Functions {
 
+  /* === string === */
+
   def toUpperCase(str: String): String = str.toUpperCase
 
   def toLowerCase(str: String): String = str.toLowerCase
@@ -26,11 +28,17 @@ object Functions {
     else
       str.contains(targetStr)
 
+  def replaceAll(str: String, find: String, replaceWith: String) = str.replaceAll(find, replaceWith)
+
+  /* === numeric === */
+
   def numeric(str: String, default: BigDecimal): BigDecimal = Try(BigDecimal(str)).getOrElse(default)
 
   def numeric(str: String): BigDecimal = numeric(str, 0)
 
   def numeric(str: String, format: String): String = new DecimalFormat(format).format(numeric(str))
+
+  /* === date === */
 
   def date(date: Date, format: String): String = new SimpleDateFormat(format).format(date)
 
@@ -43,7 +51,8 @@ object Functions {
     c.getTime
   }
 
-  // short hands
+  /* === short hand === */
+
   def sq(str: String): String = str.replace("'", "''")
 
 }

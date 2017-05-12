@@ -26,7 +26,4 @@ class TaskTemplate(name: String, val config: DataSet) extends TaskTransform(name
           DataRecord(h.success :: templates.map(t => DataString(t._1, executor.eval(h.success,t._2.get).stringOption.getOrElse(""))).toList)
       })
       .getOrElse(DataNothing())
-
-
-  //TODO for v1 shift the values (use old code, or similar)
 }

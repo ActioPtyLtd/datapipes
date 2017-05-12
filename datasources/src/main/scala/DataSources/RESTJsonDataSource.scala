@@ -4,6 +4,7 @@ import java.net.URI
 import java.nio.charset.Charset
 
 import DataPipes.Common.Data._
+import DataPipes.Common.{DataSource, Observer, Parameters}
 import com.typesafe.scalalogging.Logger
 
 import scala.util.Try
@@ -15,10 +16,19 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.message.BasicHeader
 import org.apache.http.util.EntityUtils
 import JsonXmlDataSet._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.async.Async.{async, await}
 
-class RESTJsonDataSource {
+import scala.concurrent.Future
+
+class RESTJsonDataSource extends DataSource {
 
   val logger = Logger("RESTJsonDataSource")
+  var _observer: Option[Observer[DataSet]] = None
+
+  def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
+
+
 
   private val CONTENT_TYPE: String = "application/json"
 
@@ -27,7 +37,7 @@ class RESTJsonDataSource {
 
   type HttpClient = HttpUriRequest => (StatusLine, Array[Header], String)
 
-  def authHeader: String = "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1"))))
+
 
   def createHttpRequest(label: String): HttpRequestBase = {
     if (label == "create" || label == "post") {
@@ -44,55 +54,50 @@ class RESTJsonDataSource {
   }
 
   def executeQueryLabel(ds: DataSet, label: String): DataSet = {
-    val requestQuery =
-      createRequest(DataNothing(),
-        createHttpRequest(""),
-        "")
 
-    logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
+    val uri = ds("query")(label)("uri").stringOption
 
-    val element = getResponseDataSet(requestQuery)(sendRequest)
+    if(uri.isDefined) {
 
-    /*
-    if(element.statusCode >= 400 && element.statusCode < 600) {
+      val user = ds("credentials")("user").stringOption
+      val password = ds("credentials")("password").stringOption
 
-      logger.error(s"Status code ${element.statusCode} returned.")
-      logger.error(s"Body "+element.body.toString)
-      logger.error("{" + Data2Json.toJsonString(element.body) + "}")
-      if (onError != null)
-        if (onError.toLowerCase  == "exit"){
-          // exiting pipeline
+      val authHeader = for {
+        u <- user
+        p <- password } yield new BasicHeader(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encodeBase64((user + ":" + password).getBytes(Charset.forName("ISO-8859-1")))))
 
-          logger.error(s"**** Exiting OnError ${element.statusCode} returned.")
+      val otherHeaders = ds("headers").elems.map(h => new BasicHeader(h.label, h.stringOption.getOrElse(""))).toList
 
-          System.exit(-1)
-        }   else   if (onError.toLowerCase == "exception"){
-          // exiting pipeline
+      val headers: Seq[Header] = authHeader.map(a => a :: otherHeaders).getOrElse(otherHeaders)
 
-          logger.error(s"**** On Error Exception: DataSourceREST ${element.statusCode} returned.")
+      val requestQuery =
+        createRequest(ds("query")(label)("body"),
+          createHttpRequest(ds("query")(label)("verb").stringOption.getOrElse("get")),
+          uri.get, headers)
 
-          throw new Exception("On Error Exception: DataSourceREST ")
-        }
-    } else {
-      logger.info(s"Status code ${element.statusCode} returned.")
+      logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
+
+      val element = getResponseDataSet(requestQuery)(sendRequest)
+
+      element
     }
-*/
-    element
+    else
+      DataNothing()
   }
 
-  private def createRequest(body: DataSet, verb: => HttpRequestBase, uri: String): HttpRequestBase =
+  private def createRequest(body: DataSet, verb: => HttpRequestBase, uri: String, headers: Seq[Header]): HttpRequestBase =
     verb match {
       case postput: HttpEntityEnclosingRequestBase => createRequest(body match {
         case DataString(_, s) => Some(s)
         case _ => Some(body.toJson)
-      }, verb, uri)
-      case _ => createRequest(None, verb, uri)
+      }, verb, uri, headers)
+      case _ => createRequest(None, verb, uri, headers)
     }
 
-  private def createRequest(body: Option[String], verb: => HttpRequestBase, uri: String): HttpRequestBase = {
+  private def createRequest(body: Option[String], verb: => HttpRequestBase, uri: String, headers: Seq[Header]): HttpRequestBase = {
     val request = verb
     request.setURI(URI.create(uri))
-    request.setHeader(HttpHeaders.AUTHORIZATION, authHeader)
+    headers.foreach(h => request.setHeader(h))
 
     if (body.isDefined) {
 
@@ -119,7 +124,7 @@ class RESTJsonDataSource {
     DataRecord("response",
       DataString("uri", request.getURI.toString) ::
       DataNumeric("status", response._1.getStatusCode) ::
-        dsBody ::
+        DataRecord("root", dsBody.elems.toList) ::
         response._2.map(h => DataString(h.getName,h.getValue)).toList
       )
   }
@@ -148,4 +153,13 @@ class RESTJsonDataSource {
   }
 
   var headers: List[(String, String)] = List()
+
+  override def exec(parameters: Parameters): Future[Unit] = async {
+    val ds = executeQueryLabel(parameters, parameters("label").stringOption.getOrElse(parameters("query").headOption.map(_.label).get))
+
+    if(_observer.isDefined)
+      await {
+        _observer.get.next(ds)
+      }
+  }
 }
