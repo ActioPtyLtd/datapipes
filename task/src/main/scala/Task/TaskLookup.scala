@@ -35,12 +35,14 @@ class TaskLookup(name: String, config: DataSet) extends Task {
       var buffer = List[DataSet]()
 
       override def completed(): Future[Unit] = async {
+        val nds = buffer.headOption match {
+          case Some(_: DataArray) => DataArray(buffer.flatMap(m => m.elems))
+          case Some(ds: DataSet) if buffer.size == 1 => ds
+        }
+
         if(_observer.isDefined)
           await {
-            val nds = buffer.headOption match {
-              case Some(_: DataArray) => DataArray(buffer.flatMap(m => m.elems))
-              case Some(ds: DataSet) if buffer.size == 1 => ds
-            }
+
             _observer.get.next(Dom() ~ Dom(name, null, Nil, nds, DataNothing()))
           }
       }
