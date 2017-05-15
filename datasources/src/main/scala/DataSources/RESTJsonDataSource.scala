@@ -159,7 +159,9 @@ class RESTJsonDataSource extends DataSource {
 
     if(_observer.isDefined)
       await {
-        _observer.get.next(ds)
+        _observer.get.next(ds) }
+      await {
+        _observer.get.completed()
       }
   }
 }

@@ -4,10 +4,8 @@ import DataPipes.Common.Data._
 import DataPipes.Common._
 
 import scala.async.Async.{async, await}
-import scala.collection.immutable.Queue
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.Try
 
 class TaskEach(val name: String, config: DataSet) extends Task {
 

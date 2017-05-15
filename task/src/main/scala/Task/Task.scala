@@ -18,6 +18,8 @@ object Task {
       new TaskBatch(name, config)),
     "each" -> ((name, config) =>
       new TaskEach(name, config)),
+    "lookup" -> ((name, config) =>
+      new TaskLookup(name, config)),
     "print" -> ((name, config) =>
       new TaskPrint(name, config)))
 
