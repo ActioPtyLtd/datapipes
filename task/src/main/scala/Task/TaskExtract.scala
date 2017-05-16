@@ -10,20 +10,20 @@ class TaskExtract(val name: String, val config: DataSet) extends Task {
 
   val dataSource: DataSource = DataSource(config("dataSource"))
 
-  def completed(): Future[Unit] = Future { Unit }
+  def completed(): Unit = { Unit }
 
-  def error(exception: Throwable): Future[Unit] = ???
+  def error(exception: Throwable): Unit = ???
 
-  def next(value: Dom): Future[Unit] = dataSource.exec(config("dataSource"))
+  def next(value: Dom): Unit = dataSource.exec(config("dataSource"))
 
   def subscribe(observer: Observer[Dom]): Unit = {
 
     val dsObserver = new Observer[DataSet] {
-      def completed(): Future[Unit] = observer.completed()
+      def completed(): Unit = observer.completed()
 
-      def error(exception: Throwable): Future[Unit] = observer.error(exception)
+      def error(exception: Throwable): Unit = observer.error(exception)
 
-      def next(value: DataSet): Future[Unit] =
+      def next(value: DataSet): Unit =
         observer.next(Dom() ~ Dom(name,null,Nil,value,DataNothing()))
     }
 

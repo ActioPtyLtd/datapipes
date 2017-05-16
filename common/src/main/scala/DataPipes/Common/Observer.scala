@@ -1,11 +1,9 @@
 package DataPipes.Common
 
-import scala.concurrent.Future
-
 trait Observer[-T] {
-  def completed(): Future[Unit]
+  def completed(): Unit
 
-  def error(exception: Throwable): Future[Unit]
+  def error(exception: Throwable): Unit
 
-  def next(value: T): Future[Unit]
+  def next(value: T): Unit
 }

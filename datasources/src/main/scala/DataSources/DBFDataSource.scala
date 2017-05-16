@@ -6,15 +6,11 @@ import DataPipes.Common._
 import DataPipes.Common.Data._
 import com.linuxense.javadbf._
 
-import scala.async.Async.{async, await}
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-
 class DBFDataSource extends DataSource {
 
   var _observer: Option[Observer[DataSet]] = None
 
-  def exec(parameters: Parameters): Future[Unit] = async {
+  def exec(parameters: Parameters): Unit = {
 
     val fileName = parameters("filePath").stringOption.getOrElse("")
     val fis = new FileInputStream(new File(fileName))
@@ -32,13 +28,13 @@ class DBFDataSource extends DataSource {
       val ds = DBFDataSource.field2ds(row, fields)
 
       if(_observer.isDefined)
-        await { _observer.get.next(ds) }
+        { _observer.get.next(ds) }
 
       row = stream.nextRecord()
     }
 
     if(_observer.isDefined)
-      await { _observer.get.completed() }
+      { _observer.get.completed() }
 
     stream.close()
     fis.close()

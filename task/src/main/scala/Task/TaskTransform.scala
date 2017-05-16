@@ -3,27 +3,23 @@ package Task
 import DataPipes.Common._
 import DataPipes.Common.Data._
 
-import scala.async.Async.{async, await}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
 abstract class TaskTransform(val name: String) extends Task {
 
   var _observer: Option[Observer[Dom]] = None
 
-  def completed(): Future[Unit] = async {
+  def completed(): Unit = {
     if(_observer.isDefined)
-      await { _observer.get.completed() }
+      { _observer.get.completed() }
   }
 
-  def error(exception: Throwable): Future[Unit] = ???
+  def error(exception: Throwable): Unit = ???
 
-  def next(value: Dom): Future[Unit] = async {
+  def next(value: Dom): Unit = {
 
     val nds = transform(value)
 
     if(_observer.isDefined)
-      await { _observer.get.next(value ~ Dom(name,null,List(),nds,DataNothing())) }
+      { _observer.get.next(value ~ Dom(name,null,List(),nds,DataNothing())) }
   }
 
   def subscribe(observer: Observer[Dom]): Unit = {

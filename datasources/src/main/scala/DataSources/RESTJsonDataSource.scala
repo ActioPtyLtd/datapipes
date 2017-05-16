@@ -16,10 +16,6 @@ import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.message.BasicHeader
 import org.apache.http.util.EntityUtils
 import JsonXmlDataSet._
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.async.Async.{async, await}
-
-import scala.concurrent.Future
 
 class RESTJsonDataSource extends DataSource {
 
@@ -154,14 +150,12 @@ class RESTJsonDataSource extends DataSource {
 
   var headers: List[(String, String)] = List()
 
-  override def exec(parameters: Parameters): Future[Unit] = async {
+  override def exec(parameters: Parameters): Unit = {
     val ds = executeQueryLabel(parameters, parameters("label").stringOption.getOrElse(parameters("query").headOption.map(_.label).get))
 
-    if(_observer.isDefined)
-      await {
-        _observer.get.next(ds) }
-      await {
-        _observer.get.completed()
-      }
+    if(_observer.isDefined) {
+      _observer.get.next(ds)
+      _observer.get.completed()
+    }
   }
 }

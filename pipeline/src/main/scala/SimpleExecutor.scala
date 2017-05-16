@@ -2,15 +2,11 @@ import DataPipes.Common._
 import Pipeline.Operation
 import Task._
 
-import scala.concurrent.Future
-import scala.async.Async.{async, await}
-import scala.concurrent.ExecutionContext.Implicits.global
-
 object SimpleExecutor {
 
   trait TaskOperation extends Observable[Dom] with Observer[Dom] {
 
-    def start(): Future[Unit] = next(Dom())
+    def start(): Unit = next(Dom())
   }
 
   def getRunnable(operation: Operation): TaskOperation = operation match {
@@ -19,11 +15,11 @@ object SimpleExecutor {
 
       val myTask = Task(t.name, t.taskType, t.config)
 
-      def next(value: Dom): Future[Unit] = { println(s"=== Task ${t.name} received Dom ==="); myTask.next(value) }
+      def next(value: Dom): Unit = { println(s"=== Task ${t.name} received Dom ==="); myTask.next(value) }
 
-      def completed(): Future[Unit] = { println(s"=== Operation ${operation.name} completed ==="); myTask.completed() }
+      def completed(): Unit = { println(s"=== Operation ${operation.name} completed ==="); myTask.completed() }
 
-      def error(exception: Throwable): Future[Unit] = myTask.error(exception)
+      def error(exception: Throwable): Unit = myTask.error(exception)
 
       def subscribe(observer: Observer[Dom]): Unit = myTask.subscribe(observer)
     }
@@ -35,21 +31,20 @@ object SimpleExecutor {
 
       l.subscribe(r)
 
-      def next(value: Dom): Future[Unit] = async {
+      def next(value: Dom): Unit = {
         println(s"=== Pipe ${p.name} received Dom ===")
-        await { l.next(value) }
-
+        l.next(value)
       }
 
-      def completed(): Future[Unit] = async {
+      def completed(): Unit = {
         println(s"=== Operation ${operation.name} completed ===")
-        await { l.completed() }
-        await { r.completed() }
+        l.completed()
+        r.completed()
       }
 
-      def error(exception: Throwable): Future[Unit] = async {
-        await { l.error(exception) }
-        await { r.error(exception) }
+      def error(exception: Throwable): Unit = {
+        l.error(exception)
+        r.error(exception)
       }
 
       def subscribe(observer: Observer[Dom]): Unit = r.subscribe(observer)

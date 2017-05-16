@@ -3,10 +3,7 @@ package DataSources
 import DataPipes.Common.Data._
 import DataPipes.Common.{DataSource, Observer, Parameters}
 
-import scala.async.Async.{async, await}
-import scala.concurrent.Future
 import java.sql._
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import com.typesafe.scalalogging.Logger
 
@@ -18,7 +15,7 @@ class JDBCDataSource extends DataSource {
 
   def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
 
-  def exec(parameters: Parameters): Future[Unit] = async {
+  def exec(parameters: Parameters): Unit = {
 
 
     val connectionString = parameters("connect").stringOption.getOrElse("")
@@ -40,17 +37,14 @@ class JDBCDataSource extends DataSource {
     val ordinals = 1 to metaData.getColumnCount
     val header = ordinals.map(o => (metaData.getColumnType(o), metaData.getColumnName(o))).toList
 
-    while (rs.next()) {
-
-      await {
-        _observer.get.next(DataRecord("row", header.map(v =>
-          JDBCDataSource.typeMap.get(v._1).map(m => m(v._2, rs)).getOrElse(DataString(v._2, rs.getObject(v._2).toString)))))
-      }
+    while (rs.next())
+    {
+      _observer.get.next(DataRecord("row", header.map(v =>
+        JDBCDataSource.typeMap.get(v._1).map(m => m(v._2, rs)).getOrElse(DataString(v._2, rs.getObject(v._2).toString)))))
     }
 
-    await {
-      _observer.get.completed()
-    }
+
+    _observer.get.completed()
 
     logger.info("Successfully executed statement.")
 

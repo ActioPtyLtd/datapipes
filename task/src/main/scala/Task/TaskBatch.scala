@@ -3,10 +3,7 @@ package Task
 import DataPipes.Common._
 import DataPipes.Common.Data._
 
-import scala.async.Async.{async, await}
 import scala.collection.immutable.Queue
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 import scala.util.Try
 
 class TaskBatch(val name: String, config: DataSet) extends Task {
@@ -15,28 +12,25 @@ class TaskBatch(val name: String, config: DataSet) extends Task {
   var _observer: Option[Observer[Dom]] = None
   var buffer: Queue[DataSet] = Queue()
 
-  def completed(): Future[Unit] = async {
+  def completed(): Unit = {
     if(buffer.nonEmpty && _observer.isDefined) {
-      await {
-        _observer.get.next(Dom("", null, List(), DataArray(buffer.toList), DataNothing()))
-      }
-      await {
-        _observer.get.completed()
-      }
+    {
+      _observer.get.next(Dom("", null, List(), DataArray(buffer.toList), DataNothing()))
+      _observer.get.completed()
+    }
     }
 
   }
 
-  def error(exception: Throwable): Future[Unit] = ???
+  def error(exception: Throwable): Unit = ???
 
-  def next(value: Dom): Future[Unit] = async {
+  def next(value: Dom): Unit = {
 
     buffer = buffer.enqueue(value.headOption.get.success) //TODO fix this
 
-    if(buffer.size == size && _observer.isDefined) {
-      await {
-        _observer.get.next(value ~ Dom(name, null, List(), DataArray(buffer.toList), DataNothing()))
-      }
+    if(buffer.size == size && _observer.isDefined)
+    {
+      _observer.get.next(value ~ Dom(name, null, List(), DataArray(buffer.toList), DataNothing()))
       buffer = Queue()
     }
   }

@@ -9,8 +9,6 @@ object AppTest extends App {
 
   println(pf)
 
-  val run = SimpleExecutor.getRunnable(pf.get.pipeline).start()
-
-  Await.result(run, 1000000 millis)
+  SimpleExecutor.getRunnable(pf.get.pipeline).start()
 
 }

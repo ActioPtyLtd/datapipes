@@ -6,5 +6,5 @@ import scala.concurrent.Future
 
 trait DataSource extends Observable[DataSet] {
 
-  def exec(parameters: Parameters): Future[Unit]
+  def exec(parameters: Parameters): Unit
 }

@@ -3,12 +3,8 @@ import DataPipes.Common.Data._
 import DataPipes.Common.{DataSource, Dom, Observer, Task}
 import Term.TermExecutor
 
-import scala.concurrent.Future
 import scala.meta._
 import scala.meta.Term
-import scala.async.Async.{async, await}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 class TaskLookup(name: String, config: DataSet) extends Task {
 
@@ -16,14 +12,14 @@ class TaskLookup(name: String, config: DataSet) extends Task {
   val terms = TaskLookup.getTermTree(config("dataSource")("query"))
   val termExecutor = new TermExecutor("Term.Function")
 
-  def completed(): Future[Unit] = async {
+  def completed(): Unit = {
     if(_observer.isDefined)
-      await { _observer.get.completed()}
+      _observer.get.completed()
   }
 
-  def error(exception: Throwable): Future[Unit] = ???
+  def error(exception: Throwable): Unit = ???
 
-  def next(value: Dom): Future[Unit] = async {
+  def next(value: Dom): Unit = {
 
     val newConfig = Operators.mergeLeft(DataRecord("dataSource", TaskLookup.interpolate(termExecutor, terms,
       value.headOption.map(m => m.success).getOrElse(DataNothing()))), config("dataSource"))
@@ -34,29 +30,28 @@ class TaskLookup(name: String, config: DataSet) extends Task {
 
       var buffer = List[DataSet]()
 
-      override def completed(): Future[Unit] = async {
+      override def completed(): Unit = {
         val nds = buffer.headOption match {
           case Some(_: DataArray) => DataArray(buffer.flatMap(m => m.elems))
           case Some(ds: DataSet) if buffer.size == 1 => ds
         }
 
         if(_observer.isDefined)
-          await {
-
-            _observer.get.next(Dom() ~ Dom(name, null, Nil, nds, DataNothing()))
-          }
+        {
+          _observer.get.next(Dom() ~ Dom(name, null, Nil, nds, DataNothing()))
+        }
       }
 
-      override def error(exception: Throwable): Future[Unit] = ???
+      override def error(exception: Throwable): Unit = ???
 
-      override def next(value: DataSet): Future[Unit] = async {
+      override def next(value: DataSet): Unit = {
         buffer = value :: buffer
       }
     }
 
     dataSource.subscribe(localObserver)
 
-    await { dataSource.exec(newConfig) }
+    dataSource.exec(newConfig)
   }
 
   def subscribe(observer: Observer[Dom]): Unit = _observer = Some(observer)

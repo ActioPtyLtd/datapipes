@@ -3,9 +3,7 @@ package DataSources
 import DataPipes.Common.Data._
 import DataPipes.Common._
 import java.io.FileReader
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.async.Async.{async, await}
+
 import org.apache.commons.csv.{CSVFormat, CSVParser}
 
 class CSVDataSource extends DataSource {
@@ -14,7 +12,7 @@ class CSVDataSource extends DataSource {
 
   def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
 
-  def exec(parameters: Parameters): Future[Unit] = async {
+  def exec(parameters: Parameters): Unit = {
     import collection.JavaConverters._
 
     val filePath = parameters("filePath").stringOption.getOrElse("")
@@ -26,15 +24,12 @@ class CSVDataSource extends DataSource {
     while (it.hasNext) {
       val i = it.next()
 
-      await {
-        _observer.get.next(DataRecord(i.toMap.asScala.map(c => DataString(c._1, c._2)).toList))
-      }
+      _observer.get.next(DataRecord(i.toMap.asScala.map(c => DataString(c._1, c._2)).toList))
+
     }
 
     in.close()
 
-    await {
-      _observer.get.completed()
-    }
+    _observer.get.completed()
   }
 }
