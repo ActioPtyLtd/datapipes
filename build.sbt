@@ -8,6 +8,8 @@ scalaVersion := "2.11.1"
 publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath+"/lib/")))
 
 lazy val common = project
+  .settings(
+    assemblyJarName in assembly := "commons.jar")
   .settings(libraryDependencies += "org.json4s" %% "json4s-native" % "3.5.1")
 
 lazy val pipescript = project
@@ -44,7 +46,7 @@ lazy val application = project
   .dependsOn(pipescript, datasources, common, task, pipeline)
 
 lazy val root =
-  project.in( file(".") )
+  (project in file("."))
     .aggregate(application, pipescript, datasources, common, pipeline, task)
 
 lazy val test = project
