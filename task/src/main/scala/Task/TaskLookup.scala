@@ -10,7 +10,8 @@ class TaskLookup(name: String, config: DataSet) extends Task {
 
   var _observer: Option[Observer[Dom]] = None
   val terms = TaskLookup.getTermTree(config("dataSource")("query"))
-  val termExecutor = new TermExecutor("Term.Function")
+  val namespace = config("namespace").stringOption.getOrElse("Term.Functions")
+  val termExecutor = new TermExecutor(namespace)
 
   def completed(): Unit = {
     if(_observer.isDefined)

@@ -14,10 +14,8 @@ class TaskBatch(val name: String, config: DataSet) extends Task {
 
   def completed(): Unit = {
     if(buffer.nonEmpty && _observer.isDefined) {
-    {
       _observer.get.next(Dom("", null, List(), DataArray(buffer.toList), DataNothing()))
       _observer.get.completed()
-    }
     }
 
   }

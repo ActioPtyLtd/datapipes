@@ -3,14 +3,13 @@ package Task
 import DataPipes.Common._
 import DataPipes.Common.Data._
 
+import scala.collection.mutable.ListBuffer
+
 abstract class TaskTransform(val name: String) extends Task {
 
-  var _observer: Option[Observer[Dom]] = None
+  val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
 
-  def completed(): Unit = {
-    if(_observer.isDefined)
-      { _observer.get.completed() }
-  }
+  def completed(): Unit = _observer.foreach(o => o.completed())
 
   def error(exception: Throwable): Unit = ???
 
@@ -18,14 +17,17 @@ abstract class TaskTransform(val name: String) extends Task {
 
     val nds = transform(value)
 
-    if(_observer.isDefined)
-      { _observer.get.next(value ~ Dom(name,null,List(),nds,DataNothing())) }
+    val send = for {
+      ds <- nds
+      o <- _observer
+    } yield (o,ds)
+
+    send.foreach(s => s._1.next(value ~ Dom(name,null,List(),s._2,DataNothing())))
+
   }
 
-  def subscribe(observer: Observer[Dom]): Unit = {
-    _observer = Some(observer)
-  }
+  def subscribe(observer: Observer[Dom]): Unit = _observer.append(observer)
 
-  def transform(dom: Dom): DataSet
+  def transform(dom: Dom): Seq[DataSet]
 
 }

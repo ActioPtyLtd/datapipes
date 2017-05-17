@@ -13,6 +13,8 @@ class TermExecutor(nameSpace: String) {
 
   def eval(ds: DataSet, text: String): DataSet = eval(ds, text.parse[Term].get)
 
+  def getTemplateTerm(str: String) = ("s\"\"\"" + str + "\"\"\"").parse[Term].get
+
   def interpolate(str: String): String = "s\"\"\"" + str + "\"\"\""
 
   def eval(ds: DataSet, t: Term): DataSet = {
@@ -24,7 +26,7 @@ class TermExecutor(nameSpace: String) {
           eval(body, Map(name -> ds))
 
         // evaluate expression, add to scope top level attributes of the DataSet
-        case _ => eval(t, ds.elems.map(e => e.label -> e).toList.toMap + ("this" -> ds))
+        case _ => eval(t, ds.map(e => e.label -> e).toList.toMap + ("this" -> ds))
       }
     } catch {
       case e : Throwable =>
@@ -109,7 +111,7 @@ class TermExecutor(nameSpace: String) {
 
     // Astrix should be treated as iteration
     case Term.Select(Term.Select(q, Term.Name("*")), Term.Name(n)) =>
-      DataArray(eval(q, scope).elems.map(i => i(n)).toList)
+      DataArray(eval(q, scope).map(i => i(n)).toList)
 
     // Look for the DataSet with label
     case Term.Select(q, Term.Name(n)) => eval(q, scope)(n)

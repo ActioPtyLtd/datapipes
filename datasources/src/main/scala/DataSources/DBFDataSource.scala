@@ -15,7 +15,7 @@ class DBFDataSource extends DataSource {
     val fileName = parameters("filePath").stringOption.getOrElse("")
     val fis = new FileInputStream(new File(fileName))
     val stream = new DBFReader(fis)
-    val selectFields = parameters("fields").elems.map(s => s.stringOption.getOrElse(""))
+    val selectFields = parameters("fields").map(s => s.stringOption.getOrElse(""))
 
     val fields = (0 until stream.getFieldCount)
       .map(i => (stream.getField(i),i))

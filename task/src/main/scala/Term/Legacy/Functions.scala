@@ -293,7 +293,7 @@ object Functions {
 
   def csvWithHeader(ds: DataSet, delim: String): DataSet = {
     val csvSplit = delim + "(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)" // TODO: should allow encapsulation to be paramaterised
-    val rows = ds.elems.map(r => r(0).stringOption.getOrElse("").split(csvSplit, -1).map(c => c.replaceAll("^\"|\"$", ""))).toList
+    val rows = ds.map(r => r(0).stringOption.getOrElse("").split(csvSplit, -1).map(c => c.replaceAll("^\"|\"$", ""))).toList
     if(rows.length == 0)
       DataNothing()
     else
@@ -308,7 +308,7 @@ object Functions {
 
   def orElse(ds: DataSet, or: DataSet): DataSet = ds.toOption.getOrElse(or)
 
-  def maprecord(ds: DataSet): DataSet = DataArray(ds.elems.map(e => DataRecord(e)).toList)
+  def maprecord(ds: DataSet): DataSet = DataArray(ds.map(e => DataRecord(e)).toList)
 
   /* below will need to be replaced when I have time */
 
@@ -332,7 +332,7 @@ object Functions {
       case DataBoolean(_, bool) => bool.toString
       case DataDate(_, date) => date.toString
       case e => toField(e.label) +
-        "{" + e.elems.map(toJsonString).mkString(",") + "}"
+        "{" + e.map(toJsonString).mkString(",") + "}"
     }
 
   def toField(name: String): String = if (name.isEmpty) "" else "\"" + name + "\": "

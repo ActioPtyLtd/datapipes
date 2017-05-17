@@ -12,7 +12,4 @@ abstract class DataBase extends DataSet {
     case DataNothing(_) => None
     case data => Some(data)
   }
-
-  def map[B](f: DataSet => B): Seq[B] = elems.map(f)
-
 }

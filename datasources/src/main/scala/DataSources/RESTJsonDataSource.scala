@@ -62,7 +62,7 @@ class RESTJsonDataSource extends DataSource {
         u <- userOption
         p <- passwordOption } yield new BasicHeader(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encodeBase64((u + ":" + p).getBytes(Charset.forName("ISO-8859-1")))))
 
-      val otherHeaders = ds("headers").elems.map(h => new BasicHeader(h.label, h.stringOption.getOrElse(""))).toList
+      val otherHeaders = ds("headers").map(h => new BasicHeader(h.label, h.stringOption.getOrElse(""))).toList
 
       val headers: Seq[Header] = authHeader.map(a => a :: otherHeaders).getOrElse(otherHeaders)
 

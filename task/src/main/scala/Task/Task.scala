@@ -8,11 +8,11 @@ object Task {
   private lazy val tasks = Map[String, (String, DataSet) => DataPipes.Common.Task](
     "extract" -> ((name, config) =>
       new TaskExtract(name, config)),
-    "term" -> ((name, config) =>
+    "transformTerm" -> ((name, config) =>
       new TaskTerm(name, config)),
     "transform" -> ((name, config) =>
       new TaskFunctionFold(name, config)),
-    "template" -> ((name, config) =>
+    "mergeTemplate" -> ((name, config) =>
       new TaskTemplate(name, config)),
     "batch" -> ((name, config) =>
       new TaskBatch(name, config)),
@@ -20,6 +20,8 @@ object Task {
       new TaskEach(name, config)),
     "lookup" -> ((name, config) =>
       new TaskLookup(name, config)),
+    "datasourceupdate" -> ((name, config) =>
+      new TaskUpdate(name, config)),
     "print" -> ((name, config) =>
       new TaskPrint(name, config)))
 

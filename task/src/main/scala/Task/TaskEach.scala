@@ -3,12 +3,14 @@ package Task
 import DataPipes.Common.Data._
 import DataPipes.Common._
 
+import scala.collection.mutable.ListBuffer
+
 class TaskEach(val name: String, config: DataSet) extends Task {
 
-  var _observer: Option[Observer[Dom]] = None
+  val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
 
   def completed(): Unit = {
-    _observer.get.completed()
+    _observer.foreach(o => o.completed())
   }
 
   def error(exception: Throwable): Unit = ???
@@ -17,13 +19,16 @@ class TaskEach(val name: String, config: DataSet) extends Task {
 
     val it = value.headOption.get.success.elems.toIterator // TODO fix
 
-    while(it.hasNext)
-    {
-      _observer.get.next(value ~ Dom(name, null, List(), it.next(), DataNothing()))
-    }
+    val send = for {
+      dom <- value.headOption.toList
+      element <- dom.success.elems
+      observer <- _observer
+    } yield (observer, element)
+
+    send.foreach(s => s._1.next(value ~ Dom(name, null, List(), s._2, DataNothing())))
   }
 
   override def subscribe(observer: Observer[Dom]): Unit = {
-    _observer = Some(observer)
+    _observer.append(observer)
   }
 }
