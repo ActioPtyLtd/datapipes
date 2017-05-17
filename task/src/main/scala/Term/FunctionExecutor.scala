@@ -45,6 +45,8 @@ object FunctionExecutor {
       if methodParameter.getType == classOf[java.util.Date] => getParamValues(tail, date :: result)
     case ((methodParameter, ds: DataSet) :: tail)
       if methodParameter.getType == classOf[DataSet] => getParamValues(tail, ds :: result)
+    case ((methodParameter, ds: DataSet) :: tail)
+      if methodParameter.getType == classOf[String] => getParamValues(tail, ds.stringOption.getOrElse("") :: result)
     case _ => None
   }
 

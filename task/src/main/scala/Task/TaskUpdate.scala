@@ -15,16 +15,16 @@ object Cache {
 
 class TaskUpdate(val name: String, val config: DataSet, version: String) extends Task {
 
-  val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
-  val namespace = config("namespace").stringOption.getOrElse("Term.Functions")
-  val termExecutor = new TermExecutor(namespace)
-  val keyRightTerm = termExecutor.getTemplateTerm(config("keyR").stringOption.getOrElse(""))
-  val changeRightTerm = termExecutor.getTemplateTerm(config("changeR").stringOption.getOrElse(""))
-  val keyLeftTerm = termExecutor.getTemplateTerm(config("keyL").stringOption.getOrElse(""))
-  val changeLeftTerm = termExecutor.getTemplateTerm(config("changeL").stringOption.getOrElse(""))
-  val queryDataSet = queryAdjust(config("dataSource")("query"))
-  val termRead = TaskLookup.getTermTree(queryDataSet("read"))
-  val termCreate = TaskLookup.getTermTree(queryDataSet("create"))
+  private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
+  private val namespace = config("namespace").stringOption.getOrElse("Term.Functions")
+  private val termExecutor = new TermExecutor(namespace)
+  private val keyRightTerm = termExecutor.getTemplateTerm(config("keyR").stringOption.getOrElse(""))
+  private val changeRightTerm = termExecutor.getTemplateTerm(config("changeR").stringOption.getOrElse(""))
+  private val keyLeftTerm = termExecutor.getTemplateTerm(config("keyL").stringOption.getOrElse(""))
+  private val changeLeftTerm = termExecutor.getTemplateTerm(config("changeL").stringOption.getOrElse(""))
+  private val queryDataSet = queryAdjust(config("dataSource")("query"))
+  private val termRead = TaskLookup.getTermTree(queryDataSet("read"))
+  private val termCreate = TaskLookup.getTermTree(queryDataSet("create"))
 
   var initialised = false
 

@@ -9,7 +9,7 @@ import _root_.Term.TermExecutor
 
 class TaskTemplate(name: String, val config: DataSet, version: String) extends TaskTransform(name) {
 
-  val executor = new TermExecutor(config("namespace").stringOption.getOrElse("Term.Functions"))
+  val executor = new TermExecutor(config("namespace").stringOption.getOrElse("Term.Legacy.Functions"))
 
   val templates = config("templates").map(m => m.label -> m.stringOption.map(i => executor.interpolate(i)).getOrElse("").parse[Term])
 

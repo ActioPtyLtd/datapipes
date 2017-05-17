@@ -11,7 +11,7 @@ import scala.meta.Term
 class TaskTerm(name: String, config: DataSet, version: String) extends TaskTransform(name) {
 
   val term: Term = config("term").stringOption.getOrElse("").parse[Term].get
-  val executor = new TermExecutor(config("namespace").stringOption.getOrElse("Term.Functions"))
+  val executor = new TermExecutor(config("namespace").stringOption.getOrElse("Term.Legacy.Functions"))
 
   def transform(dom: Dom): Seq[DataSet] = {
     val ds = executor.eval(dom.headOption.map(_.success).getOrElse(DataNothing()), term)

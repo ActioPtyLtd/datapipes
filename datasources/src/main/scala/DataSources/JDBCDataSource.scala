@@ -37,6 +37,7 @@ class JDBCDataSource extends DataSource {
 
       while (rs.next()) {
         _observer.foreach(o => o.next(DataRecord("row", header.map(v =>
+          if(rs.getObject(v._2) == null) DataNothing(v._2) else
           JDBCDataSource.typeMap.get(v._1).map(m => m(v._2, rs)).getOrElse(DataString(v._2, rs.getObject(v._2).toString))))))
       }
     } else {

@@ -4,6 +4,7 @@ import DataPipes.Common.Data._
 import DataPipes.Common._
 import java.io.FileReader
 
+import com.typesafe.scalalogging.Logger
 import org.apache.commons.csv.{CSVFormat, CSVParser}
 
 class CSVDataSource extends DataSource {

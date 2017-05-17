@@ -2,6 +2,7 @@ import DataPipes.Common.Data.{DataNothing, DataSet}
 import DataPipes.Common._
 import Pipeline.Operation
 import _root_.Task._
+import com.typesafe.scalalogging.Logger
 
 object SimpleExecutor {
 
@@ -12,15 +13,17 @@ object SimpleExecutor {
     def start(ds: DataSet) =  next(Dom() ~ Dom("start", null, Nil, ds, DataNothing()))
   }
 
+  val logger = Logger("SimpleExecutor")
+
   def getRunnable(operation: Operation): TaskOperation = operation match {
 
     case t: Pipeline.Task => new TaskOperation {
 
       val myTask = Task(t.name, t.taskType, t.config)
 
-      def next(value: Dom): Unit = { println(s"=== Task ${t.name} received Dom ==="); myTask.next(value) }
+      def next(value: Dom): Unit = { logger.debug(s"=== Task ${t.name} received Dom ==="); myTask.next(value) }
 
-      def completed(): Unit = { println(s"=== Operation ${operation.name} completed ==="); myTask.completed() }
+      def completed(): Unit = { logger.info(s"=== Operation ${operation.name} completed ==="); myTask.completed() }
 
       def error(exception: Throwable): Unit = myTask.error(exception)
 
@@ -35,12 +38,12 @@ object SimpleExecutor {
       l.subscribe(r)
 
       def next(value: Dom): Unit = {
-        println(s"=== Pipe ${p.name} received Dom ===")
+        logger.debug(s"=== Pipe ${p.name} received Dom ===")
         l.next(value)
       }
 
       def completed(): Unit = {
-        println(s"=== Operation ${operation.name} completed ===")
+        logger.info(s"=== Operation ${operation.name} completed ===")
         l.completed()
         r.completed()
       }

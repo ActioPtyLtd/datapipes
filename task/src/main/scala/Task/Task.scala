@@ -22,6 +22,8 @@ object Task {
       new TaskLookup(name, config)),
     "datasourceupdate" -> ((name, config, version) =>
       new TaskUpdate(name, config, version)),
+    "join" -> ((name, config, version) =>
+      new TaskJoin(name, config, version)),
     "print" -> ((name, config, _) =>
       new TaskPrint(name, config)))
 

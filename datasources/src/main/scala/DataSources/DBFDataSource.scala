@@ -5,14 +5,19 @@ import java.io.{File, FileInputStream}
 import DataPipes.Common._
 import DataPipes.Common.Data._
 import com.linuxense.javadbf._
+import com.typesafe.scalalogging.Logger
 
 class DBFDataSource extends DataSource {
+  val logger = Logger("DBFDataSource")
 
   var _observer: Option[Observer[DataSet]] = None
 
   def execute(config: DataSet, query: DataSet): Unit = {
 
-    val fileName = config("filePath").stringOption.getOrElse("")
+    val fileName = config("directory").stringOption.getOrElse("") + "/" + config("filenameTemplate").stringOption.getOrElse("")
+
+    logger.info(s"Reading file: ${fileName}")
+
     val fis = new FileInputStream(new File(fileName))
     val stream = new DBFReader(fis)
     val selectFields = config("fields").map(s => s.stringOption.getOrElse(""))
@@ -38,6 +43,7 @@ class DBFDataSource extends DataSource {
 
     stream.close()
     fis.close()
+    logger.info(s"Closing file ${fileName}")
 
   }
 
