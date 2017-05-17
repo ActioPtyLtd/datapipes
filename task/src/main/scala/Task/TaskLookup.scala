@@ -52,7 +52,7 @@ class TaskLookup(name: String, config: DataSet) extends Task {
 
     dataSource.subscribe(localObserver)
 
-    dataSource.exec(newConfig)
+    dataSource.execute(newConfig, DataNothing())
   }
 
   def subscribe(observer: Observer[Dom]): Unit = _observer = Some(observer)

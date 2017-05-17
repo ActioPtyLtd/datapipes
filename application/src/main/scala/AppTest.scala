@@ -5,10 +5,11 @@ import Pipeline._
 
 object AppTest extends App {
 
-  val pf = Builder.build(ConfigReader.read("/home/maurice/bitbucket/datapipes/test.conf"))
+  val config = ConfigReader.read("/home/maurice/bitbucket/datapipes/test.conf")
+  val pf = Builder.build(config)
 
   println(pf)
 
-  SimpleExecutor.getRunnable(pf.get.pipeline).start()
+  SimpleExecutor.getRunnable(pf.get.pipeline).start(config)
 
 }

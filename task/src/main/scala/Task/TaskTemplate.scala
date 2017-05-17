@@ -7,7 +7,7 @@ import scala.meta.Term
 import scala.meta._
 import _root_.Term.TermExecutor
 
-class TaskTemplate(name: String, val config: DataSet) extends TaskTransform(name) {
+class TaskTemplate(name: String, val config: DataSet, version: String) extends TaskTransform(name) {
 
   val executor = new TermExecutor(config("namespace").stringOption.getOrElse("Term.Functions"))
 
@@ -18,7 +18,7 @@ class TaskTemplate(name: String, val config: DataSet) extends TaskTransform(name
       .headOption
       .toList
       .map(h => DataArray(h.success.map(s => {
-        if(config("version").stringOption.contains("v2"))
+        if(version.contains("v2"))
           Operators.mergeLeft(
             s,
             DataRecord(templates.map(t => DataString(t._1, executor.eval(s,t._2.get).stringOption.getOrElse(""))).toList)

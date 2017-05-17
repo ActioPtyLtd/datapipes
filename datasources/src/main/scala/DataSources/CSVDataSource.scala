@@ -12,10 +12,10 @@ class CSVDataSource extends DataSource {
 
   def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
 
-  def exec(parameters: Parameters): Unit = {
+  def execute(config: DataSet, query: DataSet): Unit = {
     import collection.JavaConverters._
 
-    val filePath = parameters("filePath").stringOption.getOrElse("")
+    val filePath = config("filePath").stringOption.getOrElse("")
 
     val in = new FileReader(filePath)
     val parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in)
@@ -32,4 +32,6 @@ class CSVDataSource extends DataSource {
 
     _observer.get.completed()
   }
+
+  override def executeBatch(config: DataSet, query: Seq[DataSet]): Unit = ???
 }

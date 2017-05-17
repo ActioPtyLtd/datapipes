@@ -1,7 +1,7 @@
 package Task
 
 import DataPipes.Common.Data._
-import DataPipes.Common.{DataSource, Dom, Observer, Task}
+import DataPipes.Common.{Dom, Observer, Task}
 import Term.TermExecutor
 
 import scala.collection.mutable
@@ -13,7 +13,7 @@ object Cache {
   def clear: Unit = { dim.clear() }
 }
 
-class TaskUpdate(val name: String, val config: DataSet) extends Task {
+class TaskUpdate(val name: String, val config: DataSet, version: String) extends Task {
 
   val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
   val namespace = config("namespace").stringOption.getOrElse("Term.Functions")
@@ -22,12 +22,28 @@ class TaskUpdate(val name: String, val config: DataSet) extends Task {
   val changeRightTerm = termExecutor.getTemplateTerm(config("changeR").stringOption.getOrElse(""))
   val keyLeftTerm = termExecutor.getTemplateTerm(config("keyL").stringOption.getOrElse(""))
   val changeLeftTerm = termExecutor.getTemplateTerm(config("changeL").stringOption.getOrElse(""))
-  val terms = TaskLookup.getTermTree(config("dataSource")("query"))
+  val queryDataSet = queryAdjust(config("dataSource")("query"))
+  val termRead = TaskLookup.getTermTree(queryDataSet("read"))
+  val termCreate = TaskLookup.getTermTree(queryDataSet("create"))
+
   var initialised = false
+
+  // add a $ sign to any templates if it looks like a template variable
+  def queryAdjust(query: DataSet): DataSet =
+    if(version == "v1") {
+      query match {
+        case r: DataRecord => DataRecord(r.label, r.fields.map(f => queryAdjust(f)))
+        case DataString(label, str) if str.matches("[a-zA-Z_$][a-zA-Z_$0-9]*$") => DataString(label, "$" + str)
+        case ds => ds
+      }
+    }
+    else
+      query
+
 
   def subscribe(observer: Observer[Dom]): Unit = _observer.append(observer)
 
-  def completed(): Unit = ???
+  def completed(): Unit = _observer.foreach(o => o.completed())
 
   def error(exception: Throwable): Unit = ???
 
@@ -35,8 +51,8 @@ class TaskUpdate(val name: String, val config: DataSet) extends Task {
 
     if(!initialised) {
 
-      val newConfig = Operators.mergeLeft(DataRecord("dataSource", TaskLookup.interpolate(termExecutor, terms,
-        value.headOption.map(m => m.success).getOrElse(DataNothing()))), config("dataSource"))
+      val query = TaskLookup.interpolate(termExecutor, termRead,
+        value.headOption.map(m => m.success).getOrElse(DataNothing()))
 
       val src = DataSource(config("dataSource"))
 
@@ -57,7 +73,7 @@ class TaskUpdate(val name: String, val config: DataSet) extends Task {
 
       src.subscribe(localObserver)
 
-      src.exec(newConfig)
+      src.execute(config("dataSource"), query)
 
       initialised = true
 
@@ -75,14 +91,19 @@ class TaskUpdate(val name: String, val config: DataSet) extends Task {
       .map(f => f._2.head)
       .toList)
 
-
     val inserts = incoming.filter(d => Cache.dim.get(d._2).isEmpty)
     val updates = incoming.filter(d => Cache.dim.get(d._2).isDefined)
       .filterNot(d => Cache.dim.get(d._2).contains(d._3))
 
-    if(config("dataSource")("query")("create").toOption.isDefined) {
+    if(config("dataSource")("query")("create").toOption.isDefined && inserts.nonEmpty) {
       val src = DataSource(config("dataSource"))
-      src.exec(DataArray(inserts.map(_._1)))
+
+      val query = inserts.map(i =>
+        TaskLookup.interpolate(termExecutor, termCreate, i._1))
+
+      src.executeBatch(config("dataSource"), query)
+
+      Cache.dim.++=(inserts.map(i => i._2 -> i._3))
     }
 
 

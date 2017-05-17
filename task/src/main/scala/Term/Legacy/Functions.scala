@@ -243,6 +243,8 @@ object Functions {
       case _: Throwable => DataString(str)
     }
 
+  def sha256(str: String): DataSet = DataString(org.apache.commons.codec.digest.DigestUtils.sha256Hex(str))
+
   def cleanStr(str: String) : DataSet =
     try {
       DataString(str.replace("[","_").replace("]","_").replace(".","_").replace("\n","").replace("\"","'"))

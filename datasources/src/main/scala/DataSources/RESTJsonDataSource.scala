@@ -4,7 +4,7 @@ import java.net.URI
 import java.nio.charset.Charset
 
 import DataPipes.Common.Data._
-import DataPipes.Common.{DataSource, Observer, Parameters}
+import DataPipes.Common.{DataSource, Observer}
 import com.typesafe.scalalogging.Logger
 
 import scala.util.Try
@@ -150,12 +150,14 @@ class RESTJsonDataSource extends DataSource {
 
   var headers: List[(String, String)] = List()
 
-  override def exec(parameters: Parameters): Unit = {
-    val ds = executeQueryLabel(parameters, parameters("label").stringOption.getOrElse(parameters("query").headOption.map(_.label).get))
+  override def execute(config: DataSet, query: DataSet): Unit = {
+    val ds = executeQueryLabel(config, config("label").stringOption.getOrElse(config("query").headOption.map(_.label).get))
 
     if(_observer.isDefined) {
       _observer.get.next(ds)
       _observer.get.completed()
     }
   }
+
+  override def executeBatch(config: DataSet, query: Seq[DataSet]): Unit = ???
 }

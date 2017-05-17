@@ -1,12 +1,15 @@
+import DataPipes.Common.Data.{DataNothing, DataSet}
 import DataPipes.Common._
 import Pipeline.Operation
-import Task._
+import _root_.Task._
 
 object SimpleExecutor {
 
   trait TaskOperation extends Observable[Dom] with Observer[Dom] {
 
     def start(): Unit = next(Dom())
+
+    def start(ds: DataSet) =  next(Dom() ~ Dom("start", null, Nil, ds, DataNothing()))
   }
 
   def getRunnable(operation: Operation): TaskOperation = operation match {

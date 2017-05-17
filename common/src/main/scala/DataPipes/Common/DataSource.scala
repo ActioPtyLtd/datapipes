@@ -6,5 +6,6 @@ import scala.concurrent.Future
 
 trait DataSource extends Observable[DataSet] {
 
-  def exec(parameters: Parameters): Unit
+  def execute(config: DataSet, query: DataSet): Unit
+  def executeBatch(config: DataSet, query: Seq[DataSet]): Unit
 }

@@ -30,6 +30,8 @@ object Functions {
 
   def replaceAll(str: String, find: String, replaceWith: String) = str.replaceAll(find, replaceWith)
 
+  def sha256(str: String): String = org.apache.commons.codec.digest.DigestUtils.sha256Hex(str)
+
   /* === numeric === */
 
   def numeric(str: String, default: BigDecimal): BigDecimal = Try(BigDecimal(str)).getOrElse(default)

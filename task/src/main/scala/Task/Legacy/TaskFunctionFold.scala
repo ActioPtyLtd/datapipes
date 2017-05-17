@@ -1,7 +1,7 @@
 package Task.Legacy
 
 import DataPipes.Common.Data._
-import DataPipes.Common.{Dom, Parameters}
+import DataPipes.Common.{Dom}
 import Task.TaskTransform
 import Term.{FunctionExecutor, TermExecutor}
 

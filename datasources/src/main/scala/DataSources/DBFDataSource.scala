@@ -10,12 +10,12 @@ class DBFDataSource extends DataSource {
 
   var _observer: Option[Observer[DataSet]] = None
 
-  def exec(parameters: Parameters): Unit = {
+  def execute(config: DataSet, query: DataSet): Unit = {
 
-    val fileName = parameters("filePath").stringOption.getOrElse("")
+    val fileName = config("filePath").stringOption.getOrElse("")
     val fis = new FileInputStream(new File(fileName))
     val stream = new DBFReader(fis)
-    val selectFields = parameters("fields").map(s => s.stringOption.getOrElse(""))
+    val selectFields = config("fields").map(s => s.stringOption.getOrElse(""))
 
     val fields = (0 until stream.getFieldCount)
       .map(i => (stream.getField(i),i))
@@ -42,6 +42,8 @@ class DBFDataSource extends DataSource {
   }
 
   def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
+
+  override def executeBatch(config: DataSet, query: Seq[DataSet]): Unit = ???
 }
 
 object DBFDataSource {
