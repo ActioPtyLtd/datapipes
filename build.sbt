@@ -43,6 +43,7 @@ lazy val task = project
   .dependsOn(common, datasources)
 
 lazy val application = project
+  .settings(libraryDependencies += "commons-cli" % "commons-cli" % "1.3.1")
   .dependsOn(pipescript, datasources, common, task, pipeline)
 
 lazy val root =
