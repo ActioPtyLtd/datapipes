@@ -49,7 +49,9 @@ class DBFDataSource extends DataSource {
 
   def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
 
-  override def executeBatch(config: DataSet, query: Seq[DataSet]): Unit = ???
+  def execute(config: DataSet, query: DataSet*): Unit = {
+    query.foreach(q => execute(config, q))
+  }
 }
 
 object DBFDataSource {

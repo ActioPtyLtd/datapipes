@@ -98,10 +98,11 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
     if(config("dataSource")("query")("create").toOption.isDefined && inserts.nonEmpty) {
       val src = DataSource(config("dataSource"))
 
-      val query = inserts.map(i =>
-        TaskLookup.interpolate(termExecutor, termCreate, i._1))
+      val query = inserts
+        .map(i => TaskLookup.interpolate(termExecutor, termCreate, i._1))
+        .toSeq
 
-      src.executeBatch(config("dataSource"), query)
+      src.execute(config("dataSource"), query: _*)
 
       Cache.dim.++=(inserts.map(i => i._2 -> i._3))
     }

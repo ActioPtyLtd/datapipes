@@ -8,10 +8,16 @@ object DataSource {
   private lazy val sources = Map(
     "stdin" -> ((_: DataSet) =>
       new StdInDataSource()),
-    "file" -> ((config: DataSet) =>
-      if(config("behavior").stringOption.contains("DBF"))
+    "file" -> ((config: DataSet) => {
+      val behavior = config("behavior").stringOption
+
+      if(behavior.contains("DBF"))
         new DBFDataSource()
-      else new CSVDataSource()),
+      else if(behavior.contains("csv"))
+        new CSVDataSource()
+      else
+        new TextFileDataSource()
+    }),
     "rest" -> ((_: DataSet) =>
       new RESTJsonDataSource()),
     "sql" -> ((_: DataSet) =>

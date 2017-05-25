@@ -34,5 +34,7 @@ class CSVDataSource extends DataSource {
     _observer.get.completed()
   }
 
-  override def executeBatch(config: DataSet, query: Seq[DataSet]): Unit = ???
+  def execute(config: DataSet, query: DataSet*): Unit = {
+    query.foreach(q => execute(config, q))
+  }
 }

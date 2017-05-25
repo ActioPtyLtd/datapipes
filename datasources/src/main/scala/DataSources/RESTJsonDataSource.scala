@@ -150,7 +150,7 @@ class RESTJsonDataSource extends DataSource {
 
   var headers: List[(String, String)] = List()
 
-  override def execute(config: DataSet, query: DataSet): Unit = {
+  def execute(config: DataSet, query: DataSet): Unit = {
     val ds = executeQueryLabel(config, config("label").stringOption.getOrElse(config("query").headOption.map(_.label).get))
 
     if(_observer.isDefined) {
@@ -159,5 +159,7 @@ class RESTJsonDataSource extends DataSource {
     }
   }
 
-  override def executeBatch(config: DataSet, query: Seq[DataSet]): Unit = ???
+  def execute(config: DataSet, query: DataSet*): Unit = {
+    query.foreach(q => execute(config, q))
+  }
 }

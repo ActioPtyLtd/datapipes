@@ -55,7 +55,7 @@ class JDBCDataSource extends DataSource {
     execute(config, query.stringOption.getOrElse(""), query.label == "read")
   }
 
-  override def executeBatch(config: DataSet, query: Seq[DataSet]): Unit = {
+  override def execute(config: DataSet, query: DataSet*): Unit = {
     execute(config, query.flatMap(_.stringOption).mkString(";"), false)
   }
 }
