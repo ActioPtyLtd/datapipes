@@ -14,7 +14,7 @@ class TaskBatch(val name: String, config: DataSet) extends Task {
 
   def completed(): Unit = {
     if(buffer.nonEmpty && _observer.isDefined) {
-      _observer.get.next(Dom("", null, List(), DataArray(buffer.toList), DataNothing()))
+      _observer.get.next(Dom("", List(), DataArray(buffer.toList), DataNothing()))
       _observer.get.completed()
     }
 
@@ -28,7 +28,7 @@ class TaskBatch(val name: String, config: DataSet) extends Task {
 
     if(buffer.size == size && _observer.isDefined)
     {
-      _observer.get.next(value ~ Dom(name, null, List(), DataArray(buffer.toList), DataNothing()))
+      _observer.get.next(value ~ Dom(name, List(), DataArray(buffer.toList), DataNothing()))
       buffer = Queue()
     }
   }

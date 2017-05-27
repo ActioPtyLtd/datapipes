@@ -66,6 +66,6 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
           DataRecord(m.label, DataNothing(name) :: m.elems.toList)
         )).getOrElse(m)).toList)
 
-    _observer.foreach(o => o.next(value ~ Dom(name, null, Nil, DataArray(incoming), DataNothing())))
+    _observer.foreach(o => o.next(value ~ Dom(name, Nil, DataArray(incoming), DataNothing())))
   }
 }

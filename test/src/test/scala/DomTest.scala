@@ -4,9 +4,9 @@ import org.scalatest.FunSuite
 
 class DomTest extends FunSuite {
 
-  val dom1 = Dom("dom1",null, Nil, DataString("str1","val1"), DataNothing())
-  val dom2 = Dom("dom2",null, Nil, DataString("str2","val2"), DataNothing())
-  val dom3 = Dom("dom3",null, Nil, DataString("str3", "val3"), DataNothing())
+  val dom1 = Dom("dom1", Nil, DataString("str1","val1"), DataNothing())
+  val dom2 = Dom("dom2", Nil, DataString("str2","val2"), DataNothing())
+  val dom3 = Dom("dom3", Nil, DataString("str3", "val3"), DataNothing())
 
   test("Dom merge and select by name") {
     val result = Dom() ~ dom1 ~ dom2

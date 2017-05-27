@@ -25,7 +25,7 @@ class TaskEach(val name: String, config: DataSet) extends Task {
       observer <- _observer
     } yield (observer, element)
 
-    send.foreach(s => s._1.next(value ~ Dom(name, null, List(), s._2, DataNothing())))
+    send.foreach(s => s._1.next(value ~ Dom(name, List(), s._2, DataNothing())))
   }
 
   override def subscribe(observer: Observer[Dom]): Unit = {

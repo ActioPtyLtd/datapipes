@@ -10,7 +10,7 @@ object SimpleExecutor {
 
     def start(): Unit = next(Dom())
 
-    def start(ds: DataSet) =  next(Dom() ~ Dom("start", null, Nil, ds, DataNothing()))
+    def start(ds: DataSet) =  next(Dom() ~ Dom("start", Nil, ds, DataNothing()))
   }
 
   val logger = Logger("SimpleExecutor")

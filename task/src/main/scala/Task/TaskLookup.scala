@@ -39,7 +39,7 @@ class TaskLookup(name: String, config: DataSet) extends Task {
 
         if(_observer.isDefined)
         {
-          _observer.get.next(Dom() ~ Dom(name, null, Nil, nds, DataNothing()))
+          _observer.get.next(Dom() ~ Dom(name, Nil, nds, DataNothing()))
         }
       }
 

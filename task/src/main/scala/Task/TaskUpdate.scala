@@ -25,6 +25,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
   private val queryDataSet = queryAdjust(config("dataSource")("query"))
   private val termRead = TaskLookup.getTermTree(queryDataSet("read"))
   private val termCreate = TaskLookup.getTermTree(queryDataSet("create"))
+  private val termUpdate = TaskLookup.getTermTree(queryDataSet("update"))
 
   var initialised = false
 
@@ -107,6 +108,17 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
       Cache.dim.++=(inserts.map(i => i._2 -> i._3))
     }
 
+    if(config("dataSource")("query")("update").toOption.isDefined && updates.nonEmpty) {
+      val src = DataSource(config("dataSource"))
+
+      val query = updates
+        .map(i => TaskLookup.interpolate(termExecutor, termUpdate, i._1))
+        .toSeq
+
+      src.execute(config("dataSource"), query: _*)
+
+      Cache.dim.++=(updates.map(i => i._2 -> i._3))
+    }
 
   }
 }

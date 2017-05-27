@@ -51,12 +51,9 @@ class JDBCDataSource extends DataSource {
     cn.close()
   }
 
-  def execute(config: DataSet, query: DataSet): Unit = {
-    execute(config, query.stringOption.getOrElse(""), query.label == "read")
-  }
-
   override def execute(config: DataSet, query: DataSet*): Unit = {
-    execute(config, query.flatMap(_.stringOption).mkString(";"), false)
+    val read = query.headOption.map(_.label).contains("read")
+    execute(config, query.flatMap(_.stringOption).mkString(";"), read)
   }
 }
 

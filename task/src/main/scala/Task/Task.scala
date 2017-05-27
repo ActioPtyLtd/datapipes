@@ -6,8 +6,8 @@ import Legacy._
 object Task {
 
   private lazy val tasks = Map[String, (String, DataSet, String) => DataPipes.Common.Task](
-    "extract" -> ((name, config, _) =>
-      new TaskExtract(name, config)),
+    "extract" -> ((name, config, version) =>
+      new TaskExtract(name, config, version)),
     "load" -> ((name, config, _) =>
       new TaskLoad(name, config)),
     "transformTerm" -> ((name, config, version) =>

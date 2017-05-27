@@ -7,7 +7,7 @@ import Term.TermExecutor
 import scala.util.Try
 import scala.collection.mutable.{ListBuffer, Queue}
 
-class TaskExtract(val name: String, val config: DataSet) extends Task {
+class TaskExtract(val name: String, val config: DataSet, val version: String) extends Task {
 
   val size: Int = config("size").stringOption.flatMap(m => Try(m.toInt).toOption).getOrElse(100)
   val dataSource: DataSource = DataSource(config("dataSource"))
@@ -34,7 +34,7 @@ class TaskExtract(val name: String, val config: DataSet) extends Task {
   lazy val dsObserver = new Observer[DataSet] {
     def completed(): Unit = {
       if(buffer.nonEmpty) {
-        _observer.foreach(o => o.next(Dom() ~ Dom(name, null, List(), DataArray(buffer.toList), DataNothing())))
+        responseAdjust()
         _observer.foreach(o => o.completed())
       }
     }
@@ -46,12 +46,24 @@ class TaskExtract(val name: String, val config: DataSet) extends Task {
 
       if(buffer.size == size)
       {
-        _observer.foreach(o => o.next(Dom() ~ Dom(name, null, List(), DataArray(buffer.toList), DataNothing())))
+        responseAdjust()
         buffer.clear()
       }
     }
 
   }
+
+  // dont send an array for rest data source if v1
+  def responseAdjust() =
+    if (config("dataSource")("type").stringOption.contains("rest") && version == "v1") {
+      val send = for {
+        o <- _observer
+        b <- buffer
+      } yield (o,b)
+      send.foreach(s => s._1.next(Dom() ~ Dom(name, List(), s._2("root"), DataNothing())))
+    } else
+      _observer.foreach(o => o.next(Dom() ~ Dom(name, List(), DataArray(buffer.toList), DataNothing())))
+
 
   def subscribe(observer: Observer[Dom]): Unit = {
     _observer.append(observer)

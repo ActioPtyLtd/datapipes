@@ -9,7 +9,7 @@ trait DomTrait extends LinkedTree[DomTrait] {
 
 }
 
-case class Dom(label: String, parent: Dom, children: List[Dom], success: DataSet, error: DataSet) extends DomTrait {
+case class Dom(label: String, children: List[Dom], success: DataSet, error: DataSet) extends DomTrait {
 
   lazy val mapFields: Map[String, Dom] = children.map(f => f.label -> f).toMap
 
@@ -22,14 +22,14 @@ case class Dom(label: String, parent: Dom, children: List[Dom], success: DataSet
   def apply(num: Int): DomTrait = ???
 
   def ~(other: Dom): Dom = {
-    Dom(label, null, other :: this.children, success, error)
+    Dom(label, other :: this.children, success, error)
   }
 
 }
 
 object Dom {
 
-  def apply() = new Dom("", null, List(), DataNothing(), DataNothing())
+  def apply() = new Dom("", List(), DataNothing(), DataNothing())
 
   import scala.language.implicitConversions
 
