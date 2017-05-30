@@ -8,11 +8,11 @@ class TaskPrint(val name: String, config: DataSet) extends DataPipes.Common.Task
   var _observer: Option[Observer[Dom]] = None
 
   val formatLookup: Map[String,(DataSet => String)] = Map(
-    "" -> (ds => ds.print),
+    "raw" -> (ds => ds.print),
     "xml" -> (ds => ds.toXml),
     "json" -> (ds => ds.toJson))
 
-  val format = config("format").stringOption.getOrElse("")
+  val format = config("format").stringOption.getOrElse("raw")
 
   def completed(): Unit= {
     if(_observer.isDefined)

@@ -38,6 +38,7 @@ lazy val task = project
     "org.scalameta" %% "scalameta" % "1.0.0",
     "ch.qos.logback" % "logback-classic" % "1.1.7",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
+    "me.chrons" %% "boopickle" % "1.2.5",
       "commons-lang" % "commons-lang" % "2.6",
       "commons-codec" % "commons-codec" % "1.10"))
   .dependsOn(common, datasources)

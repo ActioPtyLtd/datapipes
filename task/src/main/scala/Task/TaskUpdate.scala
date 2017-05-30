@@ -34,7 +34,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
     if(version == "v1") {
       query match {
         case r: DataRecord => DataRecord(r.label, r.fields.map(f => queryAdjust(f)))
-        case DataString(label, str) if str.matches("[a-zA-Z_$][a-zA-Z_$0-9]*$") => DataString(label, "$" + str)
+        case DataString(label, str) if str.matches("[a-zA-Z_]((-)?[a-zA-Z_0-9])*$") => DataString(label, "$" + str)
         case ds => ds
       }
     }

@@ -21,7 +21,12 @@ object SimpleExecutor {
 
       val myTask = Task(t.name, t.taskType, t.config)
 
-      def next(value: Dom): Unit = { logger.debug(s"=== Task ${t.name} received Dom ==="); myTask.next(value) }
+      def next(value: Dom): Unit = {
+        val size = value.headOption.map(_.success.elems.size).getOrElse(0)
+
+        logger.debug(s"=== Task ${t.name} received Dom with last successful DataSet of size ($size) ===")
+        myTask.next(value)
+      }
 
       def completed(): Unit = { logger.info(s"=== Operation ${operation.name} completed ==="); myTask.completed() }
 

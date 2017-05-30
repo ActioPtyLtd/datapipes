@@ -1,8 +1,11 @@
 
 import Pipeline._
+import com.typesafe.scalalogging.Logger
 import org.apache.commons.cli._
 
 object AppTest {
+
+  val logger = Logger("AppTest")
 
   def main(args: Array[String]): Unit = {
 
@@ -10,7 +13,7 @@ object AppTest {
 
     val options = new Options()
     options.addOption("c", "config", true, "config")
-    //options.addOption("p", "pipe", true, "run named pipeline ..")
+    options.addOption("p", "pipe", true, "run named pipeline ..")
     //options.addOption("s", "service", false, "run as Service, as configured in Services section")
     //options.addOption("n", "return number of records processed in final task as the exit code")
     //options.addOption("help", "print this help message")
@@ -27,12 +30,15 @@ object AppTest {
         "./application.conf"
       }
 
+    if(line.hasOption("p"))
+      System.setProperty("script.startup.exec",line.getOptionValue('p'))
+
     println(configFile)
 
     val config = ConfigReader.read(configFile)
     val pf = Builder.build(config)
 
-    println(pf)
+    logger.info(s"Running pipe: ${pf.get.pipeline.name}")
 
     SimpleExecutor.getRunnable(pf.get.pipeline).start(config)
   }

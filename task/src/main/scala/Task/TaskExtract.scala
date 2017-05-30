@@ -35,6 +35,7 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
     def completed(): Unit = {
       if(buffer.nonEmpty) {
         responseAdjust()
+        buffer.clear()
         _observer.foreach(o => o.completed())
       }
     }

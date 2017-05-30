@@ -26,7 +26,9 @@ object Task {
       new TaskUpdate(name, config, version)),
     "join" -> ((name, config, version) =>
       new TaskJoin(name, config, version)),
-    "print" -> ((name, config, _) =>
+    "dumpFile" -> ((name, config, version) =>
+      new TaskFileDump(name, config)),
+    "dump" -> ((name, config, _) =>
       new TaskPrint(name, config)))
 
   def apply(name: String, taskType: String, config: DataSet): DataPipes.Common.Task =
