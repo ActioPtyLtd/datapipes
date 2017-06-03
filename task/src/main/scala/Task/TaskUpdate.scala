@@ -10,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 object Cache {
   var dim: scala.collection.mutable.HashMap[String, String] = mutable.HashMap()
 
-  def clear: Unit = { dim.clear() }
+  def clear(): Unit = { dim.clear() }
 }
 
 class TaskUpdate(val name: String, val config: DataSet, version: String) extends Task {
@@ -29,18 +29,17 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
 
   var initialised = false
 
-  // add a $ sign to any templates if it looks like a template variable
+  // add a $ sign to any templates if it looks like a template variable if v1
+  // except if label is verb
   def queryAdjust(query: DataSet): DataSet =
-    if(version == "v1") {
+    if (version == "v1") {
       query match {
         case r: DataRecord => DataRecord(r.label, r.fields.map(f => queryAdjust(f)))
-        case DataString(label, str) if str.matches("[a-zA-Z_]((-)?[a-zA-Z_0-9])*$") => DataString(label, "$" + str)
+        case DataString(label, str) if str.matches("[a-zA-Z_]((-)?[a-zA-Z_0-9])*$") && label != "verb" => DataString(label, "$" + str)
         case ds => ds
       }
-    }
-    else
+    } else
       query
-
 
   def subscribe(observer: Observer[Dom]): Unit = _observer.append(observer)
 
@@ -50,7 +49,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
 
   def next(value: Dom): Unit = {
 
-    if(!initialised) {
+    if (!initialised) {
 
       val query = TaskLookup.interpolate(termExecutor, termRead,
         value.headOption.map(m => m.success).getOrElse(DataNothing()))
@@ -68,7 +67,8 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
         override def next(value: DataSet): Unit = {
           Cache.dim.put(
             termExecutor.eval(value, keyRightTerm).stringOption.getOrElse(""),
-            termExecutor.eval(value, changeRightTerm).stringOption.getOrElse(""))
+            termExecutor.eval(value, changeRightTerm).stringOption.getOrElse("")
+          )
         }
       }
 
@@ -88,15 +88,15 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
         termExecutor.eval(m, keyLeftTerm).stringOption.getOrElse(""),
         termExecutor.eval(m, changeLeftTerm).stringOption.getOrElse("")
       )).toList
-      .groupBy(g => g._2)
-      .map(f => f._2.head)
-      .toList)
+        .groupBy(g => g._2)
+        .map(f => f._2.head)
+        .toList)
 
     val inserts = incoming.filter(d => Cache.dim.get(d._2).isEmpty)
     val updates = incoming.filter(d => Cache.dim.get(d._2).isDefined)
       .filterNot(d => Cache.dim.get(d._2).contains(d._3))
 
-    if(config("dataSource")("query")("create").toOption.isDefined && inserts.nonEmpty) {
+    if (config("dataSource")("query")("create").toOption.isDefined && inserts.nonEmpty) {
       val src = DataSource(config("dataSource"))
 
       val query = inserts
@@ -108,7 +108,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
       Cache.dim.++=(inserts.map(i => i._2 -> i._3))
     }
 
-    if(config("dataSource")("query")("update").toOption.isDefined && updates.nonEmpty) {
+    if (config("dataSource")("query")("update").toOption.isDefined && updates.nonEmpty) {
       val src = DataSource(config("dataSource"))
 
       val query = updates

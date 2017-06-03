@@ -9,11 +9,11 @@ import scala.util.Try
 
 class TaskLoad(val name: String, val config: DataSet) extends Task {
 
-  val dataSource: DataSource = DataSource(config("dataSource"))
+  private val dataSource: DataSource = DataSource(config("dataSource"))
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
-  val terms = TaskLookup.getTermTree(config("dataSource")("query")("create"))
-  val namespace = config("namespace").stringOption.getOrElse("Term.Functions")
-  val termExecutor = new TermExecutor(namespace)
+  private val terms: TermLinkedTree = TaskLookup.getTermTree(config("dataSource")("query")("create"))
+  private val namespace: String = config("namespace").stringOption.getOrElse("Term.Functions")
+  private val termExecutor = new TermExecutor(namespace)
 
   def completed(): Unit = { Unit }
 

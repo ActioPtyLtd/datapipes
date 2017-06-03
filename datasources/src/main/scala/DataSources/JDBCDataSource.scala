@@ -25,7 +25,7 @@ class JDBCDataSource extends DataSource {
 
     val stmt: PreparedStatement = cn.prepareStatement(statement)
 
-    logger.info("Executing SQL batch statement...")
+    logger.info("Executing SQL statement...")
     logger.info(statement)
 
     if(executeQuery) {
@@ -46,7 +46,7 @@ class JDBCDataSource extends DataSource {
 
     _observer.foreach(o => o.completed())
 
-    logger.info("Successfully executed statement.")
+    logger.info("Successfully executed SQL statement.")
 
     cn.close()
   }

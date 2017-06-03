@@ -8,13 +8,15 @@ import com.typesafe.scalalogging.Logger
 import scala.collection.mutable.ListBuffer
 
 class TaskPrint(val name: String, config: DataSet) extends DataPipes.Common.Task {
+
   private val logger = Logger("TaskPrint")
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
-  private val formatLookup: Map[String, (DataSet => String)] = Map(
-    "raw" -> (ds => ds.print),
-    "xml" -> (ds => ds.toXml),
-    "json" -> (ds => ds.toJson)
-  )
+  private val formatLookup: Map[String, (DataSet => String)] =
+    Map(
+      "raw" -> (ds => ds.print),
+      "xml" -> (ds => ds.toXml),
+      "json" -> (ds => ds.toJson)
+    )
   private val format: String = config("format").stringOption.getOrElse("raw")
 
   def completed(): Unit = {

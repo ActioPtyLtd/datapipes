@@ -10,7 +10,7 @@ import boopickle.Default._
 
 class TaskFileDump(val name: String, config: DataSet) extends Task {
 
-  val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
+  private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
 
   def completed(): Unit = _observer.foreach(o => o.completed())
 

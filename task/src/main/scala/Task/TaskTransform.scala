@@ -20,9 +20,9 @@ abstract class TaskTransform(val name: String) extends Task {
     val send = for {
       ds <- nds
       o <- _observer
-    } yield (o,ds)
+    } yield (o, ds)
 
-    send.foreach(s => s._1.next(value ~ Dom(name, List(), s._2,DataNothing())))
+    send.foreach(s => s._1.next(value ~ Dom(name, List(), s._2, DataNothing())))
 
   }
 

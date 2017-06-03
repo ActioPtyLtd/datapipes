@@ -1,6 +1,5 @@
 package Task
 
-
 import DataPipes.Common._
 import DataPipes.Common.Data._
 import Term.TermExecutor
@@ -16,7 +15,7 @@ class TaskTerm(name: String, config: DataSet, version: String) extends TaskTrans
   def transform(dom: Dom): Seq[DataSet] = {
     val ds = executor.eval(dom.headOption.map(_.success).getOrElse(DataNothing()), term)
 
-    if(version.contains("v2"))
+    if (version.contains("v2"))
       List(ds)
     else
       ds.elems

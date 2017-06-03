@@ -5,14 +5,13 @@ import java.io.{BufferedWriter, FileReader, FileWriter}
 import DataPipes.Common.Data._
 import DataPipes.Common._
 import com.typesafe.scalalogging.Logger
-import org.apache.commons.csv.CSVFormat
 
 import scala.collection.mutable.ListBuffer
 
 class TextFileDataSource extends DataSource {
 
-  val logger = Logger("TextFileDataSource")
-  val _observer: ListBuffer[Observer[DataSet]] = ListBuffer()
+  private val logger = Logger("TextFileDataSource")
+  private val _observer: ListBuffer[Observer[DataSet]] = ListBuffer()
 
   def subscribe(observer: Observer[DataSet]): Unit = _observer.append(observer)
 
@@ -38,8 +37,11 @@ class TextFileDataSource extends DataSource {
 
     if (query.nonEmpty && !query.map(_.label).contains("read")) {
 
-      val lines = query.map(_("line").stringOption.getOrElse(""))
-      val fw = new FileWriter(getFilePath(config, query.headOption.getOrElse(DataNothing())), true)
+      val lines = query.map(q => q("line").stringOption.getOrElse(q(0).stringOption.getOrElse("")))
+      val filePath = getFilePath(config, query.headOption.getOrElse(DataNothing()))
+
+      logger.info(s"Writing to file: ${filePath}...")
+      val fw = new FileWriter(filePath, true)
       val bw = new BufferedWriter(fw)
 
       lines.foreach(l => {
@@ -49,6 +51,8 @@ class TextFileDataSource extends DataSource {
       fw.flush()
       bw.close()
       fw.close()
+
+      logger.info(s"Completed writing to file: ${filePath}...")
     } else {
       executeQuery(config, query.headOption.getOrElse(DataNothing()))
     }
