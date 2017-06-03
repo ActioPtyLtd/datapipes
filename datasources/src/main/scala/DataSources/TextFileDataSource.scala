@@ -16,7 +16,8 @@ class TextFileDataSource extends DataSource {
 
   def execute(config: DataSet, query: DataSet): Unit = {
 
-    val filePath = query("filePath").stringOption.getOrElse("")
+    val filePath = query("filenameTemplate").stringOption
+      .getOrElse(config("filenameTemplate").stringOption.get)
 
     val send = for {
       line <- io.Source.fromFile(filePath).getLines()
@@ -30,9 +31,9 @@ class TextFileDataSource extends DataSource {
 
   def execute(config: DataSet, query: DataSet*): Unit = {
 
-    if(query.headOption.exists(m => m("line").toOption.isDefined)) {
+    if(query.nonEmpty && !query.map(_.label).contains("read")) {
 
-      val filePath = query.head("filePath").stringOption.getOrElse("")
+      val filePath = query.head("filenameTemplate").stringOption.getOrElse("")
       val lines = query.map(_ ("line").stringOption.getOrElse(""))
 
       val fw = new FileWriter(filePath, true)
@@ -45,8 +46,8 @@ class TextFileDataSource extends DataSource {
       fw.flush()
       bw.close()
       fw.close()
-    } else if(query.nonEmpty){
-      execute(config, query.headOption.get)
+    } else {
+      execute(config, query.headOption.getOrElse(DataNothing()))
     }
     _observer.foreach(o => o.completed())
   }

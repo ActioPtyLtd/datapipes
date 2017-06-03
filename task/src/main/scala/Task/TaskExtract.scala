@@ -13,7 +13,7 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
   val dataSource: DataSource = DataSource(config("dataSource"))
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
   val buffer = Queue[DataSet]()
-  private val namespace = config("namespace").stringOption.getOrElse("Term.Functions")
+  private val namespace = config("namespace").stringOption.getOrElse("Term.Legacy.Functions")
   private val termExecutor = new TermExecutor(namespace)
   private val termRead = TaskLookup.getTermTree(config("dataSource")("query")("read"))
 
@@ -24,11 +24,12 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
   def next(value: Dom): Unit = {
     dataSource.subscribe(dsObserver)
 
-    val query = TaskLookup.interpolate(termExecutor, termRead,
-      value.headOption.map(m => m.success).getOrElse(DataNothing()))
 
-
-    dataSource.execute(config("dataSource"), query)
+    if(config("dataSource")("query")("read").toOption.isDefined)
+      dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, termRead,
+        value.headOption.map(m => m.success).getOrElse(DataNothing())))
+    else
+      dataSource.execute(config("dataSource"))
   }
 
   lazy val dsObserver = new Observer[DataSet] {

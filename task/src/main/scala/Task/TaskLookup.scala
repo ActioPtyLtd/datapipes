@@ -5,6 +5,7 @@ import Term.TermExecutor
 
 import scala.meta._
 import scala.meta.Term
+import scala.meta.tokens.Token.Comment
 
 class TaskLookup(name: String, config: DataSet) extends Task {
 
@@ -72,6 +73,6 @@ object TaskLookup {
         fields
           .filter(f => f.isInstanceOf[DataRecord] || f.isInstanceOf[DataString])
           .map(m => getTermTree(config(m.label))))
-      // TODO: handle bad use
+    case _ => TermLeaf("", Term.Name("a").asInstanceOf[Term])
   }
 }
