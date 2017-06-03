@@ -50,7 +50,10 @@ class DBFDataSource extends DataSource {
   def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
 
   def execute(config: DataSet, query: DataSet*): Unit = {
-    query.foreach(q => execute(config, q))
+    if(query.nonEmpty)
+      query.foreach(q => execute(config, q))
+    else
+      execute(config, DataNothing())
   }
 }
 

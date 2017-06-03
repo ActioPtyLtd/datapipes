@@ -20,7 +20,7 @@ object JsonXmlDataSet {
         "[" + key + "," +
           fs.map(f => f.print).mkString(",") +
           "]"
-      case DataNothing(_) => "()"
+      case DataNothing(l) => "(" + l + ")"
       case DataNumeric(l, num) => l + " -> " + num.setScale(2, BigDecimal.RoundingMode.HALF_UP).underlying().stripTrailingZeros().toPlainString
       case DataBoolean(l, bool) => l + " -> " + bool.toString
       case DataDate(l, date) => l + " -> " + date.toString
