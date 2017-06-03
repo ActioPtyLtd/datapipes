@@ -16,8 +16,6 @@ object Task {
       new TaskFunctionFold(name, config)),
     "mergeTemplate" -> ((name, config, version) =>
       new TaskTemplate(name, config, version)),
-    "batch" -> ((name, config, _) =>
-      new TaskBatch(name, config)),
     "each" -> ((name, config, _) =>
       new TaskEach(name, config)),
     "lookup" -> ((name, config, _) =>

@@ -9,16 +9,16 @@ import scala.xml.{Attribute, _}
 object JsonXmlDataSet {
 
   implicit class Extend(data: DataSet) {
-    def print(): String = data match {
+    def print: String = data match {
       case DataString(l, s) => l + " -> \"" + s + "\""
 
       case DataRecord(key, fs) =>
         "(" + key + "," +
-          fs.map(f => f.print()).mkString(",") +
+          fs.map(f => f.print).mkString(",") +
           ")"
       case DataArray(key, fs) =>
         "[" + key + "," +
-          fs.map(f => f.print()).mkString(",") +
+          fs.map(f => f.print).mkString(",") +
           "]"
       case DataNothing(_) => "()"
       case DataNumeric(l, num) => l + " -> " + num.setScale(2, BigDecimal.RoundingMode.HALF_UP).underlying().stripTrailingZeros().toPlainString
