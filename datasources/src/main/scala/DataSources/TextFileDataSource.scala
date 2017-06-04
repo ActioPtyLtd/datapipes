@@ -40,13 +40,14 @@ class TextFileDataSource extends DataSource {
 
       val lines = query.map(q => q("line").stringOption.getOrElse(q(0).stringOption.getOrElse("")))
       val filePath = getFilePath(config, query.headOption.getOrElse(DataNothing()))
+      val path = Paths.get(filePath).toAbsolutePath
+      val doesFileExist = Files.exists(path)
 
       logger.info(s"Writing to file: ${filePath}...")
       val fw = new FileWriter(filePath, true)
       val bw = new BufferedWriter(fw)
-      val path = Paths.get(filePath)
 
-      if (!Files.exists(path)) {
+      if (!doesFileExist) {
         config("header").stringOption.foreach(h => {
           bw.write(h); bw.newLine()
         })

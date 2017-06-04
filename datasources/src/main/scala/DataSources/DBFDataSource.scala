@@ -14,13 +14,13 @@ class DBFDataSource extends DataSource {
 
   def execute(config: DataSet, query: DataSet): Unit = {
 
-    val fileName = config("directory").stringOption.getOrElse("") + "/" + config("filenameTemplate").stringOption.getOrElse("")
+    val fileName = getFilePath(config, query)
 
     logger.info(s"Reading file: ${fileName}")
 
     val fis = new FileInputStream(new File(fileName))
     val stream = new DBFReader(fis)
-    val selectFields = config("fields").map(s => s.stringOption.getOrElse(""))
+    val selectFields = query("fields").map(s => s.stringOption.getOrElse(""))
 
     val fields = (0 until stream.getFieldCount)
       .map(i => (stream.getField(i),i))
@@ -43,7 +43,7 @@ class DBFDataSource extends DataSource {
 
     stream.close()
     fis.close()
-    logger.info(s"Closing file ${fileName}")
+    logger.info(s"Completed reading file: ${fileName}")
 
   }
 
@@ -55,6 +55,9 @@ class DBFDataSource extends DataSource {
     else
       execute(config, DataNothing())
   }
+
+  def getFilePath(config: DataSet, query: DataSet): String = config("directory").stringOption.map(_ + "/").getOrElse("") + query("filenameTemplate").stringOption
+    .getOrElse(config("filenameTemplate").stringOption.getOrElse(""))
 }
 
 object DBFDataSource {
