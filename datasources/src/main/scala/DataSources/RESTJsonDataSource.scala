@@ -75,6 +75,16 @@ class RESTJsonDataSource extends DataSource {
 
       val element = getResponseDataSet(requestQuery)(sendRequest)
 
+      element("status").stringOption.foreach(s => {
+        val statusCode = s.toInt
+        if(statusCode >= 400 && statusCode < 600) {
+          logger.error(s"Status code ${statusCode} returned.")
+          logger.error(s"Body " + element("root").toJson)
+        } else {
+          logger.info(s"Status code ${statusCode} returned.")
+        }
+      })
+
       element
     }
     else

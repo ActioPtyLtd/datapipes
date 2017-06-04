@@ -1,6 +1,7 @@
 package DataSources
 
 import java.io.{BufferedWriter, FileReader, FileWriter}
+import java.nio.file._
 
 import DataPipes.Common.Data._
 import DataPipes.Common._
@@ -43,6 +44,13 @@ class TextFileDataSource extends DataSource {
       logger.info(s"Writing to file: ${filePath}...")
       val fw = new FileWriter(filePath, true)
       val bw = new BufferedWriter(fw)
+      val path = Paths.get(filePath)
+
+      if (!Files.exists(path)) {
+        config("header").stringOption.foreach(h => {
+          bw.write(h); bw.newLine()
+        })
+      }
 
       lines.foreach(l => {
         bw.write(l); bw.newLine()
