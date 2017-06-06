@@ -18,8 +18,8 @@ object Task {
       new TaskTemplate(name, config, version)),
     "each" -> ((name, config, _) =>
       new TaskEach(name, config)),
-    "lookup" -> ((name, config, _) =>
-      new TaskLookup(name, config)),
+    "lookup" -> ((name, config, version) =>
+      new TaskLookup(name, config, version)),
     "datasourceupdate" -> ((name, config, version) =>
       new TaskUpdate(name, config, version)),
     "join" -> ((name, config, version) =>

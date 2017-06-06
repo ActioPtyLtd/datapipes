@@ -49,9 +49,9 @@ class RESTJsonDataSource extends DataSource {
     }
   }
 
-  def executeQueryLabel(ds: DataSet, label: String): DataSet = {
+  def executeQuery(ds: DataSet, query: DataSet): DataSet = {
 
-    val uri = ds("query")(label)("uri").stringOption
+    val uri = query("uri").stringOption
 
     if(uri.isDefined) {
 
@@ -67,8 +67,8 @@ class RESTJsonDataSource extends DataSource {
       val headers: Seq[Header] = authHeader.map(a => a :: otherHeaders).getOrElse(otherHeaders)
 
       val requestQuery =
-        createRequest(ds("query")(label)("body"),
-          createHttpRequest(ds("query")(label)("verb").stringOption.getOrElse("get")),
+        createRequest(query("body"),
+          createHttpRequest(query("verb").stringOption.getOrElse("get")),
           uri.get, headers)
 
       logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
@@ -131,7 +131,7 @@ class RESTJsonDataSource extends DataSource {
       DataString("uri", request.getURI.toString) ::
       DataNumeric("status", response._1.getStatusCode) ::
         DataRecord("root", dsBody.elems.toList) ::
-        response._2.map(h => DataString(h.getName,h.getValue)).toList
+        dsBody.elems.toList
       )
   }
 
@@ -160,16 +160,11 @@ class RESTJsonDataSource extends DataSource {
 
   var headers: List[(String, String)] = List()
 
-  def execute(config: DataSet, query: DataSet): Unit = {
-    val ds = executeQueryLabel(config, config("label").stringOption.getOrElse(config("query").headOption.map(_.label).get))
-
-    if(_observer.isDefined) {
-      _observer.get.next(ds)
-      _observer.get.completed()
-    }
-  }
-
   def execute(config: DataSet, query: DataSet*): Unit = {
-    query.foreach(q => execute(config, q))
+    query.foreach(q => {
+      val ds = executeQuery(config, q)
+      _observer.foreach(o => o.next(ds))
+    })
+    _observer.foreach(o => o.completed())
   }
 }

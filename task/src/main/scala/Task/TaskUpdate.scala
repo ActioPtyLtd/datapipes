@@ -22,24 +22,12 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
   private val changeRightTerm = termExecutor.getTemplateTerm(config("changeR").stringOption.getOrElse(""))
   private val keyLeftTerm = termExecutor.getTemplateTerm(config("keyL").stringOption.getOrElse(""))
   private val changeLeftTerm = termExecutor.getTemplateTerm(config("changeL").stringOption.getOrElse(""))
-  private val queryDataSet = queryAdjust(config("dataSource")("query"))
+  private val queryDataSet = TaskLookup.queryAdjust(config("dataSource")("query"), version)
   private val termRead = TaskLookup.getTermTree(queryDataSet("read"))
   private val termCreate = TaskLookup.getTermTree(queryDataSet("create"))
   private val termUpdate = TaskLookup.getTermTree(queryDataSet("update"))
 
   var initialised = false
-
-  // add a $ sign to any templates if it looks like a template variable if v1
-  // except if label is verb
-  def queryAdjust(query: DataSet): DataSet =
-    if (version == "v1") {
-      query match {
-        case r: DataRecord => DataRecord(r.label, r.fields.map(f => queryAdjust(f)))
-        case DataString(label, str) if str.matches("[a-zA-Z_]((-)?[a-zA-Z_0-9])*$") && label != "verb" => DataString(label, "$" + str)
-        case ds => ds
-      }
-    } else
-      query
 
   def subscribe(observer: Observer[Dom]): Unit = _observer.append(observer)
 

@@ -12,7 +12,7 @@ class TaskLoad(val name: String, val config: DataSet) extends Task {
   private val dataSource: DataSource = DataSource(config("dataSource"))
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
   private val terms: TermLinkedTree = TaskLookup.getTermTree(config("dataSource")("query")("create"))
-  private val namespace: String = config("namespace").stringOption.getOrElse("Term.Functions")
+  private val namespace: String = config("namespace").stringOption.getOrElse("Term.Legacy.Functions")
   private val termExecutor = new TermExecutor(namespace)
 
   def completed(): Unit = { Unit }
@@ -25,7 +25,8 @@ class TaskLoad(val name: String, val config: DataSet) extends Task {
     else i))
 
     creates.foreach(c =>
-      dataSource.execute(config("dataSource"), c: _*))
+      if(c.nonEmpty)
+        dataSource.execute(config("dataSource"), c: _*))
   }
 
   def subscribe(observer: Observer[Dom]): Unit = {

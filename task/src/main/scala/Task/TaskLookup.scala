@@ -1,62 +1,68 @@
 package Task
+
 import DataPipes.Common.Data._
 import DataPipes.Common.{DataSource, Dom, Observer, Task}
 import Term.TermExecutor
 
+import scala.collection.mutable.ListBuffer
 import scala.meta._
 import scala.meta.Term
-import scala.meta.tokens.Token.Comment
 
-class TaskLookup(name: String, config: DataSet) extends Task {
+class TaskLookup(name: String, config: DataSet, version: String) extends Task {
 
-  var _observer: Option[Observer[Dom]] = None
-  val terms = TaskLookup.getTermTree(config("dataSource")("query"))
-  val namespace = config("namespace").stringOption.getOrElse("Term.Functions")
-  val termExecutor = new TermExecutor(namespace)
+  private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
+  private val terms = TaskLookup.getTermTree(TaskLookup.queryAdjust(config("dataSource")("query")("read"), version))
+  private val namespace = config("namespace").stringOption.getOrElse("Term.Legacy.Functions")
+  private val termExecutor = new TermExecutor(namespace)
 
   def completed(): Unit = {
-    if(_observer.isDefined)
-      _observer.get.completed()
+    _observer.foreach(o => o.completed())
   }
 
   def error(exception: Throwable): Unit = ???
 
   def next(value: Dom): Unit = {
 
-    val newConfig = Operators.mergeLeft(DataRecord("dataSource", TaskLookup.interpolate(termExecutor, terms,
-      value.headOption.map(m => m.success).getOrElse(DataNothing()))), config("dataSource"))
-
     val dataSource: DataSource = DataSource(config("dataSource"))
+    val ret = ListBuffer[DataSet]()
 
     val localObserver = new Observer[DataSet] {
 
-      var buffer = List[DataSet]()
+      var singleBuffer = ListBuffer[DataSet]()
 
       override def completed(): Unit = {
-        val nds = buffer.headOption match {
-          case Some(_: DataArray) => DataArray(buffer.flatMap(m => m.elems))
-          case Some(ds: DataSet) if buffer.size == 1 => ds
+        val nds = singleBuffer.headOption match {
+          case Some(_: DataArray) => DataArray(singleBuffer.flatMap(m => m.elems).toList)
+          case Some(ds: DataSet) if singleBuffer.size == 1 => ds
         }
-
-        if(_observer.isDefined)
-        {
-          _observer.get.next(Dom() ~ Dom(name, Nil, nds, DataNothing()))
-        }
+        ret.append(nds)
+        singleBuffer.clear()
       }
 
       override def error(exception: Throwable): Unit = ???
 
       override def next(value: DataSet): Unit = {
-        buffer = value :: buffer
+        singleBuffer.append(value)
       }
     }
 
     dataSource.subscribe(localObserver)
 
-    dataSource.execute(newConfig, DataNothing())
+    value.headOption.foreach { h =>
+      h.success.elems.foreach { e =>
+        dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, terms, e))
+      }
+    }
+
+    // TODO: check old code for merge logic
+    val merge = value.headOption.map(h => DataArray((h.success.elems zip ret).map(z =>
+      DataRecord(DataArray(name, z._2 :: z._1.elems.toList))
+    ).toList)).getOrElse(DataNothing())
+
+    _observer.foreach(o => o.next(value ~ Dom(name, Nil, merge, DataNothing())))
   }
 
-  def subscribe(observer: Observer[Dom]): Unit = _observer = Some(observer)
+  def subscribe(observer: Observer[Dom]): Unit = _observer.append(observer)
 }
 
 object TaskLookup {
@@ -67,12 +73,26 @@ object TaskLookup {
   }
 
   def getTermTree(config: DataSet): TermLinkedTree = config match {
-    case DataString(label, str) => TermLeaf(label, ("s\"\"\"" + str + "\"\"\"").parse[Term].get ) //TODO: fix no parse
+    case DataString(label, str) => TermLeaf(label, ("s\"\"\"" + str + "\"\"\"").parse[Term].get) //TODO: fix no parse
     case DataRecord(label, fields) =>
-      TermNode(label,
+      TermNode(
+        label,
         fields
           .filter(f => f.isInstanceOf[DataRecord] || f.isInstanceOf[DataString])
-          .map(m => getTermTree(config(m.label))))
+          .map(m => getTermTree(config(m.label)))
+      )
     case _ => TermLeaf("", Term.Name("a").asInstanceOf[Term])
   }
+
+  // add a $ sign to any templates if it looks like a template variable if v1
+  // except if label is verb
+  def queryAdjust(query: DataSet, version: String): DataSet =
+    if (version == "v1") {
+      query match {
+        case r: DataRecord => DataRecord(r.label, r.fields.map(f => queryAdjust(f, version)))
+        case DataString(label, str) if str.matches("[a-zA-Z_]((-)?[a-zA-Z_0-9])*$") && label != "verb" => DataString(label, "$" + str)
+        case ds => ds
+      }
+    } else
+      query
 }
