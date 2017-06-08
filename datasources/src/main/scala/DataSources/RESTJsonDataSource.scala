@@ -142,8 +142,6 @@ class RESTJsonDataSource extends DataSource {
 
     headers.foreach(t => request.setHeader(new BasicHeader(t._1, t._2.replace("\"", ""))))
 
-    logger.info(">>>>>>>>" + request.toString + "<<<<<<<" + request.getRequestLine)
-
     request.getAllHeaders.foreach(f => logger.info(">>>" + f.getName + ">>" + f.getValue))
 
     val httpreq = HttpClientBuilder.create()
