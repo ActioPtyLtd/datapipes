@@ -43,7 +43,6 @@ object SimpleExecutor {
       l.subscribe(r)
 
       def next(value: Dom): Unit = {
-        logger.debug(s"=== Pipe ${p.name} received Dom ===")
         l.next(value)
       }
 
