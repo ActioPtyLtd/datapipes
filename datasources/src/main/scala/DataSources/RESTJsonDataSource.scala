@@ -127,6 +127,9 @@ class RESTJsonDataSource extends DataSource {
 
     val dsBody = Try(JsonXmlDataSet.fromJson(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))
 
+
+    // body added twice for backwards compatability, can remove later
+
     DataRecord("response",
       DataString("uri", request.getURI.toString) ::
       DataNumeric("status", response._1.getStatusCode) ::

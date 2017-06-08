@@ -17,7 +17,7 @@ object FunctionExecutor {
     Class.forName(nameSpace)
       .getDeclaredMethods
       .filter(f => f.getName.equalsIgnoreCase(methodName) && params.size >= f.getParameterCount)
-      .map(m => (m, getParamValues(m.getParameters.toList zip params, Nil)))
+      .map(m => (m, getParamValues(m.getParameters.toList, params, Nil)))
       .find(c => c._2.isDefined)
       .flatMap(i =>
         i._1.invoke(null, i._2.get.map(_.asInstanceOf[Object]): _*) match { // return type conversion
@@ -49,5 +49,45 @@ object FunctionExecutor {
       if methodParameter.getType == classOf[String] => getParamValues(tail, ds.stringOption.getOrElse("") :: result)
     case _ => None
   }
+
+  private def getParamValue(parameter: Parameter, input: DataSet): Option[Any] = (parameter,input) match {
+    case ((methodParameter, DataString(_, str)))
+      if methodParameter.getType == classOf[String] || methodParameter.getType == classOf[Object] =>
+        Some(Option(str).getOrElse(""))
+    case ((methodParameter, DataNumeric(_, num)))
+      if methodParameter.getType == classOf[Int] && Try(num.toInt).isSuccess => Some(num.toInt)
+    case ((methodParameter, DataNumeric(_, num)))
+      if methodParameter.getType == classOf[BigDecimal] => Some(num)
+    case ((methodParameter, DataDate(_, date)) )
+      if methodParameter.getType == classOf[java.util.Date] => Some(date)
+    case ((methodParameter, ds: DataSet))
+      if methodParameter.getType == classOf[DataSet] => Some(ds)
+    case ((methodParameter, ds: DataSet))
+      if methodParameter.getType == classOf[String] => Some(ds.stringOption.getOrElse(""))
+    case _ => None
+  }
+
+  @tailrec
+  private def getParamValues(sigParams: List[Parameter], inputParams: List[DataSet], result: List[Any]): Option[List[Any]] =
+    sigParams match {
+      case Nil => Some(result.reverse)
+      case (sigParam :: sigTail) => inputParams match {
+        case Nil => Some(null)
+        case (inputParam :: inputTail) => {
+          val trySingle = getParamValue(sigParam, inputParam)
+          if(trySingle.isDefined)
+            getParamValues(sigTail, inputTail, trySingle.get :: result)
+          else {
+            if(sigParam.getType == classOf[List[DataSet]]) {
+              val listLength = inputParams.length - sigParams.length + 1
+                getParamValues(sigTail, inputParams.drop(listLength), inputParams.take(listLength) :: result)
+            }
+            else
+              None
+          }
+        }
+      }
+    }
+
 
 }

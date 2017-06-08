@@ -61,7 +61,7 @@ class TextFileDataSource extends DataSource {
       bw.close()
       fw.close()
 
-      logger.info(s"Completed writing to file: ${filePath}...")
+      logger.info(s"Completed writing ${lines.size} lines to file: ${filePath}...")
     } else {
       executeQuery(config, query.headOption.getOrElse(DataNothing()))
     }
