@@ -7,6 +7,9 @@ scalaVersion := "2.11.1"
 
 publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath+"/lib/")))
 
+resolvers += Resolver.bintrayRepo("hseeberger", "maven")
+
+
 lazy val common = project
   .settings(
     assemblyJarName in assembly := "commons.jar")
@@ -44,7 +47,10 @@ lazy val task = project
   .dependsOn(common, datasources)
 
 lazy val application = project
-  .settings(libraryDependencies += "commons-cli" % "commons-cli" % "1.3.1")
+  .settings(libraryDependencies ++= Seq("commons-cli" % "commons-cli" % "1.3.1",
+    "de.heikoseeberger" % "akka-http-json4s_2.11" % "1.16.1",
+    "com.typesafe.akka" %% "akka-http" % "10.0.1",
+  "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.1"))
   .dependsOn(pipescript, datasources, common, task, pipeline)
 
 lazy val root =

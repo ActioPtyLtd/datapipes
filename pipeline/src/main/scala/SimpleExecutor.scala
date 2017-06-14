@@ -59,6 +59,12 @@ object SimpleExecutor {
 
       def subscribe(observer: Observer[Dom]): Unit = r.subscribe(observer)
     }
+  }
 
+  def getService(operation: Operation, observer: Observer[Dom]): TaskOperation = {
+    val runnable = getRunnable(operation)
+
+    runnable.subscribe(observer)
+    runnable
   }
 }

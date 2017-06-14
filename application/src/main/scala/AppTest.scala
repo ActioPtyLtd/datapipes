@@ -14,7 +14,7 @@ object AppTest {
     val options = new Options()
     options.addOption("c", "config", true, "config")
     options.addOption("p", "pipe", true, "run named pipeline ..")
-    //options.addOption("s", "service", false, "run as Service, as configured in Services section")
+    options.addOption("s", "service", false, "run as Service, as configured in Services section")
     //options.addOption("n", "return number of records processed in final task as the exit code")
     //options.addOption("help", "print this help message")
     //options.addOption("L", "load config file into Admin Server")
@@ -40,7 +40,10 @@ object AppTest {
 
     logger.info(s"Running pipe: ${pf.get.pipeline.name}")
 
-    SimpleExecutor.getRunnable(pf.get.pipeline).start(config)
+    if(line.hasOption("s"))
+      new AppService(pf.get.pipeline)
+    else
+      SimpleExecutor.getRunnable(pf.get.pipeline).start(config)
   }
 
 }
