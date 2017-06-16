@@ -4,7 +4,7 @@ import DataPipes.Common.Data._
 
 object Builder {
 
-  def build(ds: DataSet): Option[PipeScript] = {
+  def build(ds: DataSet): PipeScript = {
 
     val startup = "startup"
     val exec = "exec"
@@ -15,20 +15,21 @@ object Builder {
     val pipelines = "pipelines"
     val settings = "settings"
 
-    val pipeName = ds(script)(startup)(exec).stringOption.getOrElse("")
+    val defaultPipeName = ds(script)(startup)(exec).stringOption.getOrElse("")
 
     val tasks = ds(script)(taskList)
       .elems
       .map(t => t.label -> Task(t.label, t(taskType).stringOption.getOrElse(""), Operators.mergeLeft(t, ds(script)(settings))))
       .toMap
 
-    val pipeExec = ds(script)(pipelines)(pipeName)(pipe)
+    val pipeExec = ds(script)(pipelines).map(p => p(pipe)
       .stringOption
       .map(s => s.split("\\|")
         .map(m => tasks(m.replace(" ", "")).asInstanceOf[Operation])
-        .reduceLeft((a,b) => Pipe(pipeName, a, b)))
+        .reduceLeft((a,b) => Pipe(p.label, a, b))))
+      .toList
 
-    pipeExec.map(p => PipeScript(ds(script)(settings), tasks.values.toList, p))
+    PipeScript(ds(script)(settings), tasks.values.toList, pipeExec.flatMap(f => f), defaultPipeName)
 
   }
 }

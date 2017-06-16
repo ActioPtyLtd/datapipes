@@ -38,12 +38,12 @@ object AppTest {
     val config = ConfigReader.read(configFile)
     val pf = Builder.build(config)
 
-    logger.info(s"Running pipe: ${pf.get.pipeline.name}")
+    logger.info(s"Running pipe: ${pf.defaultPipeline}")
 
     if(line.hasOption("s"))
-      new AppService(pf.get.pipeline)
+      new AppService(pf)
     else
-      SimpleExecutor.getRunnable(pf.get.pipeline).start(config)
+      SimpleExecutor.getRunnable(pf.pipelines.find(f => f.name == pf.defaultPipeline).get).start(config)
   }
 
 }
