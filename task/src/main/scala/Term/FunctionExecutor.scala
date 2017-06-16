@@ -23,6 +23,7 @@ object FunctionExecutor {
         i._1.invoke(null, i._2.get.map(_.asInstanceOf[Object]): _*) match { // return type conversion
           case r: DataSet => Some(r)
           case str: String => Some(str: DataSet)
+          case arr: Array[String] => Some(DataArray(arr.map(DataString(_)).toList))
           case bool: java.lang.Boolean => Some(bool: DataSet)
           case num: BigDecimal => Some(num: DataSet)
           case date: java.util.Date => Some(date: DataSet)

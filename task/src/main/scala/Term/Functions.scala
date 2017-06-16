@@ -4,6 +4,9 @@ import java.lang._
 import java.text.{DecimalFormat, SimpleDateFormat}
 import java.util.{Calendar, Date}
 
+import DataPipes.Common.Data.{DataArray, DataRecord, DataSet, DataString}
+import org.apache.commons.csv.CSVFormat
+
 import scala.util.Try
 
 object Functions {
@@ -29,6 +32,22 @@ object Functions {
       str.contains(targetStr)
 
   def replaceAll(str: String, find: String, replaceWith: String) = str.replaceAll(find, replaceWith)
+
+  def split(str: String, s: String): Array[String] = str.split(s)
+
+  def csv(str: String, delim: String): DataSet = {
+    import collection.JavaConverters._
+
+    val parser = CSVFormat.RFC4180.withFirstRecordAsHeader().withDelimiter(delim.toCharArray.headOption.getOrElse(',')).parse(new java.io.StringReader(str))
+
+    val records = parser.getRecords().asScala
+
+    DataArray(records.map(r => DataRecord(parser.getHeaderMap().asScala.take(r.size()).map(c =>
+      DataString(c._1, r.get(c._2))).toList)).toList)
+  }
+
+
+  def getProperty(str: String): String = System.getProperty(str)
 
   def sha256(str: String): String = org.apache.commons.codec.digest.DigestUtils.sha256Hex(str)
 

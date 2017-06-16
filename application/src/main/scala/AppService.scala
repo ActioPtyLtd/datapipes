@@ -14,7 +14,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 class AppService(operation: Operation) {
-  
+
   implicit val system = ActorSystem("datapipes-server")
   implicit val materializer = ActorMaterializer()
 
@@ -53,8 +53,9 @@ class AppService(operation: Operation) {
         else
           reject
       } ~
-      (post & extract(_.request.entity.dataBytes)) { bytes =>
-        val str = Await.result(bytes.map(_.utf8String).runWith(Sink.lastOption), Duration(10, "seconds"))
+      (post & extract(_.request)) { req =>
+        val str = Await.result(req.entity.dataBytes.map(b =>
+          b.utf8String).runWith(Sink.lastOption), Duration(10, "seconds"))
         handle(DataString(str.getOrElse("")))
       }
     }
