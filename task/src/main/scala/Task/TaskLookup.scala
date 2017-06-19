@@ -56,7 +56,11 @@ class TaskLookup(name: String, config: DataSet, version: String) extends Task {
 
     // TODO: check old code for merge logic
     val merge = value.headOption.map(h => DataArray((h.success.elems zip ret).map(z =>
-      DataRecord(DataArray(name, z._2 :: z._1.elems.toList))
+
+      if(version == "v1")
+        DataRecord(DataArray(name,z._2.elems.toList) :: z._1.elems.toList)
+      else
+        Operators.mergeLeft(z._1, z._2)
     ).toList)).getOrElse(DataNothing())
 
     _observer.foreach(o => o.next(value ~ Dom(name, Nil, merge, DataNothing())))

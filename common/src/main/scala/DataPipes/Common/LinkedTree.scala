@@ -14,6 +14,8 @@ abstract class LinkedTree[D <: LinkedTree[D]] {
 
   def stringOption: Option[String] = None
 
+  def intOption: Option[Int] = None
+
   def headOption: Option[D] = elems.headOption
 
   def map[E](f:D => E) = elems.map(f)

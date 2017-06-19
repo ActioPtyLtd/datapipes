@@ -24,16 +24,12 @@ class RESTJsonDataSource extends DataSource {
 
   def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
 
-
-
   private val CONTENT_TYPE: String = "application/json"
 
   var user: String = null
   var password: String = null
 
   type HttpClient = HttpUriRequest => (StatusLine, Array[Header], String)
-
-
 
   def createHttpRequest(label: String): HttpRequestBase = {
     if (label == "create" || label == "post") {
@@ -53,23 +49,26 @@ class RESTJsonDataSource extends DataSource {
 
     val uri = query("uri").stringOption
 
-    if(uri.isDefined) {
+    if (uri.isDefined) {
 
       val userOption = ds("credential")("user").stringOption
       val passwordOption = ds("credential")("password").stringOption
 
       val authHeader = for {
         u <- userOption
-        p <- passwordOption } yield new BasicHeader(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encodeBase64((u + ":" + p).getBytes(Charset.forName("ISO-8859-1")))))
+        p <- passwordOption
+      } yield new BasicHeader(HttpHeaders.AUTHORIZATION, "Basic " + new String(Base64.encodeBase64((u + ":" + p).getBytes(Charset.forName("ISO-8859-1")))))
 
       val otherHeaders = ds("headers").map(h => new BasicHeader(h.label, h.stringOption.getOrElse(""))).toList
 
       val headers: Seq[Header] = authHeader.map(a => a :: otherHeaders).getOrElse(otherHeaders)
 
       val requestQuery =
-        createRequest(query("body"),
+        createRequest(
+          query("body"),
           createHttpRequest(query("verb").stringOption.getOrElse("get")),
-          uri.get, headers)
+          uri.get, headers
+        )
 
       logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
 
@@ -77,7 +76,7 @@ class RESTJsonDataSource extends DataSource {
 
       element("status").stringOption.foreach(s => {
         val statusCode = s.toInt
-        if(statusCode >= 400 && statusCode < 600) {
+        if (statusCode >= 400 && statusCode < 600) {
           logger.error(s"Status code ${statusCode} returned.")
           logger.error(s"Body " + element("root").toJson)
         } else {
@@ -86,8 +85,7 @@ class RESTJsonDataSource extends DataSource {
       })
 
       element
-    }
-    else
+    } else
       DataNothing()
   }
 
@@ -109,7 +107,7 @@ class RESTJsonDataSource extends DataSource {
 
       logger.info(body.get)
 
-      val input: StringEntity = new StringEntity(body.get,"UTF-8")
+      val input: StringEntity = new StringEntity(body.get, "UTF-8")
       input.setContentType(CONTENT_TYPE)
       request.asInstanceOf[HttpEntityEnclosingRequestBase].setEntity(input)
     }
@@ -120,22 +118,25 @@ class RESTJsonDataSource extends DataSource {
   def getResponseDataSet(request: HttpUriRequest)(implicit httpClient: HttpClient): DataSet = {
     val response = httpClient(request)
 
-    val displayString:String = Option(response._3).getOrElse("")
+    val displayString: String = Option(response._3).getOrElse("")
     if (displayString.length > 0) {
       logger.info(s"Body: '" + displayString.substring(0, Math.min(displayString.length, 500)) + "'")
     }
 
     val dsBody = Try(JsonXmlDataSet.fromJson(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))
 
-
     // body added twice for backwards compatability, can remove later
 
-    DataRecord("response",
-      DataString("uri", request.getURI.toString) ::
-      DataNumeric("status", response._1.getStatusCode) ::
-        DataRecord("root", dsBody.elems.toList) ::
-        dsBody.elems.toList
-      )
+    Operators.mergeLeft(
+      DataRecord(
+        "response",
+        DataString("uri", request.getURI.toString) ::
+          DataNumeric("status", response._1.getStatusCode) ::
+          DataRecord("root", dsBody.elems.toList)
+          :: Nil
+      ),
+      DataRecord("body", dsBody.elems.toList)
+    )
   }
 
   def sendRequest(request: HttpUriRequest): (StatusLine, Array[Header], String) = {
@@ -151,9 +152,11 @@ class RESTJsonDataSource extends DataSource {
     val response = builthttp.execute(request)
     val respEntity = response.getEntity
 
-    val ret = (response.getStatusLine,
+    val ret = (
+      response.getStatusLine,
       response.getAllHeaders,
-      if (Option(respEntity).isDefined) EntityUtils.toString(response.getEntity, "UTF-8") else "")
+      if (Option(respEntity).isDefined) EntityUtils.toString(response.getEntity, "UTF-8") else ""
+    )
 
     response.close()
     ret

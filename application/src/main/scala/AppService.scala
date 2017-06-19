@@ -1,4 +1,4 @@
-import DataPipes.Common.Data.{DataRecord, DataSet, DataString, JsonXmlDataSet}
+import DataPipes.Common.Data._
 import DataPipes.Common.{Dom, Observer}
 import Pipeline.{Operation, PipeScript}
 import SimpleExecutor.TaskOperation
@@ -8,6 +8,7 @@ import akka.http.scaladsl.server._
 import akka.stream.ActorMaterializer
 import org.json4s.{DefaultFormats, JValue, native}
 import akka.http.scaladsl.model.MediaTypes._
+import akka.http.scaladsl.model.{StatusCodes}
 import akka.stream.scaladsl.Sink
 
 import scala.concurrent.Await
@@ -70,8 +71,12 @@ class AppService(pipeScript: PipeScript) {
         import JsonXmlDataSet.Extend
 
         taskListen.response.headOption.map(_.success) match {
-          case Some(dr@DataRecord(_, _)) => complete(200, dr.toJsonAST)
-          case _ => complete(500, "")
+          case Some(ds) =>
+            if(ds == DataNothing())
+              complete(StatusCodes.OK)
+            else
+              complete(ds("status").intOption.getOrElse(200), ds.toJsonAST)
+          case _ => complete(StatusCodes.InternalServerError, "")
         }
       }
   }

@@ -363,6 +363,8 @@ class TermExecutor(nameSpace: String) {
       value match {
         case DataString(_, v) => DataString(key, v)
         case DataNumeric(_, v) => DataNumeric(key, v)
+        case DataRecord(_,v) => DataRecord(key, v)
+        case DataArray(_,v) => DataArray(key, v)
         case _ => DataString(key, "")
       }
     }
