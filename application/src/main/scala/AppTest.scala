@@ -44,6 +44,8 @@ object AppTest {
       new AppService(pf)
     else
       SimpleExecutor.getRunnable(pf.pipelines.find(f => f.name == pf.defaultPipeline).get).start(config)
+
+    logger.info(s"Pipe ${pf.defaultPipeline} completed successfully.")
   }
 
 }

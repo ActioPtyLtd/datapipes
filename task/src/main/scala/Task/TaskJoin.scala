@@ -44,15 +44,24 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
 
         override def error(exception: Throwable): Unit = ???
 
+        val adjustForREST: Boolean = config("dataSource")("type").stringOption.contains("rest") && version == "v1"
+
         override def next(value: DataSet): Unit = {
 
           if(iterateRightTerm.isDefined)
             {
               iterateRightTerm.foreach { t =>
-                termExecutor.eval(value, t).map(i => (
-                  termExecutor.eval(i, keyRightTerm).stringOption.getOrElse(""),
-                  i
-                )).foreach { f =>
+
+                if(adjustForREST)
+                  termExecutor.eval(value, t).map(i => (
+                    termExecutor.eval(i, keyRightTerm).stringOption.getOrElse(""),
+                    i
+                  ))
+                else {
+                  val i = termExecutor.eval(value, t)
+                  List((termExecutor.eval(i, keyRightTerm).stringOption.getOrElse(""),i))
+                }
+                .foreach { f =>
                   lookup.put(f._1, f._2)
                 }
               }

@@ -1,4 +1,4 @@
-import java.io.File
+import java.io.{File, FileNotFoundException}
 
 import DataPipes.Common.Data.{DataSet, _}
 import com.typesafe.config._
@@ -7,10 +7,16 @@ import scala.collection.JavaConversions._
 
 object ConfigReader {
 
-  def read(file: String): DataSet = convert(
-    ConfigFactory.parseProperties(System.getProperties)
-      .withFallback(ConfigFactory.parseFile(new File(file)))
-      .resolve())
+  def read(file: String): DataSet = {
+    val f = new File(file)
+    if(f.canRead)
+      convert(
+        ConfigFactory.parseProperties(System.getProperties)
+          .withFallback(ConfigFactory.parseFile(f))
+          .resolve())
+    else
+      throw new FileNotFoundException(file)
+  }
 
   def convert(config: Config): DataSet = convert("root", config.root())
 
