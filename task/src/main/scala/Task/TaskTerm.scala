@@ -5,8 +5,6 @@ import DataPipes.Common.Data._
 import Term.TermExecutor
 import scala.meta._
 
-import scala.meta.Term
-
 class TaskTerm(name: String, config: DataSet, version: String) extends TaskTransform(name) {
 
   val term: Term = config("term").stringOption.getOrElse("").parse[Term].get

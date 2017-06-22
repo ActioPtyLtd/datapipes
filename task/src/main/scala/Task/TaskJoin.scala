@@ -6,6 +6,7 @@ import Term.TermExecutor
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
+import scala.meta._
 
 class TaskJoin(val name: String, val config: DataSet, version: String) extends Task {
 
@@ -14,6 +15,7 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
   private val termExecutor = new TermExecutor(namespace)
   private val keyRightTerm = termExecutor.getTemplateTerm(config("keyR").stringOption.getOrElse(""))
   private val keyLeftTerm = termExecutor.getTemplateTerm(config("keyL").stringOption.getOrElse(""))
+  private val iterateRightTerm: Option[Term] = config("iterateR").stringOption.map(m => m.parse[Term].get)
   private val termRead = TaskLookup.getTermTree(config("dataSource")("query")("read"))
   private val lookup = HashMap[String, DataSet]()
 
@@ -43,9 +45,23 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
         override def error(exception: Throwable): Unit = ???
 
         override def next(value: DataSet): Unit = {
-          lookup.put(
-            termExecutor.eval(value, keyRightTerm).stringOption.getOrElse(""),
-            value)
+
+          if(iterateRightTerm.isDefined)
+            {
+              iterateRightTerm.foreach { t =>
+                termExecutor.eval(value, t).map(i => (
+                  termExecutor.eval(i, keyRightTerm).stringOption.getOrElse(""),
+                  i
+                )).foreach { f =>
+                  lookup.put(f._1, f._2)
+                }
+              }
+            }
+          else
+            lookup.put(
+              termExecutor.eval(value, keyRightTerm).stringOption.getOrElse(""),
+              value
+            )
         }
       }
 
@@ -61,8 +77,7 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
       .toList
       .flatMap(_.success.map(m =>
         termExecutor.eval(m, keyLeftTerm).stringOption.map(kLeft => lookup.get(kLeft).map(r =>
-          DataRecord(m.label, DataRecord(name, List(r)) :: m.elems.toList)
-        ).getOrElse(
+          DataRecord(m.label, DataRecord(name, List(r)) :: m.elems.toList)).getOrElse(
           DataRecord(m.label, DataNothing(name) :: m.elems.toList)
         )).getOrElse(m)).toList)
 

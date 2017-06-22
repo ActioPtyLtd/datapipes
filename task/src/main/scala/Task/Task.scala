@@ -8,8 +8,8 @@ object Task {
   private lazy val tasks = Map[String, (String, DataSet, String) => DataPipes.Common.Task](
     "extract" -> ((name, config, version) =>
       new TaskExtract(name, config, version)),
-    "load" -> ((name, config, _) =>
-      new TaskLoad(name, config)),
+    "load" -> ((name, config, version) =>
+      new TaskLoad(name, config, version)),
     "transformTerm" -> ((name, config, version) =>
       new TaskTerm(name, config, version)),
     "transform" -> ((name, config, _) =>

@@ -7,11 +7,11 @@ import Term.TermExecutor
 import scala.collection.mutable.{ ListBuffer, Queue }
 import scala.util.Try
 
-class TaskLoad(val name: String, val config: DataSet) extends Task {
+class TaskLoad(val name: String, val config: DataSet, version: String) extends Task {
 
   private val dataSource: DataSource = DataSource(config("dataSource"))
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
-  private val terms: TermLinkedTree = TaskLookup.getTermTree(config("dataSource")("query")("create"))
+  private val terms: TermLinkedTree = TaskLookup.getTermTree(TaskLookup.queryAdjust(config("dataSource")("query")("create"), version))
   private val namespace: String = config("namespace").stringOption.getOrElse("Term.Legacy.Functions")
   private val termExecutor = new TermExecutor(namespace)
 
