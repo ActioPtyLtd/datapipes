@@ -1,5 +1,7 @@
 target/
 out/
+.idea/
+project/build.properties
 
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
