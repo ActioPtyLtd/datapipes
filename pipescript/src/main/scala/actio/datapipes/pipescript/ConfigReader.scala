@@ -2,7 +2,7 @@ package actio.datapipes.pipescript
 
 import java.io.{File, FileNotFoundException}
 
-import DataPipes.Common.Data.{DataSet, _}
+import actio.common.Data._
 import com.typesafe.config._
 
 import scala.collection.JavaConversions._

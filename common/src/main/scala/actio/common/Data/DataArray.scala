@@ -1,4 +1,4 @@
-package DataPipes.Common.Data
+package actio.common.Data
 
 case class DataArray(label: String, arrayElems: List[DataSet]) extends DataBase {
 

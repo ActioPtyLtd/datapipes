@@ -1,4 +1,4 @@
-package DataPipes.Common.Data
+package actio.common.Data
 
 case class DataString(label: String, str: String) extends DataBase {
 

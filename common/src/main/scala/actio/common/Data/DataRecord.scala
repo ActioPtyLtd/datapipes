@@ -1,4 +1,4 @@
-package DataPipes.Common.Data
+package actio.common.Data
 
 case class DataRecord(label: String, fields: List[DataSet]) extends DataBase {
 

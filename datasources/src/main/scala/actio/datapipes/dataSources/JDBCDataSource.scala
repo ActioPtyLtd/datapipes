@@ -1,9 +1,9 @@
 package actio.datapipes.dataSources
 
-import DataPipes.Common.Data._
-import DataPipes.Common.{DataSource, Dom, Observer}
 import java.sql._
 
+import actio.common.Data._
+import actio.common.{DataSource, Observer}
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.ListBuffer

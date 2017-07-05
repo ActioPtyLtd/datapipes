@@ -1,12 +1,13 @@
 package actio.datapipes.task
 
-import DataPipes.Common.Data.DataSet
+import actio.common.Data.DataSet
+import actio.common.Task
 import actio.datapipes.task.Legacy.TaskFunctionFold
 
 
 object Task {
 
-  private lazy val tasks = Map[String, (String, DataSet, String) => DataPipes.Common.Task](
+  private lazy val tasks = Map[String, (String, DataSet, String) => Task](
     "extract" -> ((name, config, version) =>
       new TaskExtract(name, config, version)),
     "load" -> ((name, config, version) =>
@@ -30,6 +31,6 @@ object Task {
     "dump" -> ((name, config, _) =>
       new TaskPrint(name, config)))
 
-  def apply(name: String, taskType: String, config: DataSet): DataPipes.Common.Task =
+  def apply(name: String, taskType: String, config: DataSet): Task =
     tasks(taskType)(name, config, config("version").stringOption.getOrElse("v1") )
 }

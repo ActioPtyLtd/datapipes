@@ -2,8 +2,8 @@ package actio.datapipes.task
 
 import java.io.{File, FileOutputStream}
 
-import DataPipes.Common.Data._
-import DataPipes.Common._
+import actio.common.Data._
+import actio.common.{Dom, Observer, Task}
 
 import scala.collection.mutable.ListBuffer
 import boopickle.Default._

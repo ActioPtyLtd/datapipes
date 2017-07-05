@@ -1,8 +1,6 @@
-package DataPipes.Common
+package actio.common
 
-import DataPipes.Common.Data.DataSet
-
-import scala.concurrent.Future
+import actio.common.Data.DataSet
 
 trait DataSource extends Observable[DataSet] {
 

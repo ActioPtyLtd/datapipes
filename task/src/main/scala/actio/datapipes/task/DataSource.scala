@@ -1,6 +1,7 @@
 package actio.datapipes.task
 
-import DataPipes.Common.Data.DataSet
+import actio.common.Data.DataSet
+import actio.common.DataSource
 import actio.datapipes.dataSources._
 
 
@@ -28,6 +29,6 @@ object DataSource {
   )
 
 
-  def apply(parameters: DataSet): DataPipes.Common.DataSource = sources(parameters("type").stringOption.get)(parameters)
+  def apply(parameters: DataSet): DataSource = sources(parameters("type").stringOption.get)(parameters)
 
 }

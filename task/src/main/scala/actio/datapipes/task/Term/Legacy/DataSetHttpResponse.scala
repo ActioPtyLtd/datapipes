@@ -1,6 +1,6 @@
 package actio.datapipes.task.Term.Legacy
 
-import DataPipes.Common.Data._
+import actio.common.Data.{DataNothing, DataSet, DataString}
 
 case class DataSetHttpResponse(label: String, uri: String, statusCode: Int, headers: Map[String, String], body: DataSet) extends DataSet {
 

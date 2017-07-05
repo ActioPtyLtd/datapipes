@@ -1,7 +1,7 @@
 package actio.datapipes.task
 
-import DataPipes.Common._
-import DataPipes.Common.Data._
+import actio.common.Data._
+import actio.common.Dom
 
 import scala.meta.Term
 import scala.meta._

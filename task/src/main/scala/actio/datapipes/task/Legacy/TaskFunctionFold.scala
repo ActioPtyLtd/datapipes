@@ -1,8 +1,8 @@
 package actio.datapipes.task.Legacy
 
-import DataPipes.Common.Data._
-import DataPipes.Common.Dom
-import actio.datapipes.task.Term.{FunctionExecutor, TermExecutor}
+import actio.common.Data.{DataNothing, DataSet, DataString}
+import actio.common.Dom
+import actio.datapipes.task.Term.{FunctionExecutor}
 import actio.datapipes.task.TaskTransform
 
 

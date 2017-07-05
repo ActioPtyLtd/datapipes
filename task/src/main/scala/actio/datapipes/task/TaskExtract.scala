@@ -1,8 +1,8 @@
 package actio.datapipes.task
 
-import DataPipes.Common._
-import DataPipes.Common.Data._
 import Term.TermExecutor
+import actio.common.Data.{DataArray, DataNothing, DataSet}
+import actio.common.{DataSource, Dom, Observer, Task}
 import com.typesafe.scalalogging.Logger
 
 import scala.util.Try

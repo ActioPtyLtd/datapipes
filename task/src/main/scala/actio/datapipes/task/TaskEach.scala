@@ -1,7 +1,7 @@
 package actio.datapipes.task
 
-import DataPipes.Common.Data._
-import DataPipes.Common._
+import actio.common.Data.{DataNothing, DataSet}
+import actio.common.{Dom, Observer, Task}
 
 import scala.collection.mutable.ListBuffer
 

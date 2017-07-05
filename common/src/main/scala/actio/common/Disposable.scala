@@ -1,4 +1,4 @@
-package DataPipes.Common
+package actio.common
 
 trait Disposable[T] {
   def dispose()

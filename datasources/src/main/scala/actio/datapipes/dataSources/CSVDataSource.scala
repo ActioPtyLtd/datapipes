@@ -1,11 +1,10 @@
 package actio.datapipes.dataSources
 
-import DataPipes.Common.Data._
-import DataPipes.Common._
 import java.io.FileReader
 
-import com.typesafe.scalalogging.Logger
-import org.apache.commons.csv.{CSVFormat, CSVParser}
+import actio.common.Data.{DataRecord, DataSet, DataString}
+import actio.common.{DataSource, Observer}
+import org.apache.commons.csv.{CSVFormat}
 
 class CSVDataSource extends DataSource {
 

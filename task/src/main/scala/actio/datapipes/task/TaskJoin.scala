@@ -1,8 +1,8 @@
 package actio.datapipes.task
 
-import DataPipes.Common.Data._
-import DataPipes.Common.{Dom, Observer, Task}
 import Term.TermExecutor
+import actio.common.Data.{DataArray, DataNothing, DataRecord, DataSet}
+import actio.common.{Dom, Observer, Task}
 
 import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer

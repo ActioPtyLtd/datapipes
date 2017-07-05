@@ -1,7 +1,7 @@
 package actio.datapipes.pipeline
 
-import DataPipes.Common.Data.{DataNothing, DataSet}
-import DataPipes.Common._
+import actio.common.Data.{DataNothing, DataSet}
+import actio.common.{Dom, Observable, Observer}
 import actio.datapipes.pipescript.Pipeline.Operation
 import actio.datapipes.task.Task
 import com.typesafe.scalalogging.Logger

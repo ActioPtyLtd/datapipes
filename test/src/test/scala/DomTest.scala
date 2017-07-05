@@ -1,5 +1,6 @@
-import DataPipes.Common._
-import DataPipes.Common.Data._
+
+import actio.common.Data.{DataNothing, DataString}
+import actio.common.Dom
 import org.scalatest.FunSuite
 
 class DomTest extends FunSuite {

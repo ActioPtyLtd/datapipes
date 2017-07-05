@@ -1,6 +1,6 @@
 package actio.datapipes.pipescript.Pipeline
 
-import DataPipes.Common.Data._
+import actio.common.Data.{DataSet, Operators}
 
 import scala.annotation.tailrec
 

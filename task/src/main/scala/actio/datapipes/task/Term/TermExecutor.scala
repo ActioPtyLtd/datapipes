@@ -1,10 +1,9 @@
 package actio.datapipes.task.Term
 
-import DataPipes.Common._
-import DataPipes.Common.Data._
+
+import actio.common.Data._
 import com.typesafe.scalalogging.Logger
 
-import scala.meta.Term.Arg.Repeated
 import scala.meta._
 
 class TermExecutor(nameSpace: String) {

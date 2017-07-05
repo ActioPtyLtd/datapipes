@@ -2,8 +2,8 @@ package actio.datapipes.task.Term
 
 import java.lang.reflect.Parameter
 
-import DataPipes.Common.Data._
-import DataPipes.Common.Data.ImplicitCasts._
+import actio.common.Data._
+import actio.common.Data.ImplicitCasts._
 
 import scala.annotation.tailrec
 import scala.util.Try

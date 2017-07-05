@@ -1,12 +1,12 @@
 package actio.datapipes.dataSources
 
-import java.io.{BufferedWriter, File, FileWriter}
+import java.io.{File}
 import java.nio.ByteBuffer
 import java.nio.file._
 import java.util.regex.Pattern
 
-import DataPipes.Common.Data._
-import DataPipes.Common._
+import actio.common.Data._
+import actio.common.{DataSource, Observer}
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.ListBuffer

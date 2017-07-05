@@ -1,6 +1,6 @@
-package DataPipes.Common
+package actio.common
 
-import DataPipes.Common.Data.{DataNothing, DataRecord, DataSet}
+import actio.common.Data.{DataNothing, DataRecord, DataSet}
 
 trait DomTrait extends LinkedTree[DomTrait] {
   def success: DataSet

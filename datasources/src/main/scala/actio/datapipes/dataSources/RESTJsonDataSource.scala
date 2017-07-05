@@ -3,8 +3,9 @@ package actio.datapipes.dataSources
 import java.net.URI
 import java.nio.charset.Charset
 
-import DataPipes.Common.Data._
-import DataPipes.Common.{DataSource, Observer}
+import actio.common.Data._
+import actio.common.Data.JsonXmlDataSet._
+import actio.common.{DataSource, Observer}
 import com.typesafe.scalalogging.Logger
 
 import scala.util.Try
@@ -15,7 +16,6 @@ import org.apache.http.entity.StringEntity
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.http.message.BasicHeader
 import org.apache.http.util.EntityUtils
-import JsonXmlDataSet._
 
 class RESTJsonDataSource extends DataSource {
 

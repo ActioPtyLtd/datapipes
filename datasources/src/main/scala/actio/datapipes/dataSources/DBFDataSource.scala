@@ -2,8 +2,8 @@ package actio.datapipes.dataSources
 
 import java.io.{File, FileInputStream}
 
-import DataPipes.Common._
-import DataPipes.Common.Data._
+import actio.common.Data._
+import actio.common.{DataSource, Observer}
 import com.linuxense.javadbf._
 import com.typesafe.scalalogging.Logger
 

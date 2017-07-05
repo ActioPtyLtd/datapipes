@@ -1,7 +1,7 @@
 package actio.datapipes.dataSources
 
-import DataPipes.Common.Data._
-import DataPipes.Common._
+import actio.common.Data.{DataNothing, DataSet, DataString}
+import actio.common.{DataSource, Observer}
 
 import scala.collection.mutable.ListBuffer
 
