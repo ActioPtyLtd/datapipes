@@ -1,7 +1,5 @@
 package actio.datapipes.task
 
-import scala.meta.Term
-
 trait TermLinkedTree {
   def label: String
 }
@@ -10,6 +8,6 @@ case class TermNode(label: String, fields: List[TermLinkedTree]) extends TermLin
 
 }
 
-case class TermLeaf(label: String, term: Term) extends TermLinkedTree {
+case class TermLeaf(label: String, term: scala.meta.Term) extends TermLinkedTree {
 
 }
