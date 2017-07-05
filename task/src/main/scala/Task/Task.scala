@@ -24,7 +24,7 @@ object Task {
       new TaskUpdate(name, config, version)),
     "join" -> ((name, config, version) =>
       new TaskJoin(name, config, version)),
-    "dumpFile" -> ((name, config, version) =>
+    "fileDump" -> ((name, config, version) =>
       new TaskFileDump(name, config)),
     "dump" -> ((name, config, _) =>
       new TaskPrint(name, config)))
