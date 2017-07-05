@@ -28,8 +28,8 @@ project/build.properties
 .idea/.name
 
 # Sensitive or high-churn files:
-.idea/dataSources.ids
-.idea/dataSources.xml
+.idea/actio.datapipes.dataSources.ids
+.idea/actio.datapipes.dataSources.xml
 .idea/sqlDataSources.xml
 .idea/dynamic.xml
 .idea/uiDesigner.xml
