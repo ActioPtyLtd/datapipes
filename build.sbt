@@ -27,6 +27,7 @@ lazy val datasources = project
     "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
     "org.postgresql" % "postgresql" % "42.1.1",
     "org.apache.httpcomponents" % "httpclient" % "4.5.2",
+    "me.chrons" %% "boopickle" % "1.2.5",
     "com.github.albfernandez" % "javadbf" % "1.2.1"))
   .dependsOn(pipescript)
 

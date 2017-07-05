@@ -3,13 +3,13 @@ import Pipeline._
 import com.typesafe.scalalogging.Logger
 import org.apache.commons.cli._
 
-object AppTest {
+object AppConsole {
 
   val logger = Logger("AppTest")
 
   def main(args: Array[String]): Unit = {
 
-    val parser: CommandLineParser = new DefaultParser();
+    val parser: CommandLineParser = new DefaultParser()
 
     val options = new Options()
     options.addOption("c", "config", true, "config")

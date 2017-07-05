@@ -7,9 +7,11 @@ import DataPipes.Common._
 
 import scala.collection.mutable.ListBuffer
 import boopickle.Default._
+import com.typesafe.scalalogging.Logger
 
 class TaskFileDump(val name: String, config: DataSet) extends Task {
 
+  private val logger = Logger("TaskFileDump")
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
 
   def completed(): Unit = _observer.foreach(o => o.completed())
@@ -32,8 +34,10 @@ class TaskFileDump(val name: String, config: DataSet) extends Task {
       .addConcreteType[DataDate]
       .addConcreteType[DataNumeric]
 
+    logger.info(s"Writing file: ${tmpFile.getName}...")
     fileOut.write(Pickle.intoBytes(value.headOption.map(m => m.success).getOrElse(DataNothing())).array())
     fileOut.close()
+    logger.info(s"Completed writing file: ${tmpFile.getName}...")
 
     _observer.foreach(s => s.next(value))
   }

@@ -81,6 +81,8 @@ class AppService(pipeScript: PipeScript) {
       }
   }
 
-  Http().bindAndHandle(route, "0.0.0.0", sys.props.get("http.port").fold(8080)(_.toInt))
+
+  val port = pipeScript.settings("port").intOption.getOrElse(8080)
+  Http().bindAndHandle(route, "0.0.0.0", sys.props.get("http.port").fold(port)(_.toInt))
 
 }

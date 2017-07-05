@@ -15,6 +15,8 @@ object DataSource {
         new DBFDataSource()
       else if(behavior.contains("csv"))
         new CSVDataSource()
+      else if(behavior.contains("dump"))
+        new DumpDataSource()
       else
         new TextFileDataSource()
     }),
