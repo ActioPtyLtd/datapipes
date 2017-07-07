@@ -54,7 +54,7 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
             {
               iterateRightTerm.foreach { t =>
 
-                if(adjustForREST)
+                (if(adjustForREST)
                   termExecutor.eval(value, t).map(i => (
                     termExecutor.eval(i, keyRightTerm).stringOption.getOrElse(""),
                     i
@@ -62,7 +62,7 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
                 else {
                   val i = termExecutor.eval(value, t)
                   List((termExecutor.eval(i, keyRightTerm).stringOption.getOrElse(""),i))
-                }
+                })
                 .foreach { f =>
                   lookup.put(f._1, f._2)
                 }
