@@ -20,8 +20,10 @@ class DumpDataSource extends DataSource {
   def subscribe(observer: Observer[DataSet]): Unit = _observer.append(observer)
 
   def executeQuery(config: DataSet, query: DataSet): Unit = {
-
+    val cleanupAfterRead = !config("cleanupAfterRead").stringOption.contains("false")
     val filePaths = getFilePath(config, query)
+
+    logger.info(s"Cleanup files after reading: ${cleanupAfterRead}")
 
     if(filePaths.isEmpty)
       logger.warn("No files matched regex expression.")
@@ -55,9 +57,11 @@ class DumpDataSource extends DataSource {
 
       logger.info(s"Completed reading file: ${filePath}...")
 
-      logger.info(s"Deleting file: ${filePath}...")
-      Files.delete(path)
-      logger.info(s"Successfully deleted file: ${filePath}...")
+      if(cleanupAfterRead) {
+        logger.info(s"Deleting file: ${filePath}...")
+        Files.delete(path)
+        logger.info(s"Successfully deleted file: ${filePath}...")
+      }
 
       _observer.foreach(s => s.next(ds))
     }
@@ -75,7 +79,11 @@ class DumpDataSource extends DataSource {
     val regex = query("regex").stringOption
       .getOrElse(config("regex").stringOption.getOrElse(""))
 
-    new File(dir).listFiles.filter(f => Pattern.compile(regex).matcher(f.getName).matches).map(m => m.getPath()).toList
+    new File(dir)
+      .listFiles
+      .filter(f => Pattern.compile(regex).matcher(f.getName).matches)
+      .sortBy(s => s.lastModified())
+      .map(m => m.getPath()).toList
   }
 
 }
