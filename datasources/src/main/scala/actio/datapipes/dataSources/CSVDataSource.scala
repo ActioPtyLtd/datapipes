@@ -4,9 +4,11 @@ import java.io.FileReader
 
 import actio.common.Data.{DataNothing, DataRecord, DataSet, DataString}
 import actio.common.{DataSource, Observer}
+import com.typesafe.scalalogging.Logger
 import org.apache.commons.csv.CSVFormat
 
 class CSVDataSource extends DataSource {
+  private val logger = Logger("CSVDataSource")
 
   var _observer: Option[Observer[DataSet]] = None
 
@@ -16,6 +18,8 @@ class CSVDataSource extends DataSource {
     import collection.JavaConverters._
 
     val filePath = getFilePath(config, query)
+
+    logger.info(s"Reading file: ${filePath}...")
 
     val in = new FileReader(filePath)
     val parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in)
@@ -29,6 +33,8 @@ class CSVDataSource extends DataSource {
     }
 
     in.close()
+    
+    logger.info(s"Completed reading file: ${filePath}...")
 
     _observer.get.completed()
   }
