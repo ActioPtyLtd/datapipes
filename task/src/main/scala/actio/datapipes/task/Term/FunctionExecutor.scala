@@ -29,7 +29,7 @@ object FunctionExecutor {
           case date: java.util.Date => Some(date: DataSet)
           case _ => None
         })
-      .getOrElse(DataNothing())
+      .getOrElse(throw new Exception(s"Method not found: $nameSpace.$methodName"))
 
   // pattern match on parameters and cast if necessary
   @tailrec
