@@ -35,9 +35,10 @@ class TaskFileDump(val name: String, config: DataSet) extends Task {
       .addConcreteType[DataNumeric]
 
     logger.info(s"Writing file: ${tmpFile.getName}...")
-    fileOut.write(Pickle.intoBytes(value.headOption.map(m => m.success).getOrElse(DataNothing())).array())
+    val bytes = Pickle.intoBytes(value.headOption.map(m => m.success).getOrElse(DataNothing())).array()
+    fileOut.write(bytes)
     fileOut.close()
-    logger.info(s"Completed writing file: ${tmpFile.getName}...")
+    logger.info(s"Completed writing file: ${tmpFile.getName}. ${bytes.length} bytes written.")
 
     _observer.foreach(s => s.next(value))
   }

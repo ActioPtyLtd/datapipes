@@ -16,7 +16,7 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
   private val keyRightTerm = termExecutor.getTemplateTerm(config("keyR").stringOption.getOrElse(""))
   private val keyLeftTerm = termExecutor.getTemplateTerm(config("keyL").stringOption.getOrElse(""))
   private val iterateRightTerm: Option[Term] = config("iterateR").stringOption.map(m => m.parse[Term].get)
-  private val termRead = TaskLookup.getTermTree(config("dataSource")("query")("read"))
+  private val termRead = config("dataSource")("query")("read").toOption.map(r => TaskLookup.getTermTree(r))
   private val lookup = HashMap[String, DataSet]()
 
   var initialised = false
@@ -31,8 +31,8 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
 
     if (!initialised) {
 
-      val query = TaskLookup.interpolate(termExecutor, termRead,
-        value.headOption.map(m => m.success).getOrElse(DataNothing()))
+      val query = termRead.map(r => TaskLookup.interpolate(termExecutor, r,
+        value.headOption.map(m => m.success).getOrElse(DataNothing()))).getOrElse(DataNothing())
 
       val src = DataSource(config("dataSource"))
 
@@ -44,7 +44,9 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
 
         override def error(exception: Throwable): Unit = ???
 
-        val adjustForREST: Boolean = config("dataSource")("type").stringOption.contains("rest") && version == "v1"
+        // total hack
+        val adjustForREST: Boolean = (config("dataSource")("type").stringOption.contains("rest") ||
+          config("dataSource")("type").stringOption.contains("file") ) && version == "v1"
 
         override def next(value: DataSet): Unit = {
 

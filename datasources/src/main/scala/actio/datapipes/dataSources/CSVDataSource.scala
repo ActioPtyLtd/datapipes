@@ -2,9 +2,9 @@ package actio.datapipes.dataSources
 
 import java.io.FileReader
 
-import actio.common.Data.{DataRecord, DataSet, DataString}
+import actio.common.Data.{DataNothing, DataRecord, DataSet, DataString}
 import actio.common.{DataSource, Observer}
-import org.apache.commons.csv.{CSVFormat}
+import org.apache.commons.csv.CSVFormat
 
 class CSVDataSource extends DataSource {
 
@@ -15,7 +15,7 @@ class CSVDataSource extends DataSource {
   def execute(config: DataSet, query: DataSet): Unit = {
     import collection.JavaConverters._
 
-    val filePath = config("filePath").stringOption.getOrElse("")
+    val filePath = getFilePath(config, query)
 
     val in = new FileReader(filePath)
     val parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in)
@@ -34,6 +34,12 @@ class CSVDataSource extends DataSource {
   }
 
   def execute(config: DataSet, query: DataSet*): Unit = {
-    query.foreach(q => execute(config, q))
+    if(query.isEmpty)
+      execute(config, DataNothing())
+    else
+      query.foreach(q => execute(config, q))
   }
+
+  def getFilePath(config: DataSet, query: DataSet): String = config("directory").stringOption.map(_ + "/").getOrElse("") + query("filenameTemplate").stringOption
+    .getOrElse(config("filenameTemplate").stringOption.getOrElse(""))
 }

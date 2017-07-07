@@ -301,6 +301,15 @@ object Functions {
       DataArray(rows.tail.map(r => DataRecord(rows.head.zipWithIndex.map(c => DataString(c._1, r(c._2))).toList)).toList)
   }
 
+  /*
+  def row1header(ds: DataSet): DataSet = {
+
+  }
+
+  def split2cols(ds: DataSet): DataSet {
+
+  }*/
+
   def removeTrailingZeros(value: String): DataSet = DataNumeric(Try(BigDecimal(value).setScale(2, BigDecimal.RoundingMode.HALF_UP)).getOrElse(BigDecimal(0)).underlying().stripTrailingZeros())
 
   def batch(ds: DataSet): DataSet = DataRecord("", List(ds))
