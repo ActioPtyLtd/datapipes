@@ -11,13 +11,11 @@ import akka.http.scaladsl.model.MediaTypes._
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server._
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
+import com.typesafe.scalalogging.Logger
 import org.json4s.{DefaultFormats, JValue, native}
 
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-
 class AppService(pipeScript: PipeScript) {
+  val logger = Logger("AppService")
 
   implicit val system = ActorSystem("datapipes-server")
   implicit val materializer = ActorMaterializer()
@@ -25,9 +23,6 @@ class AppService(pipeScript: PipeScript) {
   import Directives._
   import de.heikoseeberger.akkahttpjson4s.Json4sSupport._
   import system.dispatcher
-
-  implicit val serialization = native.Serialization
-  implicit val formats = DefaultFormats
 
   val taskListen = new TaskOperation {
 
@@ -48,18 +43,22 @@ class AppService(pipeScript: PipeScript) {
     path("datapipes" / ".*".r) { name =>
       (post & extract(_.request.entity.contentType.mediaType)) { ctype =>
 
+        implicit val serialization = native.Serialization
+        implicit val formats = DefaultFormats
+
         if (ctype == `application/json`)
           entity(as[JValue]) { requestJson =>
-            val ds = JsonXmlDataSet.json2dsHelper("", requestJson)
+            val ds = JsonXmlDataSet.json2dsHelper(requestJson)
             handle(ds, name)
           }
         else
           reject
       } ~
-      (post & extract(_.request)) { req =>
-        val str = Await.result(req.entity.dataBytes.map(b =>
-          b.utf8String).runWith(Sink.lastOption), Duration(60, "seconds"))
-        handle(DataString(str.getOrElse("")), name)
+      post {
+        entity(as[String]) { str =>
+          logger.info(s"POST received, using text body.")
+          handle(DataString(str), name)
+        }
       }
     }
 
@@ -71,6 +70,9 @@ class AppService(pipeScript: PipeScript) {
         call.get.start(ds)
 
         import JsonXmlDataSet.Extend
+
+        implicit val serialization = native.Serialization
+        implicit val formats = DefaultFormats
 
         taskListen.response.headOption.map(_.success) match {
           case Some(ds) =>

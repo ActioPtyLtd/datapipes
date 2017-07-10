@@ -60,6 +60,8 @@ object JsonXmlDataSet {
 
   def fromJson(str: String): DataSet = json2dsHelper("", parse(str))
 
+  def json2dsHelper(jValue: JValue): DataSet = json2dsHelper("", jValue)
+
   def json2dsHelper(label: String, jValue: JValue): DataSet =
     jValue match {
       case (js: JString) => DataString(label, js.s)
@@ -71,5 +73,4 @@ object JsonXmlDataSet {
       case (jo: JObject) => DataRecord(label, jo.obj.map(o => json2dsHelper(o._1, o._2)))
       case _ => DataNothing(label)
     }
-
 }
