@@ -58,7 +58,7 @@ class AppService(pipeScript: PipeScript) {
       } ~
       (post & extract(_.request)) { req =>
         val str = Await.result(req.entity.dataBytes.map(b =>
-          b.utf8String).runWith(Sink.lastOption), Duration(10, "seconds"))
+          b.utf8String).runWith(Sink.lastOption), Duration(60, "seconds"))
         handle(DataString(str.getOrElse("")), name)
       }
     }
