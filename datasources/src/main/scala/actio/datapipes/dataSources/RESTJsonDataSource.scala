@@ -78,7 +78,6 @@ class RESTJsonDataSource extends DataSource {
         val statusCode = s.toInt
         if (statusCode >= 400 && statusCode < 600) {
           logger.error(s"Status code ${statusCode} returned.")
-          logger.error(s"Body " + element("root").toJson)
         } else {
           logger.info(s"Status code ${statusCode} returned.")
         }
@@ -105,7 +104,7 @@ class RESTJsonDataSource extends DataSource {
 
     if (body.isDefined) {
 
-      logger.info(body.get)
+      logger.info("Request body: " + body.get)
 
       val input: StringEntity = new StringEntity(body.get, "UTF-8")
       input.setContentType(CONTENT_TYPE)
@@ -120,7 +119,7 @@ class RESTJsonDataSource extends DataSource {
 
     val displayString: String = Option(response._3).getOrElse("")
     if (displayString.length > 0) {
-      logger.info(s"Body: '" + displayString.substring(0, Math.min(displayString.length, 500)) + "'")
+      logger.info(s"Response body: '" + displayString.substring(0, Math.min(displayString.length, 500)) + "'")
     }
 
     val dsBody = Try(JsonXmlDataSet.fromJson(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))

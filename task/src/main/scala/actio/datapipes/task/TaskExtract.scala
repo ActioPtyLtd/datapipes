@@ -23,47 +23,50 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
 
   def error(exception: Throwable): Unit = ???
 
-  def next(value: Dom): Unit = {
+  def next(start: Dom): Unit = {
+
+    lazy val dsObserver = new Observer[DataSet] {
+      def completed(): Unit = {
+        if (buffer.nonEmpty) {
+          logger.info("Sending remaining buffered data...")
+          responseAdjust(start)
+          buffer.clear()
+          _observer.foreach(o => o.completed())
+        }
+      }
+
+      def error(exception: Throwable): Unit = _observer.foreach(o => o.error(exception))
+
+      def next(value: DataSet): Unit = {
+        buffer.enqueue(value)
+
+        if (buffer.size == size) {
+          responseAdjust(start)
+          buffer.clear()
+        }
+      }
+
+    }
+
     dataSource.subscribe(dsObserver)
 
     if (config("dataSource")("query")("read").toOption.isDefined)
       dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, termRead,
-        value.headOption.map(m => m.success).getOrElse(DataNothing())))
+        start.headOption.map(m => m.success).getOrElse(DataNothing())))
     else
       dataSource.execute(config("dataSource"))
   }
 
-  lazy val dsObserver = new Observer[DataSet] {
-    def completed(): Unit = {
-      if (buffer.nonEmpty) {
-        logger.info("Sending remaining buffered data...")
-        responseAdjust()
-        buffer.clear()
-        _observer.foreach(o => o.completed())
-      }
-    }
 
-    def error(exception: Throwable): Unit = _observer.foreach(o => o.error(exception))
-
-    def next(value: DataSet): Unit = {
-      buffer.enqueue(value)
-
-      if (buffer.size == size) {
-        responseAdjust()
-        buffer.clear()
-      }
-    }
-
-  }
 
   // dont send an array for rest data source if v1
-  def responseAdjust(): Unit = {
+  def responseAdjust(start: Dom): Unit = {
     if (config("dataSource")("type").stringOption.contains("rest") && version == "v1") {
       val send = for {
         o <- _observer
         b <- buffer
       } yield (o, b)
-      send.foreach(s => s._1.next(Dom() ~ Dom(name, List(), s._2("root"), DataNothing())))
+      send.foreach(s => s._1.next(start ~ Dom(name, List(), s._2("root"), DataNothing(), Nil)))
     } else if(config("dataSource")("type").stringOption.contains("file") &&
         config("dataSource")("behavior").stringOption.contains("dump")
     ) {
@@ -71,10 +74,10 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
         o <- _observer
         b <- buffer
       } yield (o, b)
-      send.foreach(s => s._1.next(Dom() ~ Dom(name, List(), s._2, DataNothing())))
+      send.foreach(s => s._1.next(start ~ Dom(name, List(), s._2, DataNothing(), Nil)))
     }
     else
-      _observer.foreach(o => o.next(Dom() ~ Dom(name, List(), DataArray(buffer.toList), DataNothing())))
+      _observer.foreach(o => o.next(start ~ Dom(name, List(), DataArray(buffer.toList), DataNothing(), Nil)))
   }
 
   def subscribe(observer: Observer[Dom]): Unit = {

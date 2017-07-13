@@ -24,7 +24,7 @@ object Builder {
       .map(t => t.label -> Task(t.label, t(taskType).stringOption.getOrElse(""), Operators.mergeLeft(t, ds(script)(settings))))
       .toMap
 
-    val pipes = ds(script)(pipelines).elems.toList.reverse // important to reverse so it can find pipe names
+    val pipes = ds(script)(pipelines).elems.toList.sortBy(s => s.label)// important to reverse so it can find pipe names
 
     PipeScript(ds(script)(settings), tasks.values.toList, getPipes(tasks, pipes), defaultPipeName)
 

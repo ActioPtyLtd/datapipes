@@ -211,6 +211,18 @@ class TermExecutor(nameSpace: String) {
           .reduceLeft((a, b) => eval(rem, scope + (ta -> a) + (tb -> b)))
     }
 
+    // convert dataset to json string
+    case Term.Apply(Term.Select(t, Term.Name("toJson")), Nil) => {
+      import actio.common.Data.JsonXmlDataSet.Extend
+      DataString(eval(t, scope).toJson)
+    }
+
+    // convert dataset to xml string
+    case Term.Apply(Term.Select(t, Term.Name("toXml")), Nil) => {
+      import actio.common.Data.JsonXmlDataSet.Extend
+      DataString(eval(t, scope).toXml)
+    }
+
     // get DataSet by name
     case Term.Apply(q, Seq(t)) => eval(q, scope)(eval(t, scope).stringOption.getOrElse(""))
 

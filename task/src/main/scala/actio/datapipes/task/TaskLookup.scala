@@ -63,7 +63,7 @@ class TaskLookup(name: String, config: DataSet, version: String) extends Task {
         Operators.mergeLeft(z._1, z._2)
     ).toList)).getOrElse(DataNothing())
 
-    _observer.foreach(o => o.next(value ~ Dom(name, Nil, merge, DataNothing())))
+    _observer.foreach(o => o.next(value ~ Dom(name, Nil, merge, DataNothing(), Nil)))
   }
 
   def subscribe(observer: Observer[Dom]): Unit = _observer.append(observer)

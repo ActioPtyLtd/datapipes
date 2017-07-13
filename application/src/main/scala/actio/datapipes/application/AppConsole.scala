@@ -1,5 +1,7 @@
 package actio.datapipes.application
 
+import java.util.UUID
+
 import actio.datapipes.pipescript.Pipeline._
 import actio.datapipes.pipeline.SimpleExecutor
 import actio.datapipes.pipescript.ConfigReader
@@ -35,6 +37,8 @@ object AppConsole {
 
     if(line.hasOption("p"))
       System.setProperty("script.startup.exec",line.getOptionValue('p'))
+    System.setProperty("pipelineRunId", UUID.randomUUID().toString)
+    System.setProperty("configName", configFile)
 
     println(configFile)
 

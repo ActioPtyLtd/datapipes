@@ -1,5 +1,7 @@
 package actio.common.Data
 
+import java.text.SimpleDateFormat
+
 import org.json4s._
 import org.json4s.native.JsonMethods._
 import org.json4s.Xml.{toJson, toXml}
@@ -31,7 +33,7 @@ object JsonXmlDataSet {
       case DataRecord(_, fs) => JObject(fs.map(f => (f.label, f.toJsonAST)))
       case DataNumeric(_, num) => if(num.isValidInt) JInt(num.toInt) else JDouble(num.toDouble)
       case DataBoolean(_, bool) => JBool(bool)
-      case DataDate(_, date) => JString(date.toString)
+      case DataDate(_,date) => JString(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX").format(date))
       case DataArray(_, fs) => JArray(fs.map(f => f.toJsonAST))
       case DataNothing(_) => JNull
     }
