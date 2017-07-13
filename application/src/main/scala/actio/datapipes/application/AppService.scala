@@ -1,5 +1,9 @@
 package actio.datapipes.application
 
+import java.io.InputStream
+import java.security.{KeyStore, SecureRandom}
+import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
+
 import actio.common.Data.{DataNothing, DataSet, DataString, JsonXmlDataSet}
 import actio.common.{Dom, Observer}
 import actio.datapipes.pipescript.Pipeline.PipeScript
@@ -13,6 +17,9 @@ import akka.http.scaladsl.server._
 import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.Logger
 import org.json4s.{DefaultFormats, JValue, native}
+import Directives._
+import de.heikoseeberger.akkahttpjson4s.Json4sSupport._
+import akka.http.scaladsl.{ ConnectionContext, HttpsConnectionContext }
 
 class AppService(pipeScript: PipeScript) {
   val logger = Logger("AppService")
@@ -20,8 +27,6 @@ class AppService(pipeScript: PipeScript) {
   implicit val system = ActorSystem("datapipes-server")
   implicit val materializer = ActorMaterializer()
 
-  import Directives._
-  import de.heikoseeberger.akkahttpjson4s.Json4sSupport._
   import system.dispatcher
 
   val taskListen = new TaskOperation {
@@ -62,6 +67,22 @@ class AppService(pipeScript: PipeScript) {
       }
     }
 
+
+  val port = pipeScript.settings("port").intOption.getOrElse(8080)
+  val https = pipeScript.settings("ssl").toOption.map(ssl =>
+    httpsContext(ssl("key-store-password").stringOption.get,
+      ssl("key-store").stringOption.get,
+      ssl("key-store-type").stringOption.get
+    ))
+
+  if(https.isDefined) {
+    Http().setDefaultServerHttpContext(https.get)
+    Http().bindAndHandle(route, "0.0.0.0", sys.props.get("http.port").fold(port)(_.toInt), https.get)
+  }
+  else
+    Http().bindAndHandle(route, "0.0.0.0", sys.props.get("http.port").fold(port)(_.toInt))
+
+
   def handle(ds: DataSet, name: String) = {
     val call = pipeLine(name)
       if(call.isEmpty)
@@ -71,22 +92,47 @@ class AppService(pipeScript: PipeScript) {
 
         import JsonXmlDataSet.Extend
 
-        implicit val serialization = native.Serialization
-        implicit val formats = DefaultFormats
-
         taskListen.response.headOption.map(_.success) match {
           case Some(ds) =>
             if(ds == DataNothing())
               complete(StatusCodes.OK)
-            else
-              complete(ds("status").intOption.getOrElse(200), ds.toJsonAST)
+            else {
+              ds match {
+                case DataString(_, str) =>
+                  complete(ds("status").intOption.getOrElse(200), str)
+                case _ => {
+                  implicit val serialization = native.Serialization
+                  implicit val formats = DefaultFormats
+
+                  complete(ds("status").intOption.getOrElse(200), ds.toJsonAST)
+                }
+              }
+            }
           case _ => complete(StatusCodes.InternalServerError, "")
         }
       }
   }
 
+  def httpsContext(pword: String, keyStoreName: String, keyStoreType: String): HttpsConnectionContext = {
 
-  val port = pipeScript.settings("port").intOption.getOrElse(8080)
-  Http().bindAndHandle(route, "0.0.0.0", sys.props.get("http.port").fold(port)(_.toInt))
+    val password: Array[Char] = pword.toCharArray
+
+    val ks: KeyStore = KeyStore.getInstance(keyStoreType)
+    val keystore: InputStream = getClass.getClassLoader.getResourceAsStream(keyStoreName)
+
+    require(keystore != null, "Keystore required!")
+    ks.load(keystore, password)
+
+    val keyManagerFactory: KeyManagerFactory = KeyManagerFactory.getInstance("SunX509")
+    keyManagerFactory.init(ks, password)
+
+    val tmf: TrustManagerFactory = TrustManagerFactory.getInstance("SunX509")
+    tmf.init(ks)
+
+    val sslContext: SSLContext = SSLContext.getInstance("TLS")
+    sslContext.init(keyManagerFactory.getKeyManagers, tmf.getTrustManagers, new SecureRandom)
+
+    ConnectionContext.https(sslContext)
+  }
 
 }
