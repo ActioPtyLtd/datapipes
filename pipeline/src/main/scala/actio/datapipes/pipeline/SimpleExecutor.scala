@@ -16,7 +16,7 @@ object SimpleExecutor {
 
     def start(ds: DataSet) = {
       val pipelineRunId = UUID.randomUUID().toString()
-      val startEvent = Event(pipelineRunId, "","", "START", "Execution of configuration " + ds("configName").stringOption.getOrElse("") + " has started.")
+      val startEvent = Event(pipelineRunId, "","INFO", "START", "Started DataPipes Runtime")
       next(Dom() ~ Dom("start", Nil, ds, DataNothing(), startEvent :: Nil))
     }
   }
@@ -38,7 +38,7 @@ object SimpleExecutor {
         val pipelineRunId = value.children.last.events.headOption.map(_.pipeInstanceId).getOrElse("")
 
         val domWithEvent = Dom(value.label, value.children, value.success, value.error,
-          Event(pipelineRunId,t.name,"", "INFO", s"Task ${t.name} received data", System.currentTimeMillis(), "", "size", size)
+          Event(pipelineRunId,t.name,"INFO", "PROGRESS", s"Task ${t.name} received data", System.currentTimeMillis(), "", "size", size)
           :: value.events)
 
         myTask.next(domWithEvent)

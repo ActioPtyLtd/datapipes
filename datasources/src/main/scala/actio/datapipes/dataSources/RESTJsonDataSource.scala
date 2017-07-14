@@ -70,8 +70,6 @@ class RESTJsonDataSource extends DataSource {
           uri.get, headers
         )
 
-      logger.info(s"Calling ${requestQuery.getMethod} ${requestQuery.getURI}")
-
       val element = getResponseDataSet(requestQuery)(sendRequest)
 
       element("status").stringOption.foreach(s => {
@@ -101,6 +99,8 @@ class RESTJsonDataSource extends DataSource {
     val request = verb
     request.setURI(URI.create(uri))
     headers.foreach(h => request.setHeader(h.getName, h.getValue))
+
+    logger.info(s"Calling ${request.getMethod} ${request.getURI}")
 
     if (body.isDefined) {
 

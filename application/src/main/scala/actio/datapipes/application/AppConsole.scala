@@ -37,7 +37,7 @@ object AppConsole {
 
     if(line.hasOption("p"))
       System.setProperty("script.startup.exec",line.getOptionValue('p'))
-    System.setProperty("pipelineRunId", UUID.randomUUID().toString)
+    System.setProperty("runId", UUID.randomUUID().toString)
     System.setProperty("configName", configFile)
 
     println(configFile)
