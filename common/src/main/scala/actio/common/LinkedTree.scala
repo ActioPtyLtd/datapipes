@@ -21,4 +21,8 @@ abstract class LinkedTree[D <: LinkedTree[D]] {
   def map[E](f:D => E) = elems.map(f)
 
   def flatMap[E](f:D => Seq[E]) = elems.flatMap(f)
+
+  def isEmpty: Boolean = elems.isEmpty
+
+  def isDefined: Boolean = toOption.isDefined
 }

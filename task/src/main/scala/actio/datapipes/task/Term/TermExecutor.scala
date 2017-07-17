@@ -202,7 +202,7 @@ class TermExecutor(nameSpace: String) {
     Seq(Term.Function(Seq(Term.Param(Nil, Term.Name(ta), None, None), Term.Param(Nil, Term.Name(tb), None, None)), rem))) => {
       val array = eval(s, scope)
 
-      if (array.elems.toList.length == 0)
+      if (array.elems.toList.isEmpty)
         array
       else
         array
@@ -211,17 +211,26 @@ class TermExecutor(nameSpace: String) {
           .reduceLeft((a, b) => eval(rem, scope + (ta -> a) + (tb -> b)))
     }
 
-    // convert dataset to json string
+    // convert data set to json string
     case Term.Apply(Term.Select(t, Term.Name("toJson")), Nil) => {
       import actio.common.Data.JsonXmlDataSet.Extend
       DataString(eval(t, scope).toJson)
     }
 
-    // convert dataset to xml string
+    // convert data set to xml string
     case Term.Apply(Term.Select(t, Term.Name("toXml")), Nil) => {
       import actio.common.Data.JsonXmlDataSet.Extend
       DataString(eval(t, scope).toXml)
     }
+
+    // check to see if data set is empty
+    case Term.Apply(Term.Select(t, Term.Name("isEmpty")), Nil) =>
+      DataBoolean(eval(t, scope).isEmpty)
+
+    // check if data set is nothing
+    case Term.Apply(Term.Select(t, Term.Name("isDefined")), Nil) =>
+      DataBoolean(eval(t, scope).isDefined)
+
 
     // get DataSet by name
     case Term.Apply(q, Seq(t)) => eval(q, scope)(eval(t, scope).stringOption.getOrElse(""))
