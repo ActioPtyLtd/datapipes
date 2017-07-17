@@ -1,5 +1,6 @@
 package actio.datapipes.application
 
+import java.io.File
 import java.util.UUID
 
 import actio.datapipes.pipescript.Pipeline._
@@ -10,7 +11,7 @@ import org.apache.commons.cli._
 
 object AppConsole {
 
-  val logger = Logger("AppTest")
+  lazy val logger = Logger("AppTest")
 
   def main(args: Array[String]): Unit = {
 
@@ -38,9 +39,9 @@ object AppConsole {
     if(line.hasOption("p"))
       System.setProperty("script.startup.exec",line.getOptionValue('p'))
     System.setProperty("runId", UUID.randomUUID().toString)
-    System.setProperty("configName", configFile)
+    System.setProperty("configName", new File(configFile).getName)
 
-    println(configFile)
+    logger.info(configFile)
 
     val config = ConfigReader.read(configFile)
     val pf = Builder.build(config)

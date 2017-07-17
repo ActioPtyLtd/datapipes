@@ -119,6 +119,7 @@ class RESTJsonDataSource extends DataSource {
 
     val displayString: String = Option(response._3).getOrElse("")
     if (displayString.length > 0) {
+      logger.info(s"Response size: ${displayString.length}")
       logger.info(s"Response body: '" + displayString.substring(0, Math.min(displayString.length, 500)) + "'")
     }
 
