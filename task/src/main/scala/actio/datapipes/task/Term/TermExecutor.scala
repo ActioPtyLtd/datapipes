@@ -50,6 +50,8 @@ class TermExecutor(nameSpace: String) {
     // construct literal numeric
     case Lit(int: Int) => DataNumeric(int)
 
+    case Lit(bool: Boolean) => DataBoolean(bool)
+
     // tuple for dataset construction
 
     case Term.Tuple(Term.Name(label) +: tail) => DataRecord(label,
@@ -106,7 +108,7 @@ class TermExecutor(nameSpace: String) {
 
     // Placeholder '_' will evaluate to accessing a
     // DataSet record by empty label (maybe obsolete)
-    case Term.Select(q, Term.Placeholder()) => eval(q, scope)("")
+    case Term.Select(q, Term.Placeholder()) => Operators.expand(eval(q, scope))
 
     // Astrix should be treated as iteration
     case Term.Select(Term.Select(q, Term.Name("*")), Term.Name(n)) =>

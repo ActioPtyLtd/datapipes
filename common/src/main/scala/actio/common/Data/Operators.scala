@@ -27,4 +27,9 @@ object Operators {
       }
     }
   }
+
+  def expand(ds: DataSet): DataSet = {
+    val children = ds :: ds.elems.flatMap(e => expand(e).elems).toList
+    DataRecord(children.groupBy(g => g.label).map(m => m._2.head).toList)
+  }
 }
