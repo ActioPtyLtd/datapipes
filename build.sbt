@@ -1,11 +1,7 @@
 
 name := "root"
 
-version := "1.4.1"
-
 scalaVersion := "2.11.1"
-
-publishTo := Some(Resolver.file("file", new File(Path.userHome.absolutePath+"/lib/")))
 
 resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 
