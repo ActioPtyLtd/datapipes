@@ -14,14 +14,16 @@ object DataSource {
       val behavior = config("behavior").stringOption
 
       if(behavior.contains("DBF"))
-        new DBFDataSource()
+        new LocalFileSystemDataSource("dbf")
       else if(behavior.contains("csv"))
-        new CSVDataSource()
+        new LocalFileSystemDataSource("csv")
       else if(behavior.contains("dump"))
-        new DumpDataSource()
+        new LocalFileSystemDataSource("dump")
       else
         new TextFileDataSource()
     }),
+    "txt" -> ((_: DataSet) =>
+      new LocalFileSystemDataSource("txt")),
     "rest" -> ((_: DataSet) =>
       new RESTJsonDataSource()),
     "sql" -> ((_: DataSet) =>

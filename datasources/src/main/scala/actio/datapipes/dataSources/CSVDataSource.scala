@@ -1,51 +1,24 @@
 package actio.datapipes.dataSources
 
-import java.io.FileReader
+import java.io.{InputStream, InputStreamReader}
 
-import actio.common.Data.{DataNothing, DataRecord, DataSet, DataString}
-import actio.common.{DataSource, Observer}
-import com.typesafe.scalalogging.Logger
+import actio.common.Data.{DataRecord, DataSet, DataString}
+import actio.common.Observer
 import org.apache.commons.csv.CSVFormat
 
-class CSVDataSource extends DataSource {
-  private val logger = Logger("CSVDataSource")
-
-  var _observer: Option[Observer[DataSet]] = None
-
-  def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
-
-  def execute(config: DataSet, query: DataSet): Unit = {
+object CSVDataSource  {
+  def read(stream: InputStream, observer: Observer[DataSet]): Unit = {
     import collection.JavaConverters._
 
-    val filePath = getFilePath(config, query)
-
-    logger.info(s"Reading file: ${filePath}...")
-
-    val in = new FileReader(filePath)
-    val parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(in)
+    val reader = new InputStreamReader(stream)
+    val parser = CSVFormat.RFC4180.withFirstRecordAsHeader().parse(reader)
     val it = parser.iterator()
 
     while (it.hasNext) {
       val i = it.next()
 
-      _observer.get.next(DataRecord(i.toMap.asScala.map(c => DataString(c._1, c._2)).toList))
-
+      observer.next(DataRecord(i.toMap.asScala.map(c => DataString(c._1, c._2)).toList))
     }
-
-    in.close()
-    
-    logger.info(s"Completed reading file: ${filePath}...")
-
-    _observer.get.completed()
+    reader.close()
   }
-
-  def execute(config: DataSet, query: DataSet*): Unit = {
-    if(query.isEmpty)
-      execute(config, DataNothing())
-    else
-      query.foreach(q => execute(config, q))
-  }
-
-  def getFilePath(config: DataSet, query: DataSet): String = config("directory").stringOption.map(_ + "/").getOrElse("") + query("filenameTemplate").stringOption
-    .getOrElse(config("filenameTemplate").stringOption.getOrElse(""))
 }

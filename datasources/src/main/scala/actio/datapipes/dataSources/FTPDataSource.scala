@@ -1,26 +1,24 @@
 package actio.datapipes.dataSources
+import java.io.InputStream
+
 import actio.common.Data.{DataNothing, DataSet}
 import com.typesafe.scalalogging.Logger
 import org.apache.commons.net.ftp._
 
-class FTPDataSource extends FileDataSource {
+class FTPDataSource(format: String) {
   private val logger = Logger("FTPDataSource")
 
   var ftpconn: FTPClient = _
 
-  override def init(config: DataSet): Unit = {
+  def init(config: DataSet): Unit = {
     ftpconn = connect(config)
   }
 
-  override def readAndSendFiles(config: DataSet, filePath: String): Iterable[DataSet] = {
-
+  def getStream(config: DataSet, filePath: String): InputStream = {
     val fs = ftpconn.retrieveFileStream(filePath)
-
     ftpconn.completePendingCommand()
-
     ftpconn.disconnect()
-
-    List(DataNothing())
+    fs
   }
 
   def connect(config: DataSet): FTPClient = {
@@ -65,4 +63,5 @@ class FTPDataSource extends FileDataSource {
     ftp
   }
 
+  def getFiles(config: DataSet, query: DataSet): List[String] = List[String]()
 }

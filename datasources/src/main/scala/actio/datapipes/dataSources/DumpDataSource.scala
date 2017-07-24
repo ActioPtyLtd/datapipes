@@ -1,89 +1,33 @@
 package actio.datapipes.dataSources
 
-import java.io.{File}
+import java.io.{InputStream}
 import java.nio.ByteBuffer
-import java.nio.file._
-import java.util.regex.Pattern
-
 import actio.common.Data._
-import actio.common.{DataSource, Observer}
-import com.typesafe.scalalogging.Logger
-
-import scala.collection.mutable.ListBuffer
+import actio.common.{Observer}
 import boopickle.Default._
+import org.apache.commons.io.IOUtils
 
-class DumpDataSource extends DataSource {
+object DumpDataSource {
 
-  private val logger = Logger("DumpDataSource")
-  private val _observer: ListBuffer[Observer[DataSet]] = ListBuffer()
+  def read(stream: InputStream, observer: Observer[DataSet]): Unit = {
+    val bytes = IOUtils.toByteArray(stream)
+    val bb = ByteBuffer.wrap(new Array[Byte](bytes.length))
+    bb.put(bytes)
+    bb.flip()
 
-  def subscribe(observer: Observer[DataSet]): Unit = _observer.append(observer)
+    implicit val dsPickler = compositePickler[DataSet]
 
-  def executeQuery(config: DataSet, query: DataSet): Unit = {
-    val cleanupAfterRead = !config("cleanupAfterRead").stringOption.contains("false")
-    val filePaths = getFilePath(config, query)
+    dsPickler
+      .addConcreteType[DataString]
+      .addConcreteType[DataBoolean]
+      .addConcreteType[DataNothing]
+      .addConcreteType[DataRecord]
+      .addConcreteType[DataArray]
+      .addConcreteType[DataDate]
+      .addConcreteType[DataNumeric]
 
-    logger.info(s"Cleanup files after reading: ${cleanupAfterRead}")
+    val ds = Unpickle[DataSet].fromBytes(bb)
 
-    if(filePaths.isEmpty)
-      logger.warn("No files matched regex expression.")
-    else {
-      logger.info(s"Files matching regex expression:")
-      logger.info(filePaths.mkString(","))
-    }
-
-    filePaths.foreach { filePath =>
-
-      logger.info(s"Reading file: ${filePath}...")
-
-      val path = Paths.get(filePath)
-      val bytes = Files.readAllBytes(path)
-      val bb = ByteBuffer.wrap(new Array[Byte](bytes.length))
-      bb.put(bytes)
-      bb.flip()
-
-      implicit val dsPickler = compositePickler[DataSet]
-
-      dsPickler
-        .addConcreteType[DataString]
-        .addConcreteType[DataBoolean]
-        .addConcreteType[DataNothing]
-        .addConcreteType[DataRecord]
-        .addConcreteType[DataArray]
-        .addConcreteType[DataDate]
-        .addConcreteType[DataNumeric]
-
-      val ds = Unpickle[DataSet].fromBytes(bb)
-
-      logger.info(s"Completed reading file: ${filePath}...")
-
-      if(cleanupAfterRead) {
-        logger.info(s"Deleting file: ${filePath}...")
-        Files.delete(path)
-        logger.info(s"Successfully deleted file: ${filePath}...")
-      }
-
-      _observer.foreach(s => s.next(ds))
-    }
+    ds.elems.foreach(d => observer.next(d))
   }
-
-  def execute(config: DataSet, query: DataSet*): Unit = {
-
-    executeQuery(config, query.headOption.getOrElse(DataNothing()))
-
-    _observer.foreach(o => o.completed())
-  }
-
-  def getFilePath(config: DataSet, query: DataSet): List[String] = {
-    val dir = config("directory").stringOption.getOrElse("")
-    val regex = query("regex").stringOption
-      .getOrElse(config("regex").stringOption.getOrElse(""))
-
-    new File(dir)
-      .listFiles
-      .filter(f => Pattern.compile(regex).matcher(f.getName).matches)
-      .sortBy(s => s.lastModified())
-      .map(m => m.getPath()).toList
-  }
-
 }

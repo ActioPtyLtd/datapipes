@@ -19,6 +19,7 @@ lazy val datasources = project
   .settings(libraryDependencies ++= Seq(
     "org.apache.commons" % "commons-csv" % "1.4",
     "commons-net" % "commons-net" % "3.5",
+    "commons-io" % "commons-io" % "2.4",
     "org.scala-lang.modules" %% "scala-async" % "0.9.6",
     "ch.qos.logback" % "logback-classic" % "1.1.7",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",

@@ -1,67 +1,34 @@
 package actio.datapipes.dataSources
 
-import java.io.File
+import java.io._
 import java.util.regex.Pattern
 
-import actio.common.Data.{DataNothing, DataSet}
-import actio.common.{DataSource, Observer}
-import com.typesafe.scalalogging.Logger
+import actio.common.Data.{DataSet}
+import actio.common.Observer
 
-import scala.collection.mutable.ListBuffer
+object FileDataSource {
 
-abstract class FileDataSource extends DataSource {
-  private val logger = Logger("FileDataSource")
-  private val _observer: ListBuffer[Observer[DataSet]] = ListBuffer()
-
-  def init(config: DataSet): Unit
-  def readAndSendFiles(config: DataSet, filePath: String): Iterable[DataSet]
-
-  def executeQuery(config: DataSet, query: DataSet): Unit = {
-    val cleanupAfterRead = !config("cleanupAfterRead").stringOption.contains("false")
-    val filePaths = getFilePath(config, query)
-
-    logger.info(s"Cleanup files after reading: ${cleanupAfterRead}")
-
-    if (filePaths.isEmpty)
-      logger.warn("No files matched regex expression.")
-    else {
-      logger.info(s"Files matching regex expression:")
-      logger.info(filePaths.mkString(","))
-    }
-
-    val send = filePaths.foreach{ f =>
-      val it = readAndSendFiles(config, f)
-      it.foreach { ds =>
-        _observer.foreach{ o =>
-          o.next(ds)
-        }
-      }
-    }
-
-
-  }
-
-  def execute(config: DataSet, query: DataSet*): Unit = {
-    if(query.isEmpty)
-      executeQuery(config, DataNothing())
-    else
-      query.foreach(q => executeQuery(config, q))
-
-    _observer.foreach(o => o.completed())
-  }
-
-  def subscribe(observer: Observer[DataSet]): Unit = _observer.append(observer)
-
-  def getFilePath(config: DataSet, query: DataSet): List[String] = {
-    val dir = config("directory").stringOption.getOrElse("")
+  // TODO sort by last modified
+  def getFilePaths(config: DataSet, query: DataSet, files: List[String]): List[String] = {
     val regex = query("regex").stringOption
       .getOrElse(config("regex").stringOption.getOrElse(query("filenameTemplate").stringOption
         .getOrElse(config("filenameTemplate").stringOption.getOrElse(""))))
 
-    new File(dir)
-      .listFiles
-      .filter(f => Pattern.compile(regex).matcher(f.getName).matches)
-      .sortBy(s => s.lastModified())
-      .map(m => m.getPath()).toList
+    files
+      .filter(f => Pattern.compile(regex).matcher(new File(f).getName).matches)
+      //.sortBy(s => s.lastModified())
   }
+
+  def sendData(stream: InputStream, format: String, query: DataSet, observer: Observer[DataSet]): Unit = {
+    if(format == "dump") {
+      DumpDataSource.read(stream, observer)
+    } else if(format == "csv") {
+      CSVDataSource.read(stream, observer)
+    }
+    else if(format == "dbf") {
+      DBFDataSource.read(stream, query, observer)
+    }
+  }
+
 }
+

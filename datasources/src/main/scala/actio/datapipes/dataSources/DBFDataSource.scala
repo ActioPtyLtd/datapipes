@@ -1,66 +1,32 @@
 package actio.datapipes.dataSources
 
-import java.io.{File, FileInputStream}
+import java.io.{InputStream}
 
 import actio.common.Data._
-import actio.common.{DataSource, Observer}
+import actio.common.{Observer}
 import com.linuxense.javadbf._
-import com.typesafe.scalalogging.Logger
 
-class DBFDataSource extends DataSource {
-  val logger = Logger("DBFDataSource")
+object DBFDataSource {
 
-  var _observer: Option[Observer[DataSet]] = None
-
-  def execute(config: DataSet, query: DataSet): Unit = {
-
-    val fileName = getFilePath(config, query)
-
-    logger.info(s"Reading file: ${fileName}")
-
-    val fis = new FileInputStream(new File(fileName))
-    val stream = new DBFReader(fis)
+  def read(stream: InputStream, query: DataSet, observer: Observer[DataSet]): Unit = {
+    val reader = new DBFReader(stream)
     val selectFields = query("fields").map(s => s.stringOption.getOrElse(""))
 
-    val fields = (0 until stream.getFieldCount)
-      .map(i => (stream.getField(i),i))
+    val fields = (0 until reader.getFieldCount)
+      .map(i => (reader.getField(i), i))
       .filter(f => selectFields.isEmpty || selectFields.contains(f._1.getName))
       .toList
 
-    var row = stream.nextRecord()
+    var row = reader.nextRecord()
 
     while (row != null) {
       val ds = DBFDataSource.field2ds(row, fields)
-
-      if(_observer.isDefined)
-        { _observer.get.next(ds) }
-
-      row = stream.nextRecord()
+      observer.next(ds)
+      row = reader.nextRecord()
     }
 
-    if(_observer.isDefined)
-      { _observer.get.completed() }
-
-    stream.close()
-    fis.close()
-    logger.info(s"Completed reading file: ${fileName}")
-
+    reader.close()
   }
-
-  def subscribe(observer: Observer[DataSet]): Unit = _observer = Some(observer)
-
-  def execute(config: DataSet, query: DataSet*): Unit = {
-    if(query.nonEmpty)
-      query.foreach(q => execute(config, q))
-    else
-      execute(config, DataNothing())
-  }
-
-  def getFilePath(config: DataSet, query: DataSet): String = config("directory").stringOption.map(_ + "/").getOrElse("") + query("filenameTemplate").stringOption
-    .getOrElse(config("filenameTemplate").stringOption.getOrElse(""))
-}
-
-object DBFDataSource {
 
   def field2ds(row: Array[Object], fields: List[(DBFField,Int)]): DataSet =
     DataRecord("row", fields.map(f => {
