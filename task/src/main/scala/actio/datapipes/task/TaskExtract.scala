@@ -67,16 +67,7 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
         b <- buffer
       } yield (o, b)
       send.foreach(s => s._1.next(start ~ Dom(name, List(), s._2("root"), DataNothing(), Nil)))
-    } else if(config("dataSource")("type").stringOption.contains("file") &&
-        config("dataSource")("behavior").stringOption.contains("dump")
-    ) {
-      val send = for {
-        o <- _observer
-        b <- buffer
-      } yield (o, b)
-      send.foreach(s => s._1.next(start ~ Dom(name, List(), s._2, DataNothing(), Nil)))
-    }
-    else
+    } else
       _observer.foreach(o => o.next(start ~ Dom(name, List(), DataArray(buffer.toList), DataNothing(), Nil)))
   }
 
