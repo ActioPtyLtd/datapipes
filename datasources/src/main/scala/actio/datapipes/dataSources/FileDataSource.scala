@@ -13,8 +13,8 @@ abstract class FileDataSource extends DataSource {
   private val logger = Logger("FileDataSource")
   private val _observer: ListBuffer[Observer[DataSet]] = ListBuffer()
 
-
-  def readAndSendFile(filePath: String): Iterable[DataSet]
+  def init(config: DataSet): Unit
+  def readAndSendFiles(config: DataSet, filePath: String): Iterable[DataSet]
 
   def executeQuery(config: DataSet, query: DataSet): Unit = {
     val cleanupAfterRead = !config("cleanupAfterRead").stringOption.contains("false")
@@ -29,11 +29,23 @@ abstract class FileDataSource extends DataSource {
       logger.info(filePaths.mkString(","))
     }
 
+    val send = filePaths.foreach{ f =>
+      val it = readAndSendFiles(config, f)
+      it.foreach { ds =>
+        _observer.foreach{ o =>
+          o.next(ds)
+        }
+      }
+    }
+
+
   }
 
   def execute(config: DataSet, query: DataSet*): Unit = {
-
-    executeQuery(config, query.headOption.getOrElse(DataNothing()))
+    if(query.isEmpty)
+      executeQuery(config, DataNothing())
+    else
+      query.foreach(q => executeQuery(config, q))
 
     _observer.foreach(o => o.completed())
   }
@@ -43,7 +55,8 @@ abstract class FileDataSource extends DataSource {
   def getFilePath(config: DataSet, query: DataSet): List[String] = {
     val dir = config("directory").stringOption.getOrElse("")
     val regex = query("regex").stringOption
-      .getOrElse(config("regex").stringOption.getOrElse(""))
+      .getOrElse(config("regex").stringOption.getOrElse(query("filenameTemplate").stringOption
+        .getOrElse(config("filenameTemplate").stringOption.getOrElse(""))))
 
     new File(dir)
       .listFiles
