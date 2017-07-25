@@ -22,6 +22,10 @@ object DataSource {
       else
         new TextFileDataSource()
     }),
+    "ftp" -> ((config: DataSet) => {
+      val behavior = config("behavior").stringOption
+        new FTPDataSource(behavior.getOrElse(throw new UnsupportedOperationException(s"behavior required for data source.")))
+    }),
     "txt" -> ((_: DataSet) =>
       new LocalFileSystemDataSource("txt")),
     "rest" -> ((_: DataSet) =>
