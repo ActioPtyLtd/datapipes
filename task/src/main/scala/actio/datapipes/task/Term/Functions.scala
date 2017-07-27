@@ -57,7 +57,9 @@ object Functions {
 
   def numeric(str: String): BigDecimal = numeric(str, 0)
 
-  def numeric(str: String, format: String): String = new DecimalFormat(format).format(numeric(str))
+  def numeric(str: String, format: String): String = numeric(str, format, "")
+
+  def numeric(str: String, format: String, default: String): String = Try(new DecimalFormat(format).format(numeric(str))).getOrElse(default)
 
   /* === date === */
 
