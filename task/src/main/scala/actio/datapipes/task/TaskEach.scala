@@ -1,6 +1,6 @@
 package actio.datapipes.task
 
-import actio.common.Data.{DataNothing, DataSet}
+import actio.common.Data.{DataArray, DataNothing, DataSet}
 import actio.common.{Dom, Observer, Task}
 
 import scala.collection.mutable.ListBuffer
@@ -19,13 +19,10 @@ class TaskEach(val name: String, config: DataSet) extends Task {
 
     val it = value.headOption.get.success.elems.toIterator // TODO fix
 
-    val send = for {
-      dom <- value.headOption.toList
-      element <- dom.success.elems
-      observer <- _observer
-    } yield (observer, element)
+    val element = DataArray(value.headOption.toList.flatMap(m => m.success.flatMap(s => s.elems)))
+Dom()
+    _observer.foreach(o => o.next(value ~ Dom(name, List(), element, DataNothing(), Nil)))
 
-    send.foreach(s => s._1.next(value ~ Dom(name, List(), s._2, DataNothing(), Nil)))
   }
 
   override def subscribe(observer: Observer[Dom]): Unit = {
