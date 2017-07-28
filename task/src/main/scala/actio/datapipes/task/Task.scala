@@ -30,6 +30,8 @@ object Task {
       new TaskJoin(name, config, version)),
     "fileDump" -> ((name, config, version) =>
       new TaskFileDump(name, config)),
+    "stage" -> ((name, config, _) =>
+      new TaskStage(name, config)),
     "dump" -> ((name, config, _) =>
       new TaskPrint(name, config)))
 

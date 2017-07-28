@@ -32,4 +32,14 @@ object Operators {
     val children = ds :: ds.elems.flatMap(e => expand(e).elems).toList
     DataRecord(children.groupBy(g => g.label).map(m => m._2.head).toList)
   }
+
+  def relabel(ds: DataSet, key: String): DataSet = ds match {
+    case DataString(_, v) => DataString(key, v)
+    case DataNumeric(_, v) => DataNumeric(key, v)
+    case DataDate(_, d) => DataDate(key, d)
+    case DataBoolean(_, b) => DataBoolean(key, b)
+    case DataRecord(_, f) => DataRecord(key, f)
+    case DataArray(_, a) => DataArray(key, a)
+    case _ => DataString(key, "")
+  }
 }

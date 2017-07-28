@@ -8,6 +8,7 @@ import actio.datapipes.pipeline.SimpleExecutor
 import actio.datapipes.pipescript.ConfigReader
 import com.typesafe.scalalogging.Logger
 import org.apache.commons.cli._
+import org.apache.commons.io.FilenameUtils
 
 object AppConsole {
 
@@ -39,7 +40,7 @@ object AppConsole {
     if(line.hasOption("p"))
       System.setProperty("script.startup.exec",line.getOptionValue('p'))
     System.setProperty("runId", UUID.randomUUID().toString)
-    System.setProperty("configName", new File(configFile).getName)
+    System.setProperty("configName", FilenameUtils.removeExtension(new File(configFile).getName))
 
     logger.info(configFile)
 
