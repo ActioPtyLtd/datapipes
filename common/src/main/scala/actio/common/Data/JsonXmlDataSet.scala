@@ -38,7 +38,7 @@ object JsonXmlDataSet {
       case DataNothing(_) => JNull
     }
 
-    def toJson: String = pretty(render(data.toJsonAST))
+    def toJson: String = compact(render(data.toJsonAST))
 
     def toXmlAST: Node = data match {
       case DataString(l, s) => Elem(null, l, Null, TopScope, false, Text(s))

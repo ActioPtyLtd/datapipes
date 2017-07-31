@@ -19,7 +19,7 @@ object FileDataSource {
       //.sortBy(s => s.lastModified())
   }
 
-  def sendData(stream: InputStream, format: String, query: DataSet, observer: Observer[DataSet]): Unit = {
+  def readData(stream: InputStream, format: String, query: DataSet, observer: Observer[DataSet]): Unit = {
     if(format == "dump") {
       DumpDataSource.read(stream, observer)
     } else if(format == "csv") {
@@ -27,6 +27,12 @@ object FileDataSource {
     }
     else if(format == "dbf") {
       DBFDataSource.read(stream, query, observer)
+    }
+  }
+
+  def writeData(stream: OutputStream, format: String, queries: Seq[DataSet]): Unit = {
+    if(format == "txt") {
+      TxtDataSource.write(stream, queries)
     }
   }
 

@@ -8,6 +8,7 @@ import actio.common.{Dom, Observer, Task}
 import scala.collection.mutable.ListBuffer
 import boopickle.Default._
 import com.typesafe.scalalogging.Logger
+import org.apache.commons.io.FileUtils
 
 class TaskFileDump(val name: String, config: DataSet) extends Task {
 
@@ -19,8 +20,11 @@ class TaskFileDump(val name: String, config: DataSet) extends Task {
   def error(exception: Throwable): Unit = ???
 
   def next(value: Dom): Unit = {
+    val dir = new File(config("directory").stringOption.get)
 
-    val tmpFile = File.createTempFile(config.label, ".ds", new File(config("directory").stringOption.get))
+    FileUtils.forceMkdir(dir)
+
+    val tmpFile = File.createTempFile(config.label, ".ds", dir)
     val fileOut = new FileOutputStream(tmpFile)
 
     implicit val dsPickler = compositePickler[DataSet]

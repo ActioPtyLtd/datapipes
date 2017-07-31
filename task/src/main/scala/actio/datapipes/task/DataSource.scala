@@ -19,6 +19,8 @@ object DataSource {
         new LocalFileSystemDataSource("csv")
       else if(behavior.contains("dump"))
         new LocalFileSystemDataSource("dump")
+      else if(behavior.contains("txt"))
+        new LocalFileSystemDataSource("txt")
       else
         new TextFileDataSource()
     }),

@@ -31,7 +31,7 @@ class FTPDataSource(format: String) extends DataSource {
 
     files.foreach { f =>
       val stream = connection.retrieveFileStream(f)
-      _observer.foreach(o => FileDataSource.sendData(stream, format, query, o))
+      _observer.foreach(o => FileDataSource.readData(stream, format, query, o))
 
       stream.close()
     }

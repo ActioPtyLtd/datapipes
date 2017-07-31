@@ -1,11 +1,12 @@
 package actio.datapipes.dataSources
 
-import java.io.{File, FileInputStream}
+import java.io.{File, FileInputStream, FileOutputStream}
 import java.nio.file.Files
 
 import actio.common.Data.{DataNothing, DataSet}
 import actio.common.{DataSource, Observer}
 import com.typesafe.scalalogging.Logger
+import org.apache.commons.io.FileUtils
 
 import scala.collection.mutable.ListBuffer
 
@@ -34,7 +35,7 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
     files.foreach { f =>
       val file = new File(f)
       val stream = new FileInputStream(file)
-      _observer.foreach(o => FileDataSource.sendData(stream, format, query, o))
+      _observer.foreach(o => FileDataSource.readData(stream, format, query, o))
 
       stream.close()
 
@@ -48,9 +49,32 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
     _observer.foreach(o => o.completed())
   }
 
+  def executeWrite(config: DataSet, queries: Seq[DataSet]): Unit = {
+    val dir = config("directory").stringOption.getOrElse("")
+    val filePath = dir + "/" + queries.head("regex").stringOption
+      .getOrElse(config("regex").stringOption.getOrElse(queries.head("filenameTemplate").stringOption
+        .getOrElse(config("filenameTemplate").stringOption.getOrElse(""))))
+
+    FileUtils.forceMkdir(new File(dir))
+
+    logger.info(s"Writing to file: ${filePath}...")
+
+    val stream = new FileOutputStream(filePath)
+
+    FileDataSource.writeData(stream, format, queries)
+    stream.close()
+
+    logger.info(s"Completed writing to file: ${filePath}.")
+
+    _observer.foreach(o => o.completed())
+  }
+
+
   override def execute(config: DataSet, query: DataSet*): Unit = {
     if(query.isEmpty)
       executeQuery(config, DataNothing())
+    else if(query.head.label == "create")
+      executeWrite(config, query)
     else
       query.foreach(q => executeQuery(config, q))
   }
