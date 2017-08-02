@@ -59,7 +59,7 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
 
     logger.info(s"Writing to file: ${filePath}...")
 
-    val stream = new FileOutputStream(filePath)
+    val stream = new FileOutputStream(filePath, true)
 
     FileDataSource.writeData(stream, format, queries)
     stream.close()
