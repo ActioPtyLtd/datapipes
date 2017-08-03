@@ -17,6 +17,8 @@ object DataSource {
         new LocalFileSystemDataSource("dbf")
       else if(behavior.contains("csv"))
         new LocalFileSystemDataSource("csv")
+      else if(behavior.contains("json"))
+        new LocalFileSystemDataSource("json")
       else if(behavior.contains("dump"))
         new LocalFileSystemDataSource("dump")
       else if(behavior.contains("txt"))

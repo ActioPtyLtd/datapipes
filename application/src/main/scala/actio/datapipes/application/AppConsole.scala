@@ -39,14 +39,14 @@ object AppConsole {
 
     if(line.hasOption("p"))
       System.setProperty("script.startup.exec",line.getOptionValue('p'))
-    System.setProperty("runId", UUID.randomUUID().toString)
-    System.setProperty("configName", FilenameUtils.removeExtension(new File(configFile).getName))
-    System.setProperty("pipeName", if (line.hasOption("p")) line.getOptionValue('p') else "default")
+    System.setProperty("run.id", UUID.randomUUID().toString)
+    System.setProperty("run.configName", FilenameUtils.removeExtension(new File(configFile).getName))
+    System.setProperty("run.pipeName", if (line.hasOption("p")) line.getOptionValue('p') else "default")
 
     import java.text.SimpleDateFormat
     val dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss")
 
-    System.setProperty("startDate", dateFormat.format(new java.util.Date()))
+    System.setProperty("run.startDate", dateFormat.format(new java.util.Date()))
 
     logger.info(configFile)
 

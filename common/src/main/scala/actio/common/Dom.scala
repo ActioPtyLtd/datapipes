@@ -33,5 +33,5 @@ object Dom {
 
   import scala.language.implicitConversions
 
-  implicit def dom2DataSet(dom: Dom): DataSet = DataRecord(dom.label, dom.success :: dom.children.map(d => dom2DataSet(d)))
+  implicit def dom2DataSet(dom: DomTrait): DataSet = DataRecord(dom.label, dom.success :: dom.elems.map(d => dom2DataSet(d)).toList)
 }

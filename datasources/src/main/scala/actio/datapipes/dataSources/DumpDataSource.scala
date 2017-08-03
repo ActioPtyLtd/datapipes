@@ -1,9 +1,10 @@
 package actio.datapipes.dataSources
 
-import java.io.{InputStream}
+import java.io.{InputStream, OutputStream}
 import java.nio.ByteBuffer
+
 import actio.common.Data._
-import actio.common.{Observer}
+import actio.common.Observer
 import boopickle.Default._
 import org.apache.commons.io.IOUtils
 
@@ -29,5 +30,21 @@ object DumpDataSource {
     val ds = Unpickle[DataSet].fromBytes(bb)
 
     ds.elems.foreach(d => observer.next(d))
+  }
+
+  def write(stream: OutputStream, queries: Seq[DataSet]): Unit = {
+    implicit val dsPickler = compositePickler[DataSet]
+
+    dsPickler
+      .addConcreteType[DataString]
+      .addConcreteType[DataBoolean]
+      .addConcreteType[DataNothing]
+      .addConcreteType[DataRecord]
+      .addConcreteType[DataArray]
+      .addConcreteType[DataDate]
+      .addConcreteType[DataNumeric]
+
+    val bytes = Pickle.intoBytes(queries.headOption.getOrElse(DataNothing())).array()
+    stream.write(bytes)
   }
 }

@@ -27,12 +27,18 @@ object FileDataSource {
     }
     else if(format == "dbf") {
       DBFDataSource.read(stream, query, observer)
+    } else if (format == "json") {
+      JsonDataSource.read(stream, observer)
     }
   }
 
   def writeData(stream: OutputStream, format: String, queries: Seq[DataSet]): Unit = {
     if(format == "txt") {
       TxtDataSource.write(stream, queries)
+    } else if(format == "json") {
+      JsonDataSource.write(stream, queries)
+    } else if(format == "dump") {
+      DumpDataSource.write(stream, queries)
     }
   }
 

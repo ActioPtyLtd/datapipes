@@ -1,5 +1,7 @@
 package actio.datapipes.task
 
+import java.util.UUID
+
 import actio.common.Data._
 import actio.common.{DataSource, Dom, Observer, Task}
 import actio.datapipes.dataSources.LocalFileSystemDataSource
@@ -21,6 +23,7 @@ class TaskStage(val name: String, val config: DataSet) extends Task {
   private val termExecutor = new TermExecutor(namespace)
 
   private var initialised = false
+  private var batchNum = 1
 
   def completed(): Unit = {
     _observer.foreach(o => o.completed())
@@ -30,28 +33,28 @@ class TaskStage(val name: String, val config: DataSet) extends Task {
 
   def next(value: Dom): Unit = {
 
-    // hack right now
-    if(config("dataSource")("type").stringOption.contains("file")) {
-      val t = new TaskFileDump(name, Operators.mergeLeft(config,DataRecord(config("dataSource")("directory"))))
-      t.next(value)
+    val dsInit = Operators.mergeLeft(
+      Dom.dom2DataSet(value.headOption.get),
+      DataRecord(
+        value("start").success("run"),
+        DataRecord("parameters", value("start").success.elems.collect { case s: DataString => s }.toList),
+        DataString("batchId", batchNum.toString.reverse.padTo(4, '0').reverse)
+      )
+    )
 
-      import JsonXmlDataSet._
+    val ds = if(config("dataSource")("query")("create").stringOption.isDefined)
+      TaskLookup.interpolate(termExecutor, termCreate, dsInit)
+    else
+      Operators.mergeLeft(TaskLookup.interpolate(termExecutor, termCreate, dsInit), dsInit)
 
-      runDataSource.execute(config("run_dataSource"), DataRecord("create", DataString("line", value("start").success.toJson)))
+    dataSource.execute(config("dataSource"), ds)
 
-    } else {
-      if (!initialised) {
-        val adjustedDom = Operators.mergeLeft(value,
-          DataRecord(DataString("taskName", this.name)))
-        val query = TaskLookup.interpolate(termExecutor, termInitialise, adjustedDom)
-        dataSource.execute(config("dataSource"), query)
-        initialised = true
-      }
+    batchNum = batchNum + 1
 
-      val queries = value.headOption.toList.flatMap(d => d.success.map(s => TaskLookup.interpolate(termExecutor, termCreate, DataRecord(Operators.relabel(s, "data"), DataString("taskName", this.name)))))
+    //  val queries = value.headOption.toList.flatMap(d => d.success.map(s => TaskLookup.interpolate(termExecutor, termCreate, DataRecord(Operators.relabel(s, "data"), DataString("taskName", this.name)))))
 
-      dataSource.execute(config("dataSource"), queries: _*)
-    }
+    //  dataSource.execute(config("dataSource"), queries: _*)
+    //}
   }
 
   def subscribe(observer: Observer[Dom]): Unit = {
