@@ -12,8 +12,12 @@ class TaskTerm(name: String, config: DataSet, version: String) extends TaskTrans
   val executor = new TermExecutor(config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Legacy.Functions"))
 
   def transform(dom: Dom): Seq[DataSet] = {
-    if (version.contains("v2"))
-      List(dom.headOption.map(d => DataArray(d.success.map(r => executor.eval(r, term)).toList)).getOrElse(DataNothing()))
+    if (version.contains("v2")) {
+      if(config("behavior").stringOption.contains("batch"))
+        dom.headOption.map(d => List(executor.eval(d.success, term))).getOrElse(List(DataNothing()))
+      else
+        List(dom.headOption.map(d => DataArray(d.success.map(r => executor.eval(r, term)).toList)).getOrElse(DataNothing()))
+    }
     else
       executor.eval(dom.headOption.map(_.success).getOrElse(DataNothing()), term).elems
   }

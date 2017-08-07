@@ -26,6 +26,9 @@ class TaskLoad(val name: String, val config: DataSet, version: String) extends T
     creates.foreach(c =>
       if(c.nonEmpty)
         dataSource.execute(config("dataSource"), c: _*))
+
+    _observer.foreach(o => { o.next(value); o.completed() })
+
   }
 
   def subscribe(observer: Observer[Dom]): Unit = {
