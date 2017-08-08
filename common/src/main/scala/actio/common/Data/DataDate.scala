@@ -13,6 +13,8 @@ object DataDate {
 
   def apply(date: java.util.Date): DataDate = DataDate(label, date.getTime)
 
+  def apply(date: Long): DataDate = DataDate(label, date)
+
   def apply(label: String, date: java.util.Date): DataDate =
     DataDate(label, date.getTime)
 }

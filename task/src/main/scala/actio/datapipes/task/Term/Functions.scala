@@ -4,7 +4,7 @@ import java.lang._
 import java.text.{DecimalFormat, SimpleDateFormat}
 import java.util.{Calendar, Date}
 
-import actio.common.Data.{DataArray, DataRecord, DataSet, DataString}
+import actio.common.Data._
 import org.apache.commons.csv.CSVFormat
 
 import scala.util.Try
@@ -71,6 +71,15 @@ object Functions {
   /* === date === */
 
   def date(date: Date, format: String): String = new SimpleDateFormat(format).format(date)
+
+  def dateParse(dateStr: String, formatIn: String, default: String): Date = {
+    try {
+      new SimpleDateFormat(formatIn).parse(dateStr)
+    }
+    catch {
+      case e: Exception => new SimpleDateFormat(formatIn).parse(default)
+    }
+  }
 
   def now(): Date = new Date()
 

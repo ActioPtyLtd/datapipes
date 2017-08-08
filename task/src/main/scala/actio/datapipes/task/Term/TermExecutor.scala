@@ -387,6 +387,7 @@ class TermExecutor(nameSpace: String) {
         case DataNumeric(_, v) => DataNumeric(key, v)
         case DataRecord(_,v) => DataRecord(key, v)
         case DataArray(_,v) => DataArray(key, v)
+        case DataDate(_,v) => DataDate(key, v)
         case _ => DataString(key, "")
       }
     }
