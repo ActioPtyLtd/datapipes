@@ -40,11 +40,17 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
       val insertRow = (r: DataSet) => "(" +
         cols.map(c => TaskMergeLoad.dataSetToInsertValue(r(c.label))).mkString(",") + ")"
 
-      val insertDest = s"insert into ${entity}(" +
+      val insertDest = s"insert into $entity(" +
         cols.map("\"" + _.label + "\"").mkString(",") + ")" +
-        "select " + cols.map("\"" + _.label + "\"").mkString(",") + s" from temp_$tempname where $key not in (select $key from $entity);"
+        "select " + cols.map("\"" + _.label + "\"").mkString(",") + s" from temp_$tempname where $key not in (select $key from $entity)"
 
-      val query = s"$createTempTable;$insertHeader values ${rows.map(insertRow).mkString(",")};$insertDest"
+      val updateDest = s"update $entity as td set " +
+        cols.map(c => "\"" + c.label + "\" = ts.\"" + c.label + "\"").mkString(",") +
+        s"from temp_$tempname ts where td.$key = ts.$key AND (" +
+        cols.map(c => "td.\"" + c.label + "\" <> ts.\"" + c.label + "\"").mkString(" OR ") + ")"
+
+
+      val query = s"$createTempTable;$insertHeader values ${rows.map(insertRow).mkString(",")};$insertDest;$updateDest"
 
 
       dataSource.execute(config("dataSource"), DataString("create", query))

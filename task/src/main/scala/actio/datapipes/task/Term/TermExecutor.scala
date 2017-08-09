@@ -108,7 +108,7 @@ class TermExecutor(nameSpace: String) {
 
     // Placeholder '_' will evaluate to accessing a
     // DataSet record by empty label (maybe obsolete)
-    case Term.Select(q, Term.Placeholder()) => Operators.expand(eval(q, scope))
+    case Term.Select(q, Term.Placeholder()) => Operators.flatten(eval(q, scope))
 
     // Astrix should be treated as iteration
     case Term.Select(Term.Select(q, Term.Name("*")), Term.Name(n)) =>
