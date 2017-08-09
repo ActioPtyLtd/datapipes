@@ -32,6 +32,8 @@ object Task {
       new TaskFileDump(name, config)),
     "stage_load" -> ((name, config, _) =>
       new TaskStage(name, config)),
+    "merge_load" -> ((name, config, _) =>
+      new TaskMergeLoad(name, config)),
     "dump" -> ((name, config, _) =>
       new TaskPrint(name, config)))
 

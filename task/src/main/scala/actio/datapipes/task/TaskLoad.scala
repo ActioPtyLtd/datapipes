@@ -14,7 +14,9 @@ class TaskLoad(val name: String, val config: DataSet, version: String) extends T
   private val namespace: String = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Legacy.Functions")
   private val termExecutor = new TermExecutor(namespace)
 
-  def completed(): Unit = { Unit }
+  def completed(): Unit = {
+    _observer.foreach(o => o.completed())
+  }
 
   def error(exception: Throwable): Unit = ???
 
@@ -27,8 +29,7 @@ class TaskLoad(val name: String, val config: DataSet, version: String) extends T
       if(c.nonEmpty)
         dataSource.execute(config("dataSource"), c: _*))
 
-    _observer.foreach(o => { o.next(value); o.completed() })
-
+    _observer.foreach(o => o.next(value))
   }
 
   def subscribe(observer: Observer[Dom]): Unit = {
