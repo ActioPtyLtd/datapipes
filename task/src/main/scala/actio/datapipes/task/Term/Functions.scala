@@ -94,4 +94,25 @@ object Functions {
 
   def sq(str: String): String = str.replace("'", "''")
 
+  def help(ds: DataSet): DataSet = {
+    println("===BEGIN===")
+    help(ds, "this")
+    println("===END===")
+    DataNothing()
+  }
+
+  def help(ds: DataSet, str: String): Unit = {
+    import JsonXmlDataSet._
+    ds match {
+      case DataRecord(_, rs) => rs.foreach(r => help(r, str + "." + r.label))
+      case DataArray(_, as) => as.zipWithIndex.foreach(a => help(a._1, str + s"(${a._2})"))
+      case DataNumeric(_,_) => println(str + ": " + ds.print)
+      case DataString(_,_) => println(str + ": " + ds.print)
+      case DataBoolean(_,_) => println(str + ": " + ds.print)
+      case DataDate(_,_) => println(str + ": " + ds.print)
+      case DataNothing(_) => println(str + ": " + ds.print)
+    }
+  }
+
+
 }
