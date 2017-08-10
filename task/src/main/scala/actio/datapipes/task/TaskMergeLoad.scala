@@ -24,6 +24,7 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
 
     val entity = config("entity").stringOption.getOrElse("")
     val key = config("key").stringOption.getOrElse("")
+    val doUpdate = !config("update").stringOption.contains("false")
 
     val rows = value.headOption.map(d => d.success.elems).getOrElse(Seq(DataNothing()))
 
@@ -42,15 +43,18 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
 
       val insertDest = s"insert into $entity(" +
         cols.map("\"" + _.label + "\"").mkString(",") + ")" +
-        "select " + cols.map("\"" + _.label + "\"").mkString(",") + s" from temp_$tempname where $key not in (select $key from $entity)"
+        "select " + cols.map("\"" + _.label + "\"").mkString(",") + s" from temp_$tempname where not exists (select 1 from $entity where $entity.$key = temp_$tempname.$key)"
 
-      val updateDest = s"update $entity as td set " +
-        cols.map(c => "\"" + c.label + "\" = ts.\"" + c.label + "\"").mkString(",") +
-        s"from temp_$tempname ts where td.$key = ts.$key AND (" +
-        cols.map(c => "td.\"" + c.label + "\" <> ts.\"" + c.label + "\"").mkString(" OR ") + ")"
+      val updateDest =
+        if(doUpdate)
+          s"update $entity as td set " +
+            cols.map(c => "\"" + c.label + "\" = ts.\"" + c.label + "\"").mkString(",") +
+            s"from temp_$tempname ts where td.$key = ts.$key AND (" +
+            cols.map(c => "td.\"" + c.label + "\" <> ts.\"" + c.label + "\"").mkString(" OR ") + ")"
+        else ""
 
 
-      val query = s"$createTempTable;$insertHeader values ${rows.map(insertRow).mkString(",")};$insertDest;$updateDest"
+      val query = s"$createTempTable;$insertHeader values ${rows.map(insertRow).mkString(",")};$insertDest;${updateDest}"
 
 
       dataSource.execute(config("dataSource"), DataString("create", query))
