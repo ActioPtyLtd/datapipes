@@ -25,6 +25,12 @@ object Functions {
     else
       ""
 
+  def substring(str: String, start: Int, finish: Int): String =
+    if(finish >= str.length)
+      str.substring(start, str.length - 1)
+    else
+      str.substring(start,finish)
+
   def contains(str: String, targetStr: String): Boolean =
     if (str == null || targetStr == null)
       false

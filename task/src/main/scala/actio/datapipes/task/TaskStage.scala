@@ -42,6 +42,11 @@ class TaskStage(val name: String, val config: DataSet) extends Task {
       )
     )
 
+    if(!initialised && config("dataSource")("query")("initialise").stringOption.isDefined) {
+      dataSource.execute(config("dataSource"),TaskLookup.interpolate(termExecutor, termInitialise, dsInit))
+      initialised = true
+    }
+
     val ds = if(config("dataSource")("query")("create").stringOption.isDefined)
       TaskLookup.interpolate(termExecutor, termCreate, dsInit)
     else

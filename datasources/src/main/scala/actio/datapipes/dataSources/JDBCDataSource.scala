@@ -33,12 +33,13 @@ class JDBCDataSource extends DataSource {
 
       val metaData = rs.getMetaData
       val ordinals = 1 to metaData.getColumnCount
-      val header = ordinals.map(o => (metaData.getColumnType(o), metaData.getColumnName(o))).toList
+      val cols = JDBCDataSource.uniqueNames(ordinals.map(metaData.getColumnName).toList, Nil)
+      val header = (ordinals zip cols).map(o => (o._1, metaData.getColumnType(o._1), o._2)).toList
 
       while (rs.next()) {
         _observer.foreach(o => o.next(DataRecord("row", header.map(v =>
-          if(rs.getObject(v._2) == null) DataNothing(v._2) else
-          JDBCDataSource.typeMap.get(v._1).map(m => m(v._2, rs)).getOrElse(DataString(v._2, rs.getObject(v._2).toString))))))
+          if(rs.getObject(v._1) == null) DataNothing(v._3) else
+          JDBCDataSource.typeMap.get(v._2).map(m => m(v._3, v._1, rs)).getOrElse(DataString(v._3, rs.getObject(v._1).toString))))))
       }
     } else {
       stmt.execute()
@@ -62,17 +63,26 @@ object JDBCDataSource {
   lazy val typeMap = List(
 
     (List(Types.BIGINT, Types.DECIMAL, Types.DOUBLE, Types.FLOAT, Types.INTEGER, Types.NUMERIC),
-      (name: String, rs: ResultSet) =>
+      (name: String, index: Int, rs: ResultSet) =>
         DataNumeric(name,
-          BigDecimal(BigDecimal(rs.getObject(name).toString)
+          BigDecimal(BigDecimal(rs.getObject(index).toString)
             .underlying()
             .stripTrailingZeros()
             .toPlainString))),
 
     (List(Types.DATE, Types.TIME, Types.TIMESTAMP),
-      (name: String, rs: ResultSet) =>
-        DataDate(name, rs.getDate(name)))
+      (name: String, index: Int, rs: ResultSet) =>
+        DataDate(name, rs.getDate(index)))
 
   ).flatMap(t => t._1.map(s => s -> t._2)).toMap
+
+  def uniqueNames(cols: List[String], result: List[(String,String)]): List[String] = cols match {
+    case Nil => result.map(m => m._1 + m._2).reverse
+    case c::cs => {
+      val cnt = result.count(_._1 == c)
+
+      uniqueNames(cs, (c, if (cnt == 0) "" else cnt.toString) :: result)
+    }
+  }
 
 }
