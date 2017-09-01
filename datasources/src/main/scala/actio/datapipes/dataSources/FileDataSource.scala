@@ -5,6 +5,7 @@ import java.util.regex.Pattern
 
 import actio.common.Data.{DataSet}
 import actio.common.Observer
+import java.util.zip.GZIPOutputStream
 
 object FileDataSource {
 
@@ -32,13 +33,20 @@ object FileDataSource {
     }
   }
 
-  def writeData(stream: OutputStream, format: String, queries: Seq[DataSet]): Unit = {
+  def writeData(stream: OutputStream, format: String, compression: Option[String], queries: Seq[DataSet]): Unit = {
+
+    val writeStream =
+      if (compression.isDefined)
+        new GZIPOutputStream(stream)
+      else
+        stream
+
     if(format == "txt") {
-      TxtDataSource.write(stream, queries)
+      TxtDataSource.write(writeStream, queries)
     } else if(format == "json") {
-      JsonDataSource.write(stream, queries)
+      JsonDataSource.write(writeStream, queries)
     } else if(format == "dump") {
-      DumpDataSource.write(stream, queries)
+      DumpDataSource.write(writeStream, queries)
     }
   }
 

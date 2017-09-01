@@ -61,7 +61,7 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
 
     val stream = new FileOutputStream(filePath, true)
 
-    FileDataSource.writeData(stream, format, queries)
+    FileDataSource.writeData(stream, format, config("compression").stringOption, queries)
     stream.close()
 
     logger.info(s"Completed writing to file: ${filePath}.")

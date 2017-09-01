@@ -34,6 +34,8 @@ object DataSource {
       new LocalFileSystemDataSource("txt")),
     "rest" -> ((_: DataSet) =>
       new RESTJsonDataSource()),
+    "s3" -> ((_: DataSet) =>
+      new AWSS3DataSource()),
     "sql" -> ((_: DataSet) =>
       new JDBCDataSource())
   )

@@ -26,7 +26,7 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
     val key = config("key").stringOption.getOrElse("")
     val doUpdate = !config("update").stringOption.contains("false") && key!=""
 
-    val rows = value.headOption.map(d => d.success.elems).getOrElse(Seq(DataNothing()))
+    val rows = value.headOption.map(d => d.success.elems.groupBy(g => g(key).stringOption.getOrElse("")).map(_._2.head)).getOrElse(Seq(DataNothing()))
 
     if(rows.nonEmpty) {
 
@@ -76,6 +76,7 @@ object TaskMergeLoad {
     case DataNumeric(_,num) => num.toString
     case DataBoolean(_,bool) => bool.toString
     case DataDate(_,date) => "'" + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(date)) + "'"
+    case DataNothing(_) => "null"
     case str => "'" + Functions.sq(str.stringOption.getOrElse("")) + "'"
   }
   def getColumnType(ds: DataSet): String = ds match {

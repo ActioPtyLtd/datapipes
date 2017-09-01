@@ -26,6 +26,7 @@ lazy val datasources = project
     "org.postgresql" % "postgresql" % "42.1.1",
     "org.apache.httpcomponents" % "httpclient" % "4.5.2",
     "me.chrons" %% "boopickle" % "1.2.5",
+    "com.amazonaws" % "aws-java-sdk-s3" % "1.11.184",
     "com.github.albfernandez" % "javadbf" % "1.2.1"))
   .dependsOn(pipescript)
 
