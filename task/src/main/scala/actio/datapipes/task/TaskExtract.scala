@@ -66,9 +66,9 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
         o <- _observer
         b <- buffer
       } yield (o, b)
-      send.foreach(s => s._1.next(start ~ Dom(name, List(), s._2("root"), DataNothing(), Nil)))
+      send.foreach(s => s._1.next(Dom(name, List(), s._2("root"), DataNothing(), Nil)))
     } else
-      _observer.foreach(o => o.next(start ~ Dom(name, List(), DataArray(buffer.toList), DataNothing(), Nil)))
+      _observer.foreach(o => o.next(Dom(name, List(), DataArray(buffer.toList), DataNothing(), Nil)))
   }
 
   def subscribe(observer: Observer[Dom]): Unit = {

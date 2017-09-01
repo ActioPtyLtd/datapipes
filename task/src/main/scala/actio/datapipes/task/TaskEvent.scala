@@ -25,7 +25,7 @@ class TaskEvent(val name: String) extends Task {
       o <- _observer
     } yield (e,o)
 
-    send.foreach(s => s._2.next(Dom() ~ Dom("events", Nil, DataArray(s._1.toList), DataNothing(), Nil)))
+    send.foreach(s => s._2.next(Dom("events", Nil, DataArray(s._1.toList), DataNothing(), Nil)))
 
     sendEvents.clear()
 

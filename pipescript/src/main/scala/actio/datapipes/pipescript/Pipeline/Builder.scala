@@ -65,6 +65,16 @@ object Builder {
     return buf.toList
   }
 
+  def getSelect(str: String, operations: Map[String, Operation]): Operation = {
+    import scala.meta._
+    val t = str.parse[Term].get
+
+    t match {
+      case Term.Name(name) => operations(name.replace(" ", ""))
+      case Term.Apply(Term.Name(name), args) => Select(operations(name.replace(" ", "")),args.head.toString())
+    }
+  }
+
   @tailrec
   def getPipes(operations: Map[String, Operation], pipes: List[DataSet]): List[Operation] =
     pipes match {
@@ -74,7 +84,7 @@ object Builder {
           .stringOption
           .map(s => s.split("\\|")
             .map(m =>
-              operations(m.replace(" ", "")))
+              getSelect(m, operations))
             .reduceLeft((a, b) => Pipe(h.label, a, b)))
 
         val p2 = p1
@@ -82,15 +92,6 @@ object Builder {
 
         val pipe = p2
           .getOrElse(operations)
-//
-//        val pipe = h("pipe")
-//          .stringOption
-//          .map(s => s.split("\\|")
-//            .map(m =>
-//              operations(m.replace(" ", "")))
-//            .reduceLeft((a, b) => Pipe(h.label, a, b)))
-//          .map(p => operations + (h.label -> p))
-//          .getOrElse(operations)
 
         getPipes(pipe, t)
       }

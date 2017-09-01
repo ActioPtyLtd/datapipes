@@ -8,6 +8,8 @@ import actio.datapipes.pipescript.Pipeline.Operation
 import actio.datapipes.task.Task
 import com.typesafe.scalalogging.Logger
 
+import scala.collection.mutable.ListBuffer
+
 object SimpleExecutor {
 
   trait TaskOperation extends Observable[Dom] with Observer[Dom] {
@@ -25,6 +27,26 @@ object SimpleExecutor {
 
   def getRunnable(operation: Operation): TaskOperation = operation match {
 
+    case actio.datapipes.pipescript.Pipeline.Select(left, select, _) => new TaskOperation {
+
+      val t = getRunnable(left)
+
+      override def next(value: Dom): Unit = {
+        val sel = value.children.find(f => f.label == select).get
+
+        // mask other doms
+        t.next(
+            Dom(value.label, List(sel), value.success, value.error, value.events)
+          )
+      }
+
+      override def completed(): Unit = t.completed()
+
+      override def error(exception: Throwable): Unit = t.error(exception)
+
+      override def subscribe(observer: Observer[Dom]): Unit = t.subscribe(observer)
+    }
+
     case t: actio.datapipes.pipescript.Pipeline.Task => new TaskOperation {
 
       val myTask = Task(t.name, t.taskType, t.config)
@@ -35,13 +57,14 @@ object SimpleExecutor {
         logger.debug(s"=== Task ${t.name} received Dom with last successful DataSet of size ($size) ===")
 
         // add an event
-        val pipelineRunId = value.children.last.events.headOption.map(_.pipeInstanceId).getOrElse("")
+        //val pipelineRunId = value.children.last.events.headOption.map(_.pipeInstanceId).getOrElse("")
 
-        val domWithEvent = Dom(value.label, value.children, value.success, value.error,
-          Event(pipelineRunId,t.name,"INFO", "PROGRESS", s"Task ${t.name} received data", System.currentTimeMillis(), "", "size", size)
-          :: value.events)
+        //val domWithEvent = Dom(value.label, value.children, value.success, value.error,
+        //  Event(pipelineRunId,t.name,"INFO", "PROGRESS", s"Task ${t.name} received data", System.currentTimeMillis(), "", "size", size)
+        //  :: value.events)
 
-        myTask.next(domWithEvent)
+        //myTask.next(domWithEvent)
+        myTask.next(value)
       }
 
       def completed(): Unit = { logger.info(s"=== Operation ${operation.name} completed ==="); myTask.completed() }
@@ -56,9 +79,28 @@ object SimpleExecutor {
       val l = getRunnable(p.left)
       val r = getRunnable(p.right)
 
-      l.subscribe(r)
+      val i = new TaskOperation {
+        val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
+        var parentDom: Dom = _
+
+        def setNewDom(newDom: Dom) = parentDom = newDom
+
+        override def next(value: Dom): Unit = _observer.foreach(o =>
+          o.next(parentDom ~ value)
+        )
+
+        override def completed(): Unit = _observer.foreach(o => o.completed())
+
+        override def error(exception: Throwable): Unit = _observer.foreach(o => o.error(exception))
+
+        override def subscribe(observer: Observer[Dom]): Unit = _observer.append(observer)
+      }
+
+      l.subscribe(i)
+      i.subscribe(r)
 
       def next(value: Dom): Unit = {
+        i.setNewDom(value)
         l.next(value)
       }
 
