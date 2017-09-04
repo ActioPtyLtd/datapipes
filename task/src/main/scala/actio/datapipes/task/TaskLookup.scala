@@ -48,20 +48,19 @@ class TaskLookup(name: String, config: DataSet, version: String) extends Task {
 
     dataSource.subscribe(localObserver)
 
-    value.headOption.foreach { h =>
-      h.success.elems.foreach { e =>
-        dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, terms, e))
-      }
+    value.success.elems.foreach { e =>
+      dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, terms, e))
     }
 
+
     // TODO: check old code for merge logic
-    val merge = value.headOption.map(h => DataArray((h.success.elems zip ret).map(z =>
+    val merge = DataArray((value.success.elems zip ret).map(z =>
 
       if(version == "v1")
         DataRecord(DataArray(name,z._2.elems.toList) :: z._1.elems.toList)
       else
         Operators.mergeLeft(z._1, z._2)
-    ).toList)).getOrElse(DataNothing())
+    ).toList)
 
     _observer.foreach(o => o.next(Dom(name, Nil, merge, DataNothing(), Nil)))
   }

@@ -21,13 +21,12 @@ class TaskLoad(val name: String, val config: DataSet, version: String) extends T
   def error(exception: Throwable): Unit = ???
 
   def next(value: Dom): Unit = {
-    val creates = value.headOption.map(h => h.success.map(i => if (config("dataSource")("query")("create").toOption.isDefined)
+    val creates = value.success.map(i => if (config("dataSource")("query")("create").toOption.isDefined)
       TaskLookup.interpolate(termExecutor, terms, i)
-    else i))
+    else i)
 
-    creates.foreach(c =>
-      if(c.nonEmpty)
-        dataSource.execute(config("dataSource"), c: _*))
+      if(creates.nonEmpty)
+        dataSource.execute(config("dataSource"), creates: _*)
 
     _observer.foreach(o => o.next(value))
   }

@@ -14,12 +14,12 @@ class TaskTerm(name: String, config: DataSet, version: String) extends TaskTrans
   def transform(dom: Dom): Seq[DataSet] = {
     if (version.contains("v2")) {
       if(config("behavior").stringOption.contains("batch"))
-        dom.headOption.map(d => List(executor.eval(d.success, term))).getOrElse(List(DataNothing()))
+        List(executor.eval(dom.success, term))
       else
-        List(dom.headOption.map(d => DataArray(d.success.map(r => executor.eval(r, term)).toList)).getOrElse(DataNothing()))
+        List(DataArray(dom.success.map(r => executor.eval(r, term)).toList))
     }
     else
-      executor.eval(dom.headOption.map(_.success).getOrElse(DataNothing()), term).elems
+      executor.eval(dom.success, term).elems
   }
 
 }

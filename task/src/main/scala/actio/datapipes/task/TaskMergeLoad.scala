@@ -26,7 +26,7 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
     val key = config("key").stringOption.getOrElse("")
     val doUpdate = !config("update").stringOption.contains("false") && key!=""
 
-    val rows = value.headOption.map(d => d.success.elems.groupBy(g => g(key).stringOption.getOrElse("")).map(_._2.head)).getOrElse(Seq(DataNothing()))
+    val rows = value.success.elems.groupBy(g => g(key).stringOption.getOrElse("")).map(_._2.head)
 
     if(rows.nonEmpty) {
 

@@ -13,10 +13,7 @@ class TaskTemplate(name: String, val config: DataSet, version: String) extends T
   val templates: Seq[(String, Parsed[scala.meta.Term])] = config("templates").map(m => m.label -> m.stringOption.map(i => executor.interpolate(i)).getOrElse("").parse[Term])
 
   def transform(dom: Dom): Seq[DataSet] =
-    dom
-      .headOption
-      .toList
-      .map(h => DataArray(h.success.map(s => {
+    List(DataArray(dom.success.map(s => {
         if (version.contains("v2"))
           Operators.mergeLeft(
             s,

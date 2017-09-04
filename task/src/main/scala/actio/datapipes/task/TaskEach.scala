@@ -17,9 +17,7 @@ class TaskEach(val name: String, config: DataSet) extends Task {
 
   def next(value: Dom): Unit = {
 
-    val it = value.headOption.get.success.elems.toIterator // TODO fix
-
-    val element = DataArray(value.headOption.toList.flatMap(m => m.success.flatMap(s => s.elems)))
+    val element = DataArray(value.success.flatMap(s => s.elems).toList)
 Dom()
     _observer.foreach(o => o.next(Dom(name, List(), element, DataNothing(), Nil)))
 

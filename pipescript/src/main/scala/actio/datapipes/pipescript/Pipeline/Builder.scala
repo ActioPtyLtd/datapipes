@@ -26,7 +26,7 @@ object Builder {
       .map(t => t.label -> Task(t.label, t(taskType).stringOption.getOrElse(""), Operators.mergeLeft(t, ds(script)(settings))))
       .toMap
 
-    val pipes = ds(script)(pipelines).elems.toList.sortBy(s => s.label)// important to reverse so it can find pipe names
+    val pipes = ds(script)(pipelines).elems.toList.sortBy(s => s.label) // important to reverse so it can find pipe names
     val newpipes = topologySort(pipes)
 
     PipeScript(ds(script)(settings), tasks.values.toList, getPipes(tasks, newpipes), defaultPipeName)
@@ -66,14 +66,20 @@ object Builder {
     return buf.toList
   }
 
-  def getPipeOperation(term: Term, pipeName: String, operations: Map[String, Operation], prevOpName: String): (Operation,String) = term match {
-    case Term.ApplyInfix(lTerm: Term, Term.Name("|") , Nil, Seq(rTerm: Term)) => {
+  def getPipeOperation(term: Term, pipeName: String, operations: Map[String, Operation], prevOpName: String): (Operation, String) = term match {
+    case Term.ApplyInfix(lTerm: Term, Term.Name("|"), Nil, Seq(rTerm: Term)) => {
       val left = getPipeOperation(lTerm, pipeName, operations, prevOpName)
       val right = getPipeOperation(rTerm, pipeName, operations, left._2)
-      (Pipe(pipeName,left._1,right._1),right._2)
+      (Pipe(pipeName, left._1, right._1), right._2)
     }
-    case Term.Apply(Term.Name(name), args) => (Select(operations(name.replace(" ", "")),args.head.toString()),name)
-    case Term.Name(name) => (Select(operations(name.replace(" ", "")), prevOpName),name)
+    case Term.Apply(Term.Name(name), args) => (Select(operations(name.replace(" ", "")), args.head.toString()), name)
+    case Term.Name(name) => ({
+      val task = operations(name.replace(" ", ""))
+      task match {
+        case Task(_, "stage_load", _) => task   // if the task is a stage task, don't select, i.e. send root Dom
+        case Task(_, "event", _) => task        // if the task is a event task, don't select, i.e. send root Dom
+        case _ => Select(task, prevOpName)      // in all other cases get specific Dom
+      }}, name)
   }
 
   def getPipeOperation(pipeName: String, str: String, operations: Map[String, Operation]): Operation = {
@@ -87,10 +93,10 @@ object Builder {
   def getPipes(operations: Map[String, Operation], pipes: List[DataSet]): List[Operation] =
     pipes match {
       case Nil => operations.values.toList
-      case (h::t) => {
+      case (h :: t) => {
         val p1 = h("pipe")
           .stringOption
-          .map(s => getPipeOperation(h.label, s, operations) )
+          .map(s => getPipeOperation(h.label, s, operations))
 
         val p2 = p1
           .map(p => operations + (h.label -> p))

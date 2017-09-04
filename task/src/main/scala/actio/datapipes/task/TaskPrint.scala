@@ -27,7 +27,7 @@ class TaskPrint(val name: String, config: DataSet) extends Task {
 
   def next(value: Dom): Unit = {
 
-    logger.info(value.headOption.map(s => formatLookup(format)(s.success)).getOrElse(""))
+    logger.info(formatLookup(format)(value.success))
 
     _observer.foreach(o => o.next(value))
   }

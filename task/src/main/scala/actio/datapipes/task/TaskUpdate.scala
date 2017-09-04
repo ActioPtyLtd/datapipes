@@ -40,7 +40,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
     if (!initialised) {
 
       val query = TaskLookup.interpolate(termExecutor, termRead,
-        value.headOption.map(m => m.success).getOrElse(DataNothing()))
+        value.success)
 
       val src = DataSource(config("dataSource"))
 
@@ -68,17 +68,14 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
 
     }
 
-    val incoming = value
-      .headOption
-      .toList
-      .flatMap(_.success.map(m => (
+    val incoming = value.success.map(m => (
         m,
         termExecutor.eval(m, keyLeftTerm).stringOption.getOrElse(""),
         termExecutor.eval(m, changeLeftTerm).stringOption.getOrElse("")
       )).toList
         .groupBy(g => g._2)
         .map(f => f._2.head)
-        .toList)
+        .toList
 
     val inserts = incoming.filter(d => Cache.dim.get(d._2).isEmpty)
     val updates = incoming.filter(d => Cache.dim.get(d._2).isDefined)
@@ -89,7 +86,6 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
 
       val query = inserts
         .map(i => TaskLookup.interpolate(termExecutor, termCreate, i._1))
-        .toSeq
 
       src.execute(config("dataSource"), query: _*)
 
@@ -101,7 +97,6 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
 
       val query = updates
         .map(i => TaskLookup.interpolate(termExecutor, termUpdate, i._1))
-        .toSeq
 
       src.execute(config("dataSource"), query: _*)
 

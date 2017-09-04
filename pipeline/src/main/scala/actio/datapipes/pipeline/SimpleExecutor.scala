@@ -34,12 +34,9 @@ object SimpleExecutor {
       override def next(value: Dom): Unit = {
         logger.debug(s"=== Task ${left.name} to receive Dom $select ===")
 
-        val sel = value.children.find(f => f.label == select).get
+        val sel = value.children.find(f => f.label == select).getOrElse(throw new Exception(s"Dom with name $select does not exist"))
 
-        // mask other doms
-        t.next(
-            Dom(value.label, List(sel), value.success, value.error, value.events)
-          )
+        t.next(sel)
       }
 
       override def completed(): Unit = t.completed()
@@ -54,7 +51,7 @@ object SimpleExecutor {
       val myTask = Task(t.name, t.taskType, t.config)
 
       def next(value: Dom): Unit = {
-        val size = value.headOption.map(_.success.elems.size).getOrElse(0)
+        val size = value.success.elems.size
 
         logger.debug(s"=== Task ${t.name} received Dom with last successful DataSet of size ($size) ===")
 

@@ -52,7 +52,7 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
 
     if (config("dataSource")("query")("read").toOption.isDefined)
       dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, termRead,
-        start.headOption.map(m => m.success).getOrElse(DataNothing())))
+        start.success))
     else
       dataSource.execute(config("dataSource"))
   }

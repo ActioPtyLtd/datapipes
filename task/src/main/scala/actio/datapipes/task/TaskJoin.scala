@@ -32,7 +32,7 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
     if (!initialised) {
 
       val query = termRead.map(r => TaskLookup.interpolate(termExecutor, r,
-        value.headOption.map(m => m.success).getOrElse(DataNothing()))).getOrElse(DataNothing())
+        value.success)).getOrElse(DataNothing())
 
       val src = DataSource(config("dataSource"))
 
@@ -83,14 +83,11 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
       initialised = true
     }
 
-    val incoming = value
-      .headOption
-      .toList
-      .flatMap(_.success.map(m =>
+    val incoming = value.success.map(m =>
         termExecutor.eval(m, keyLeftTerm).stringOption.map(kLeft => lookup.get(kLeft).map(r =>
           DataRecord(m.label, DataRecord(name, List(r)) :: m.elems.toList)).getOrElse(
           DataRecord(m.label, DataNothing(name) :: m.elems.toList)
-        )).getOrElse(m)).toList)
+        )).getOrElse(m)).toList
 
     _observer.foreach(o => o.next(Dom(name, Nil, DataArray(incoming), DataNothing(), Nil)))
   }
