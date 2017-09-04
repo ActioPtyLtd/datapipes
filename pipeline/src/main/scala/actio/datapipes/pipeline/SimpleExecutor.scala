@@ -32,6 +32,8 @@ object SimpleExecutor {
       val t = getRunnable(left)
 
       override def next(value: Dom): Unit = {
+        logger.debug(s"=== Task ${left.name} to receive Dom $select ===")
+
         val sel = value.children.find(f => f.label == select).get
 
         // mask other doms
@@ -79,6 +81,7 @@ object SimpleExecutor {
       val l = getRunnable(p.left)
       val r = getRunnable(p.right)
 
+      // could alternatively, un-subscribe and subscribe new task, rather than mutate dom here
       val i = new TaskOperation {
         val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
         var parentDom: Dom = _

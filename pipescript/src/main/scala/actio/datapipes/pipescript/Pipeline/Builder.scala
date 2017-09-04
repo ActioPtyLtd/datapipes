@@ -1,9 +1,10 @@
 package actio.datapipes.pipescript.Pipeline
 
-import actio.common.Data.{DataSet, Operators}
+import actio.common.Data.{DataNothing, DataSet, Operators}
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
+import scala.meta.Term
 
 object Builder {
 
@@ -65,14 +66,21 @@ object Builder {
     return buf.toList
   }
 
-  def getSelect(str: String, operations: Map[String, Operation]): Operation = {
-    import scala.meta._
-    val t = str.parse[Term].get
-
-    t match {
-      case Term.Name(name) => operations(name.replace(" ", ""))
-      case Term.Apply(Term.Name(name), args) => Select(operations(name.replace(" ", "")),args.head.toString())
+  def getPipeOperation(term: Term, pipeName: String, operations: Map[String, Operation], prevOpName: String): (Operation,String) = term match {
+    case Term.ApplyInfix(lTerm: Term, Term.Name("|") , Nil, Seq(rTerm: Term)) => {
+      val left = getPipeOperation(lTerm, pipeName, operations, prevOpName)
+      val right = getPipeOperation(rTerm, pipeName, operations, left._2)
+      (Pipe(pipeName,left._1,right._1),right._2)
     }
+    case Term.Apply(Term.Name(name), args) => (Select(operations(name.replace(" ", "")),args.head.toString()),name)
+    case Term.Name(name) => (Select(operations(name.replace(" ", "")), prevOpName),name)
+  }
+
+  def getPipeOperation(pipeName: String, str: String, operations: Map[String, Operation]): Operation = {
+    import scala.meta._
+    val p = str.parse[Term].get
+
+    getPipeOperation(p, pipeName, operations, "start")._1
   }
 
   @tailrec
@@ -82,10 +90,7 @@ object Builder {
       case (h::t) => {
         val p1 = h("pipe")
           .stringOption
-          .map(s => s.split("\\|")
-            .map(m =>
-              getSelect(m, operations))
-            .reduceLeft((a, b) => Pipe(h.label, a, b)))
+          .map(s => getPipeOperation(h.label, s, operations) )
 
         val p2 = p1
           .map(p => operations + (h.label -> p))
