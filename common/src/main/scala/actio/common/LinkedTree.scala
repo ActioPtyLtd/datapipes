@@ -25,4 +25,6 @@ abstract class LinkedTree[D <: LinkedTree[D]] {
   def isEmpty: Boolean = elems.isEmpty
 
   def isDefined: Boolean = toOption.isDefined
+
+  def size: Int = elems.size
 }

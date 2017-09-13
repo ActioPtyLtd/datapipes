@@ -233,6 +233,10 @@ class TermExecutor(nameSpace: String) {
     case Term.Apply(Term.Select(t, Term.Name("isDefined")), Nil) =>
       DataBoolean(eval(t, scope).isDefined)
 
+    // check the size of the data set
+    case Term.Apply(Term.Select(t, Term.Name("size")), Nil) =>
+      DataNumeric(eval(t, scope).size)
+
 
     // get DataSet by name
     case Term.Apply(q, Seq(t)) => eval(q, scope)(eval(t, scope).stringOption.getOrElse(""))
@@ -248,7 +252,7 @@ class TermExecutor(nameSpace: String) {
     }
 
     case Term.ApplyUnary(Term.Name("!"), r) => eval(r, scope) match {
-      case DataBoolean(label, b) => DataBoolean(label,b)
+      case DataBoolean(label, b) => DataBoolean(label,!b)
       case _ => DataNothing()
     }
   }

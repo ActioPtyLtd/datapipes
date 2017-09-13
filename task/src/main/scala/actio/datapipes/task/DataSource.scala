@@ -1,8 +1,12 @@
 package actio.datapipes.task
 
-import actio.common.Data.DataSet
+import actio.common.Data.{DataBoolean, DataSet}
 import actio.common.DataSource
 import actio.datapipes.dataSources._
+import actio.datapipes.task.Term.TermExecutor
+
+import scala.meta.Term
+import scala.meta._
 
 
 object DataSource {
@@ -41,6 +45,26 @@ object DataSource {
   )
 
 
-  def apply(parameters: DataSet): DataSource = sources(parameters("type").stringOption.get)(parameters)
+  def apply(parameters: DataSet): DataSource = {
+
+    val iterateOption = parameters("iterate")("until").stringOption
+
+    val dataSource = sources(parameters("type").stringOption.get)(parameters)
+
+    lazy val termExecutor = new TermExecutor("actio.datapipes.task.Term.Functions")
+    lazy val termRead = TaskLookup.getTermTree(parameters("query")("read"))
+    lazy val termUntil = parameters("iterate")("until").stringOption.get.parse[Term].get
+
+    iterateOption
+      .map(i => new PagingDataSource(parameters, dataSource,ds =>
+        TaskLookup.interpolate(termExecutor,termRead,ds), ds => {
+          val e = termExecutor.eval(ds,termUntil)
+          e match {
+          case DataBoolean(_,t) => t
+          case _ => true
+        }
+      }  ))
+      .getOrElse(dataSource)
+  }
 
 }
