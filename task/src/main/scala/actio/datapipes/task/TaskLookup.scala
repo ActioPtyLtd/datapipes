@@ -49,6 +49,7 @@ class TaskLookup(name: String, config: DataSet, version: String) extends Task {
     dataSource.subscribe(localObserver)
 
     value.success.elems.foreach { e =>
+      config("waiting").intOption.foreach(t => Thread.sleep(t))
       dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, terms, e))
     }
 
