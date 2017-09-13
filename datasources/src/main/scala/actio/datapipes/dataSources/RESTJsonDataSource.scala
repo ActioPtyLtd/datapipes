@@ -127,16 +127,13 @@ class RESTJsonDataSource extends DataSource {
 
     // body added twice for backwards compatability, can remove later
 
-    Operators.mergeLeft(
       DataRecord(
         "response",
         DataString("uri", request.getURI.toString) ::
           DataNumeric("status", response._1.getStatusCode) ::
-          DataRecord("root", dsBody.elems.toList)
+          Operators.relabel(dsBody,"body")
           :: Nil
-      ),
-      DataRecord("body", dsBody.elems.toList)
-    )
+      )
   }
 
   def sendRequest(request: HttpUriRequest): (StatusLine, Array[Header], String) = {

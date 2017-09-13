@@ -23,10 +23,11 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
   def next(value: Dom): Unit = {
 
     val entity = config("entity").stringOption.getOrElse("")
-    val key = config("key").stringOption.getOrElse("")
-    val doUpdate = !config("update").stringOption.contains("false") && key!=""
+    val key = if (config("key").stringOption.isDefined) List(config("key").stringOption.getOrElse("")) else
+      config("keys").map(_.stringOption.getOrElse("")).toList
+    val doUpdate = !config("update").stringOption.contains("false") && key.nonEmpty
 
-    val rows = value.success.elems.groupBy(g => g(key).stringOption.getOrElse("")).map(_._2.head)
+    val rows = value.success.elems.groupBy(g => key.map(k => g(k).stringOption.getOrElse(g(k).toString)).mkString("/")).map(_._2.head)
 
     if(rows.nonEmpty) {
 
@@ -44,13 +45,14 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
       val insertDest = s"insert into $entity(" +
         cols.map("\"" + _.label + "\"").mkString(",") + ")" +
         "select " + cols.map("\"" + _.label + "\"").mkString(",") + s" from temp_$tempname" +
-        (if(key == "") "" else s" where not exists (select 1 from $entity where $entity.$key = temp_$tempname.$key)")
+        (if(key.isEmpty) "" else
+          s" where not exists (select 1 from $entity where " + key.map(k => s"$entity.$k = temp_$tempname.$k").mkString(" AND ") + ")")
 
       val updateDest =
         if(doUpdate)
           s"update $entity as td set " +
             cols.map(c => "\"" + c.label + "\" = ts.\"" + c.label + "\"").mkString(",") +
-            s"from temp_$tempname ts where td.$key = ts.$key AND (" +
+            s"from temp_$tempname ts where " + key.map(k => s"td.$k = ts.$k").mkString(" AND ") + " AND (" +
             cols.map(c => "td.\"" + c.label + "\" <> ts.\"" + c.label +
               "\" OR (td.\"" + c.label + "\" is null AND ts.\"" + c.label + "\" is not null) OR (td.\"" + c.label + "\" is not null AND ts.\"" + c.label + "\" is null)"
 

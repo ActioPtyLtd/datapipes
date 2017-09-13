@@ -2,7 +2,7 @@ package actio.datapipes.task
 
 import Term.TermExecutor
 import actio.common.Data.{DataNothing, DataSet}
-import actio.common.{Dom, Observer, Task}
+import actio.common.{Dom, Observer}
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -13,7 +13,7 @@ object Cache {
   def clear(): Unit = { dim.clear() }
 }
 
-class TaskUpdate(val name: String, val config: DataSet, version: String) extends Task {
+class TaskUpdate(val name: String, val config: DataSet, version: String) extends actio.common.Task {
 
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
   private val namespace = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Functions")
