@@ -3,8 +3,11 @@ package actio.datapipes.application
 import java.io.File
 import java.util.UUID
 
+import actio.common.Data.{DataArray, DataNothing}
+import actio.common.{Dom, Event}
 import actio.datapipes.pipescript.Pipeline._
 import actio.datapipes.pipeline.SimpleExecutor
+import actio.datapipes.pipeline.SimpleExecutor.pipelineRunId
 import actio.datapipes.pipescript.ConfigReader
 import com.typesafe.scalalogging.Logger
 import org.apache.commons.cli._
@@ -58,8 +61,25 @@ object AppConsole {
 
     if(line.hasOption("s"))
       new AppService(pf)
-    else
-      SimpleExecutor.getRunnable(pf.pipelines.find(f => f.name == pf.defaultPipeline).get).start(config)
+    else {
+      val startPipeline = pf.pipelines.find(f => f.name == pf.defaultPipeline).get
+      val eventPipeline = pf.pipelines.find(f => f.name == "p_events").map(e => SimpleExecutor.getRunnable(e, None))
+
+      // send start event
+      eventPipeline.foreach { ep =>
+        val startEvent = Event.toDataSet(Event(pipelineRunId, "run","INFO", "START", "Started DataPipes Runtime"))
+        ep.next(Dom() ~ Dom("start", Nil, DataArray(startEvent), DataNothing(), Nil))
+      }
+
+      // run the main pipeline
+      SimpleExecutor.getRunnable(startPipeline, eventPipeline).start(config)
+
+      // send the finish event
+      eventPipeline.foreach { ep =>
+        val startEvent = Event.toDataSet(Event(pipelineRunId, "run","INFO", "FINISH", "Finished DataPipes Runtime"))
+        ep.next(Dom() ~ Dom("start", Nil, DataArray(startEvent), DataNothing(), Nil))
+      }
+    }
 
     logger.info(s"Pipe ${pf.defaultPipeline} completed successfully.")
   }

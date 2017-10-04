@@ -237,6 +237,8 @@ class TermExecutor(nameSpace: String) {
     case Term.Apply(Term.Select(t, Term.Name("size")), Nil) =>
       DataNumeric(eval(t, scope).size)
 
+    // check the size of the data set
+    case Term.Apply(Term.Select(t, Term.Name("flatten")), Nil) => Operators.flatten(eval(t, scope))
 
     // get DataSet by name
     case Term.Apply(q, Seq(t)) => eval(q, scope)(eval(t, scope).stringOption.getOrElse(""))

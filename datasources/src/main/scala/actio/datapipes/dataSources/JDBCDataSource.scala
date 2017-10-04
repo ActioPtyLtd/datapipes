@@ -26,7 +26,7 @@ class JDBCDataSource extends DataSource {
     val stmt: PreparedStatement = cn.prepareStatement(statement)
 
     logger.info("Executing SQL statement...")
-    logger.info(statement)
+    logger.info(statement.substring(0, Math.min(statement.length, 100)) + (if(statement.length>100) "..." else ""))
 
     if(executeQuery) {
       val rs = stmt.executeQuery()
