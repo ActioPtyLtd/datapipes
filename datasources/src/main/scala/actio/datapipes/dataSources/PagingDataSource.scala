@@ -32,7 +32,7 @@ class PagingDataSource(config: DataSet, dataSource: DataSource, evalQuery: DataS
     lastDataSet = DataNothing()
     dataSource.execute(config, nquery)
 
-    if (!stop(lastDataSet))
+    if (!stop(Operators.mergeLeft(lastDataSet,DataRecord(DataNumeric("index", index)))))
       executeRecursive(index + 1, query)
   }
 

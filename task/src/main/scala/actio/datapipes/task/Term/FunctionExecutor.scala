@@ -62,7 +62,7 @@ object FunctionExecutor {
     case ((methodParameter, DataNumeric(_, num)))
       if methodParameter.getType == classOf[BigDecimal] => Some(num)
     case ((methodParameter, DataDate(_, date)) )
-      if methodParameter.getType == classOf[java.util.Date] => Some(date)
+      if methodParameter.getType == classOf[java.util.Date] => Some(new java.util.Date(date))
     case ((methodParameter, ds: DataSet))
       if methodParameter.getType == classOf[DataSet] => Some(ds)
     case ((methodParameter, ds: DataSet))
