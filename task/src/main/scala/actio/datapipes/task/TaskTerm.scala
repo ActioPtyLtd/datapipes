@@ -15,6 +15,8 @@ class TaskTerm(name: String, config: DataSet, version: String) extends TaskTrans
     if (version.contains("v2")) {
       if(config("behavior").stringOption.contains("batch"))
         List(executor.eval(dom.success, term))
+      else if(config("behavior").stringOption.contains("expand"))
+        List(DataArray(dom.success.flatMap(r => executor.eval(r, term).elems).toList))
       else
         List(DataArray(dom.success.map(r => executor.eval(r, term)).toList))
     }

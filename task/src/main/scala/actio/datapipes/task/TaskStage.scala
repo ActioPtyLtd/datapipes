@@ -26,6 +26,8 @@ class TaskStage(val name: String, val config: DataSet) extends Task {
   private var batchNum = 1
 
   def completed(): Unit = {
+    if(config("dataSource")("query")("finalise").isDefined)
+      dataSource.execute(config("dataSource"),config("dataSource")("query")("finalise"))
     _observer.foreach(o => o.completed())
   }
 

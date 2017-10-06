@@ -120,7 +120,8 @@ class RESTJsonDataSource extends DataSource {
     val displayString: String = Option(response._3).getOrElse("")
     if (displayString.length > 0) {
       logger.info(s"Response size: ${displayString.length}")
-      logger.info(s"Response body: '" + displayString.substring(0, Math.min(displayString.length, 500)) + "'")
+      logger.info(s"Response body:")
+      logger.info(displayString.substring(0, Math.min(displayString.length, 100)) + (if(displayString.length>100) "..." else ""))
     }
 
     val dsBody = Try(JsonXmlDataSet.fromJson(response._3)).toOption.getOrElse(DataString(Option(response._3).getOrElse("")))

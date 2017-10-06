@@ -5,6 +5,7 @@ import java.util.Date
 
 import actio.common.Data._
 import actio.common.{DataSource, Dom, Observer, Task}
+import actio.datapipes.dataSources.JDBCDataSource
 import actio.datapipes.task.Term.{Functions, TermExecutor}
 
 import scala.collection.mutable.ListBuffer
@@ -13,6 +14,7 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
 
   private val dataSource: DataSource = DataSource(config("dataSource"))
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
+  var retrievedSchema = ""
 
   def completed(): Unit = {
     _observer.foreach(o => o.completed())
@@ -31,30 +33,36 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
 
     if(rows.nonEmpty) {
 
-      val cols = rows.headOption.toList.flatMap(r => r.elems)
+      val cols = rows.toList.flatMap(r => r.elems.map(_.label)).distinct
+
+      if(retrievedSchema.isEmpty)
+        retrievedSchema = new JDBCDataSource().getCreateTableStatement(config("dataSource"), "select " +
+          cols.map("\"" + _ + "\"").mkString(",") + s" from $entity")
+
+
+
       val tempname = entity.split('.').last
 
-      val createTempTable = s"create temporary table temp_${tempname}" +
-        "(" + cols.map(c => "\"" + c.label + "\" " + TaskMergeLoad.getColumnType(c)).mkString(",") + ")"
+      val createTempTable = s"create temporary table temp_${tempname}($retrievedSchema)"
       val insertHeader = s"insert into temp_${tempname}(" +
-        cols.map("\"" + _.label + "\"").mkString(",") + ")"
+        cols.map("\"" + _ + "\"").mkString(",") + ")"
 
       val insertRow = (r: DataSet) => "(" +
-        cols.map(c => TaskMergeLoad.dataSetToInsertValue(r(c.label))).mkString(",") + ")"
+        cols.map(c => TaskMergeLoad.dataSetToInsertValue(r(c))).mkString(",") + ")"
 
       val insertDest = s"insert into $entity(" +
-        cols.map("\"" + _.label + "\"").mkString(",") + ")" +
-        "select " + cols.map("\"" + _.label + "\"").mkString(",") + s" from temp_$tempname" +
+        cols.map("\"" + _ + "\"").mkString(",") + ")" +
+        "select " + cols.map("\"" + _ + "\"").mkString(",") + s" from temp_$tempname" +
         (if(key.isEmpty) "" else
-          s" where not exists (select 1 from $entity where " + key.map(k => s"$entity.$k = temp_$tempname.$k").mkString(" AND ") + ")")
+          s" where not exists (select 1 from $entity where " + key.map(k => entity + ".\"" + k + "\" = temp_" + tempname + ".\"" + k + "\"").mkString(" AND ") + ")")
 
       val updateDest =
         if(doUpdate)
           s"update $entity as td set " +
-            cols.map(c => "\"" + c.label + "\" = ts.\"" + c.label + "\"").mkString(",") +
-            s"from temp_$tempname ts where " + key.map(k => s"td.$k = ts.$k").mkString(" AND ") + " AND (" +
-            cols.map(c => "td.\"" + c.label + "\" <> ts.\"" + c.label +
-              "\" OR (td.\"" + c.label + "\" is null AND ts.\"" + c.label + "\" is not null) OR (td.\"" + c.label + "\" is not null AND ts.\"" + c.label + "\" is null)"
+            cols.map(c => "\"" + c + "\" = ts.\"" + c + "\"").mkString(",") +
+            s"from temp_$tempname ts where " + key.map(k => "td.\"" + k + "\" = ts.\"" + k + "\"").mkString(" AND ") + " AND (" +
+            cols.map(c => "td.\"" + c + "\" <> ts.\"" + c +
+              "\" OR (td.\"" + c + "\" is null AND ts.\"" + c + "\" is not null) OR (td.\"" + c + "\" is not null AND ts.\"" + c + "\" is null)"
 
             ).mkString(" OR ") + ")"
         else ""
@@ -81,10 +89,5 @@ object TaskMergeLoad {
     case DataNothing(_) => "null"
     case str => "'" + Functions.sq(str.stringOption.getOrElse("")) + "'"
   }
-  def getColumnType(ds: DataSet): String = ds match {
-    case DataNumeric(_,_) => "numeric"
-    case DataBoolean(_,_) => "boolean"
-    case DataDate(_,date) => "timestamp"
-    case _ => "varchar"
-  }
+
 }

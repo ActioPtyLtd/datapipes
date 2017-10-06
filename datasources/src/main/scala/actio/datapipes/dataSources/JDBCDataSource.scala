@@ -26,7 +26,7 @@ class JDBCDataSource extends DataSource {
     val stmt: PreparedStatement = cn.prepareStatement(statement)
 
     logger.info("Executing SQL statement...")
-    logger.info(statement)
+    logger.info(statement.substring(0, Math.min(statement.length, 100)) + (if(statement.length>100) "..." else ""))
 
     if(executeQuery) {
       val rs = stmt.executeQuery()
@@ -55,6 +55,32 @@ class JDBCDataSource extends DataSource {
   override def execute(config: DataSet, query: DataSet*): Unit = {
     val read = query.headOption.map(_.label).contains("read")
     execute(config, query.flatMap(_.stringOption).mkString(";"), read)
+  }
+
+  def getCreateTableStatement(config: DataSet, statement: String): String = {
+    val connectionString = config("connect").stringOption.getOrElse("")
+
+    val cn = DriverManager.getConnection(connectionString)
+
+    logger.info("Connected...")
+
+    val stmt: PreparedStatement = cn.prepareStatement(statement)
+
+    logger.info("Executing SQL statement...")
+    logger.info(statement.substring(0, Math.min(statement.length, 100)) + (if(statement.length>100) "..." else ""))
+
+    val rs = stmt.executeQuery()
+
+    val metaData = rs.getMetaData
+    val ordinals = 1 to metaData.getColumnCount
+
+    val cols = ordinals.map(o => (metaData.getColumnName(o), metaData.getColumnTypeName(o))).toList
+    logger.info("Schema retrieved...")
+
+    cn.close()
+
+    cols.map(m => "\"" + m._1 + "\" " + m._2).mkString(",")
+
   }
 }
 
