@@ -219,6 +219,10 @@ class TermExecutor(nameSpace: String) {
       DataString(eval(t, scope).toJson)
     }
 
+    case Term.Apply(Term.Select(t, Term.Name("parseJson")), Nil) => {
+      JsonXmlDataSet.fromJson(eval(t, scope).stringOption.getOrElse(""))
+    }
+
     // convert data set to xml string
     case Term.Apply(Term.Select(t, Term.Name("toXml")), Nil) => {
       import actio.common.Data.JsonXmlDataSet.Extend
