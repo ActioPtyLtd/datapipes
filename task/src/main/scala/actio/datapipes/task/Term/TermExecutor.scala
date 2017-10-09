@@ -223,6 +223,12 @@ class TermExecutor(nameSpace: String) {
       JsonXmlDataSet.fromJson(eval(t, scope).stringOption.getOrElse(""))
     }
 
+    case Term.Apply(Term.Select(t, Term.Name("label")), Nil) => {
+      val l = eval(t, scope).label
+      DataString(l,l)
+    }
+
+
     // convert data set to xml string
     case Term.Apply(Term.Select(t, Term.Name("toXml")), Nil) => {
       import actio.common.Data.JsonXmlDataSet.Extend
