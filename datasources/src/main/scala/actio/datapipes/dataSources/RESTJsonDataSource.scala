@@ -52,7 +52,7 @@ class RESTJsonDataSource extends DataSource {
     if (uri.isDefined) {
 
       val userOption = query("credential")("user").stringOption.orElse(ds("credential")("user").stringOption)
-      val passwordOption = query("credential")("password").stringOption.orElse(query("credential")("password").stringOption)
+      val passwordOption = query("credential")("password").stringOption.orElse(ds("credential")("password").stringOption)
 
       val authHeader = for {
         u <- userOption
