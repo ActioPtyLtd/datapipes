@@ -2,16 +2,18 @@ package actio.datapipes.task
 
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.io._
 
 import actio.common.Data._
 import actio.common.{DataSource, Dom, Observer, Task}
 import actio.datapipes.dataSources.JDBCDataSource
 import actio.datapipes.task.Term.{Functions, TermExecutor}
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.ListBuffer
 
 class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
-
+  private val logger = Logger("TaskMergeLoad")
   private val dataSource: DataSource = DataSource(config("dataSource"))
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
   var retrievedSchema = ""
@@ -32,14 +34,11 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
     val rows = value.success.elems.groupBy(g => key.map(k => g(k).stringOption.getOrElse(g(k).toString)).mkString("/")).map(_._2.head)
 
     if(rows.nonEmpty) {
-
       val cols = rows.toList.flatMap(r => r.elems.map(_.label)).distinct
 
       if(retrievedSchema.isEmpty)
         retrievedSchema = new JDBCDataSource().getCreateTableStatement(config("dataSource"), "select " +
           cols.map("\"" + _ + "\"").mkString(",") + s" from $entity")
-
-
 
       val tempname = entity.split('.').last
 
@@ -71,7 +70,17 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
       val query = s"$createTempTable;$insertHeader values ${rows.map(insertRow).mkString(",")};$insertDest;${updateDest}"
 
 
-      dataSource.execute(config("dataSource"), DataString("create", query))
+      try {
+        dataSource.execute(config("dataSource"), DataString("create", query))
+      }
+      catch {
+        case e: Exception => {
+          logger.debug(query)
+          val sw = new StringWriter
+          e.printStackTrace(new PrintWriter(sw))
+          logger.error("MergLoad Batch Failed:"+sw.toString)
+        }
+      }
     }
   }
 
