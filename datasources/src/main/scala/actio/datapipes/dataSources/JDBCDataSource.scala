@@ -96,7 +96,7 @@ object JDBCDataSource {
             .stripTrailingZeros()
             .toPlainString))),
 
-    (List(Types.DATE, Types.TIME, Types.TIMESTAMP),
+    (List(Types.DATE, Types.TIME, Types.TIMESTAMP, Types.TIME_WITH_TIMEZONE, Types.TIMESTAMP_WITH_TIMEZONE),
       (name: String, index: Int, rs: ResultSet) =>
         DataDate(name, rs.getDate(index)))
 
