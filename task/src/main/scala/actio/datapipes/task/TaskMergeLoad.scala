@@ -70,17 +70,7 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
       val query = s"$createTempTable;$insertHeader values ${rows.map(insertRow).mkString(",")};$insertDest;${updateDest}"
 
 
-      try {
-        dataSource.execute(config("dataSource"), DataString("create", query))
-      }
-      catch {
-        case e: Exception => {
-          logger.debug(query)
-          val sw = new StringWriter
-          e.printStackTrace(new PrintWriter(sw))
-          logger.error("MergLoad Batch Failed:"+sw.toString)
-        }
-      }
+      dataSource.execute(config("dataSource"), DataString("create", query))
     }
   }
 

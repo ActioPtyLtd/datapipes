@@ -49,4 +49,31 @@ object Event {
       DataString("counterLabel", e.counter)
     )
   }
+
+  def taskTotalError(
+    pipeInstanceId: String,
+    taskInstanceId: String,
+    size: Int
+  ) = new Event(pipeInstanceId, taskInstanceId,
+    "TASK FINISH", "PARTIAL", "Some data for this Task failed to process.", System.currentTimeMillis(), "Total Error", "Total Error", size)
+
+  def taskTotalSizeError(
+    pipeInstanceId: String,
+    taskInstanceId: String,
+    size: Int
+  ) = new Event(pipeInstanceId, taskInstanceId,
+    "TASK FINISH", "PARTIAL", "Some data for this Task failed to process.", System.currentTimeMillis(), "Total Size Error", "Total Size Error", size)
+
+  def taskNoErrorTotal(pipeInstanceId: String,
+                  taskInstanceId: String,
+                  size: Int
+                 ) = new Event(pipeInstanceId, taskInstanceId,
+    "TASK FINISH", "COMPLETE", "All data has been processed successfully.", System.currentTimeMillis(), "Total Processed", "Total Processed", size)
+
+  def taskNoErrorTotalSize(pipeInstanceId: String,
+                       taskInstanceId: String,
+                       size: Int
+                      ) = new Event(pipeInstanceId, taskInstanceId,
+    "TASK FINISH", "COMPLETE", "All data has been processed successfully.", System.currentTimeMillis(), "Total Size Processed", "Total Size Processed", size)
+
 }

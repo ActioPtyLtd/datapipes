@@ -51,20 +51,42 @@ object SimpleExecutor {
 
       val myTask = Task(t.name, t.taskType, t.config)
 
+      var totalProcessed = 0
+      var totalSizeProcessed = 0
+      var totalErrors = 0
+      var totalSizeErrors = 0
+
       def next(value: Dom): Unit = {
         val size = value.success.elems.size
 
-        logger.debug(s"=== Task ${t.name} received Dom with last successful DataSet of size ($size) ===")
+        try {
 
-        // get the events coming into this task and send them to the events pipeline
-        eventOperation.foreach{ o =>
-          if(value.events.nonEmpty) {
-            val eventDom = Dom() ~ Dom("start", Nil, DataArray(value.events.map(e => Event.toDataSet(e))), DataNothing(), Nil)
-            o.next(eventDom)
+          logger.debug(s"=== Task ${t.name} received Dom with last successful DataSet of size ($size) ===")
+
+          // get the events coming into this task and send them to the events pipeline
+          eventOperation.foreach{ o =>
+            if(value.events.nonEmpty) {
+              val eventDom = Dom() ~ Dom("start", Nil, DataArray(value.events.map(e => Event.toDataSet(e))), DataNothing(), Nil)
+              o.next(eventDom)
+            }
+          }
+
+          myTask.next(value)
+          totalProcessed = totalProcessed + 1
+          totalSizeProcessed = totalSizeProcessed + size
+        }
+        catch {
+          case e: Exception => {
+            logger.error(s"=== Task ${t.name} failed to process last successful DataSet of size ($size) ===")
+
+            totalErrors = totalErrors + 1
+            totalSizeErrors = totalSizeErrors + size
+
+            eventOperation.foreach{ o=>
+              o.next(Dom() ~ Dom("start", Nil, DataArray(Event.toDataSet(Event(pipelineRunId, t.name,"ERROR", "CONTINUE", e.getMessage))), DataNothing(), Nil))
+            }
           }
         }
-
-        myTask.next(value)
       }
 
       def completed(): Unit = {
@@ -72,10 +94,22 @@ object SimpleExecutor {
         logger.info(s"=== Operation ${operation.name} completed ===");
 
         eventOperation.foreach{ o =>
-            val eventDom = Dom() ~ Dom("start", Nil, DataArray(Event.toDataSet(
-              Event(pipelineRunId, operation.name, "INFO", "FINISH", "Task completed")
-            )), DataNothing(), Nil)
-            o.next(eventDom)
+
+          val myEvents =
+            (if (totalErrors == 0)
+              List(Event.toDataSet(Event.taskNoErrorTotal(pipelineRunId, operation.name, totalProcessed)),
+                Event.toDataSet(Event.taskNoErrorTotalSize(pipelineRunId, operation.name, totalSizeProcessed))
+              )
+            else Nil
+              ) :::
+              (if (totalErrors>0)
+                List(Event.toDataSet(Event.taskTotalError(pipelineRunId, operation.name, totalErrors)),
+                  Event.toDataSet(Event.taskTotalSizeError(pipelineRunId, operation.name, totalSizeErrors))
+                )
+              else Nil)
+
+          val eventDom = Dom() ~ Dom("start", Nil, DataArray(myEvents), DataNothing(), Nil)
+          o.next(eventDom)
         }
 
         myTask.completed()

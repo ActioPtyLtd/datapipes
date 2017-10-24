@@ -21,7 +21,7 @@ class JDBCDataSource extends DataSource {
 
     val cn = DriverManager.getConnection(connectionString)
 
-    logger.info("Connected...")
+    logger.info("Connected.")
 
     val stmt: PreparedStatement = cn.prepareStatement(statement)
 
@@ -62,7 +62,7 @@ class JDBCDataSource extends DataSource {
 
     val cn = DriverManager.getConnection(connectionString)
 
-    logger.info("Connected...")
+    logger.info("Connected.")
 
     val stmt: PreparedStatement = cn.prepareStatement(statement)
 
@@ -75,7 +75,7 @@ class JDBCDataSource extends DataSource {
     val ordinals = 1 to metaData.getColumnCount
 
     val cols = ordinals.map(o => (metaData.getColumnName(o), metaData.getColumnTypeName(o))).toList
-    logger.info("Schema retrieved...")
+    logger.info("Schema retrieved.")
 
     cn.close()
 

@@ -13,84 +13,6 @@ import scala.util.Try
 
 object Functions {
 
-  /**
-    * Sorts the DataSet by a specified property - Currently only supports dates
-    *
-    * @param ds         the DataSet containing the items to sort
-    * @param property   the property to sort by
-    * @param dataType   the data type of the property to sort by
-    * @param dataFormat the format of the property value
-    * @param direction  the direction to sort by
-    * @return           a new DataSet containing the sorted items
-    */
-
-
-
-  def orderBy(ds: DataSet, property: String, dataType: String, dataFormat: String,  direction: String): DataSet = {
-    orderByRE(ds, property, dataType, dataFormat, direction, 0)
-  }
-
-  def orderByRE(ds: DataSet, property: String, dataType: String, dataFormat: String,  direction: String, level: Int): DataSet = {
-    @tailrec
-    var dataFormatOption = Option(dataFormat)
-    var orderedSet = ds
-    if(dataFormat == "")
-      dataFormatOption = None
-    val elementCount = ds.elems.length
-    if(elementCount > 1)
-    {
-      if(ds.elems.forall(x => x(property).toOption.isDefined)) {
-        orderedSet = ds match {
-          case DataArray(label, arrayElems) => dataType.toLowerCase() match {
-            case "date" =>
-              if (dataFormatOption.isDefined)
-                DataArray(label, sortByDate(arrayElems, property, dataFormatOption.get, direction))
-              else
-                ds
-            case _ => ds
-          }
-          case DataRecord(label, elements) => dataType.toLowerCase() match {
-            case "date" =>
-              if (dataFormatOption.isDefined)
-                DataRecord(label, sortByDate(elements, property, dataFormatOption.get, direction))
-              else
-                ds
-            case _ => var sortedElements = elements.sortBy(x => x(property).stringOption)
-              if (direction.equalsIgnoreCase("desc"))
-                sortedElements = sortedElements.reverse
-              DataArray(label, sortedElements)
-          }
-          case _ => ds
-        }
-      }
-      else
-        orderedSet = DataRecord("item", ds.elems.toList)
-    }
-    else if (elementCount == 1) {
-      if(ds.headOption.isDefined) {
-        if (level == 0) {
-          orderedSet = ds match {
-            case DataArray(label, _) => DataArray(label, List[DataSet] {
-              orderByRE(ds.headOption.get, property, dataType, dataFormat, direction, (level + 1))
-            })
-            case DataRecord(label, _) => DataRecord(label, List[DataSet] {
-              orderByRE(ds.headOption.get, property, dataType, dataFormat, direction, (level + 1))
-            })
-            case DataSetHttpResponse(label, _, _, _, body) => DataRecord(label, List[DataSet] {
-              orderByRE(body, property, dataType, dataFormat, direction, (level + 1))
-            })
-            case _ => ds
-          }
-        }
-      }
-    }
-    if (level == 0)
-      DataRecord("orderBy", List[DataSet]{orderedSet})
-    else
-      orderedSet
-  }
-
-
 
   def sortByDate(items: List[DataSet], property: String, dateFormat: String, direction: String): List[DataSet] = {
     implicit val localDateOrdering: Ordering[LocalDate] = Ordering.by(_.toEpochDay)
@@ -100,28 +22,6 @@ object Functions {
     else
       sortedItems
   }
-
-
-
-  def take(ds: DataSet, numberOfItems: Int): DataSet = {
-    val elementCount = ds.elems.length
-    var takenSet = ds
-    if(elementCount > 1)
-      takenSet = DataArray(ds.label, ds.elems.take(numberOfItems).toList)
-    else if(elementCount == 1 && ds.headOption.isDefined) {
-      takenSet = ds.headOption.get match {
-        case DataArray(label, arrayElems) => DataArray(label, arrayElems.take(numberOfItems))
-        case DataRecord(label, elems) =>
-          if (elems.forall(x => x.label == elems.head.label))
-            DataArray(label, elems.take(numberOfItems))
-          else
-            DataArray("root", List(DataRecord(label, elems.take(numberOfItems))))
-        case _ => DataArray(ds.label, ds.elems.take(numberOfItems).toList)
-      }
-    }
-    DataRecord("take", List[DataSet]{takenSet})
-  }
-
 
 
   def chunk(ds: DataSet, numberOfItemsPerChunk: Int): DataSet = {
@@ -148,32 +48,6 @@ object Functions {
         itemsToReturn = itemsToReturn:::getDataSetWithHierarchy(ds(nextItemInHierarchy), hierarchyPath.tail)
     }
     itemsToReturn
-  }
-
-  /**
-    * Flattens a hierarcy structure by copying items at the specified hierarchy level into the root
-    * supports merging items at different hierarchy levels as "includes"
-    *
-    * @param ds   the dataset containing the hierarchy structure
-    * @param args comma separated list of . notation hierarchy i.e. fieldA._.* will copy all the grandchildren of fieldA without knowing the child field names
-    *             any hierarchy definitions prefixed with + will get appended to the copied items
-    * @return     DataArray
-    */
-  def flattenStructure(ds: DataSet, args: List[String]): DataSet =
-  {
-    val fieldsToFlatten = args.filterNot(x => x.startsWith("+"))
-    val fieldsToInclude = args.filter(x => x.startsWith("+")).map(x => x.substring(1))
-    var flattenedList = List[DataSet]()
-    for (field <- fieldsToFlatten) {
-      val hierarchy = field.split('.')
-      flattenedList = flattenedList:::getDataSetWithHierarchy(ds, hierarchy)
-    }
-    for ( field <- fieldsToInclude) {
-      val hierarchy = field.split('.')
-      val dataSetToInclude = getDataSetWithHierarchy(ds, hierarchy)
-      flattenedList = flattenedList.map(x => DataRecord(x.label,x.elems.toList:::dataSetToInclude))
-    }
-    DataRecord("flatternedList", List[DataSet](DataArray("item",flattenedList)))
   }
 
   def dateFormat(ds: DataSet, format: String): DataSet = {

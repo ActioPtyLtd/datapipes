@@ -12,8 +12,6 @@ object Task {
       new TaskExtract(name, config, version)),
     "load" -> ((name, config, version) =>
       new TaskLoad(name, config, version)),
-    "event" -> ((name, _, _) =>
-      new TaskEvent(name)),
     "transformTerm" -> ((name, config, version) =>
       new TaskTerm(name, config, version)),
     "transform" -> ((name, config, _) =>
