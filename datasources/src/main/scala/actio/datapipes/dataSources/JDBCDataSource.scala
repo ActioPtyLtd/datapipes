@@ -98,7 +98,7 @@ object JDBCDataSource {
 
     (List(Types.DATE, Types.TIME, Types.TIMESTAMP, Types.TIME_WITH_TIMEZONE, Types.TIMESTAMP_WITH_TIMEZONE),
       (name: String, index: Int, rs: ResultSet) =>
-        DataDate(name, rs.getDate(index)))
+        DataDate(name, rs.getTimestamp(index)))
 
   ).flatMap(t => t._1.map(s => s -> t._2)).toMap
 

@@ -22,11 +22,16 @@ object SimpleExecutor {
     def start(ds: DataSet) = {
       next(Dom() ~ Dom("start", Nil, ds, DataNothing(), Nil))
     }
+
+    def totalProcessed: Int
+    def totalProcessedSize: Int
+    def totalError: Int
+    def totalErrorSize: Int
   }
 
   val logger = Logger("SimpleExecutor")
 
-  def getRunnable(operation: Operation, eventOperation: Option[TaskOperation]): TaskOperation = operation match {
+  def getRunnable(operation: Operation, eventOperation: Option[(List[Event]) => Unit]): TaskOperation = operation match {
 
     case actio.datapipes.pipescript.Pipeline.Select(left, select, _) => new TaskOperation {
 
@@ -40,11 +45,18 @@ object SimpleExecutor {
         t.next(sel)
       }
 
-      override def completed(): Unit = t.completed()
+      override def completed(): Unit = {
+        t.completed()
+      }
 
       override def error(exception: Throwable): Unit = t.error(exception)
 
       override def subscribe(observer: Observer[Dom]): Unit = t.subscribe(observer)
+
+      val totalProcessed = 0
+      val totalProcessedSize = 0
+      val totalError = 0
+      val totalErrorSize = 0
     }
 
     case t: actio.datapipes.pipescript.Pipeline.Task => new TaskOperation {
@@ -52,9 +64,9 @@ object SimpleExecutor {
       val myTask = Task(t.name, t.taskType, t.config)
 
       var totalProcessed = 0
-      var totalSizeProcessed = 0
-      var totalErrors = 0
-      var totalSizeErrors = 0
+      var totalProcessedSize = 0
+      var totalError = 0
+      var totalErrorSize = 0
 
       def next(value: Dom): Unit = {
         val size = value.success.elems.size
@@ -63,28 +75,23 @@ object SimpleExecutor {
 
           logger.debug(s"=== Task ${t.name} received Dom with last successful DataSet of size ($size) ===")
 
-          // get the events coming into this task and send them to the events pipeline
-          eventOperation.foreach{ o =>
-            if(value.events.nonEmpty) {
-              val eventDom = Dom() ~ Dom("start", Nil, DataArray(value.events.map(e => Event.toDataSet(e))), DataNothing(), Nil)
-              o.next(eventDom)
-            }
-          }
-
           myTask.next(value)
+
           totalProcessed = totalProcessed + 1
-          totalSizeProcessed = totalSizeProcessed + size
+          totalProcessedSize = totalProcessedSize + size
         }
         catch {
           case e: Exception => {
             logger.error(s"=== Task ${t.name} failed to process last successful DataSet of size ($size) ===")
+            logger.error(e.getMessage)
 
-            totalErrors = totalErrors + 1
-            totalSizeErrors = totalSizeErrors + size
-
-            eventOperation.foreach{ o=>
-              o.next(Dom() ~ Dom("start", Nil, DataArray(Event.toDataSet(Event(pipelineRunId, t.name,"ERROR", "CONTINUE", e.getMessage))), DataNothing(), Nil))
+            eventOperation.foreach{ eo =>
+              eo(List(Event.taskError(pipelineRunId, operation.name, 1, size,
+                0, 0, e)))
             }
+
+            totalError = totalError + 1
+            totalErrorSize = totalErrorSize + size
           }
         }
       }
@@ -93,23 +100,9 @@ object SimpleExecutor {
 
         logger.info(s"=== Operation ${operation.name} completed ===");
 
-        eventOperation.foreach{ o =>
-
-          val myEvents =
-            (if (totalErrors == 0)
-              List(Event.toDataSet(Event.taskNoErrorTotal(pipelineRunId, operation.name, totalProcessed)),
-                Event.toDataSet(Event.taskNoErrorTotalSize(pipelineRunId, operation.name, totalSizeProcessed))
-              )
-            else Nil
-              ) :::
-              (if (totalErrors>0)
-                List(Event.toDataSet(Event.taskTotalError(pipelineRunId, operation.name, totalErrors)),
-                  Event.toDataSet(Event.taskTotalSizeError(pipelineRunId, operation.name, totalSizeErrors))
-                )
-              else Nil)
-
-          val eventDom = Dom() ~ Dom("start", Nil, DataArray(myEvents), DataNothing(), Nil)
-          o.next(eventDom)
+        eventOperation.foreach{ eo =>
+          eo(List(Event.taskCompleted(pipelineRunId, operation.name, totalError, totalErrorSize,
+            totalProcessed, totalProcessedSize, s"Task ${operation.name} completed.")))
         }
 
         myTask.completed()
@@ -141,6 +134,11 @@ object SimpleExecutor {
         override def error(exception: Throwable): Unit = _observer.foreach(o => o.error(exception))
 
         override def subscribe(observer: Observer[Dom]): Unit = _observer.append(observer)
+
+        val totalProcessed = 0
+        val totalProcessedSize = 0
+        val totalError = 0
+        val totalErrorSize = 0
       }
 
       l.subscribe(i)
@@ -163,6 +161,11 @@ object SimpleExecutor {
       }
 
       def subscribe(observer: Observer[Dom]): Unit = r.subscribe(observer)
+
+      val totalProcessed = 0
+      val totalProcessedSize = 0
+      val totalError = 0
+      val totalErrorSize = 0
     }
   }
 

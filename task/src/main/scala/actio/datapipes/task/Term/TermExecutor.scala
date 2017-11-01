@@ -121,8 +121,12 @@ class TermExecutor(nameSpace: String) {
   def evalApply(t: Term.Apply, scope: Map[String, AnyRef]): DataSet = t match {
 
     // construct a fixed size DataArray
-    case Term.Apply(Term.Name("DataArray"), args) =>
+    case Term.Apply(Term.Name("Array"), args) =>
       DataArray(args.map(eval(_, scope)).toList)
+
+    // construct a fixed size DataArray
+    case Term.Apply(Term.Name("Record"), args) =>
+      DataRecord(args.map(eval(_, scope)).toList)
 
     // dynamically call function, evaluating parameters before execution
     case Term.Apply(Term.Name(fName), args)
@@ -246,6 +250,9 @@ class TermExecutor(nameSpace: String) {
     // check the size of the data set
     case Term.Apply(Term.Select(t, Term.Name("size")), Nil) =>
       DataNumeric(eval(t, scope).size)
+
+    case Term.Apply(Term.Select(t, Term.Name("toString")), Nil) =>
+      DataString(eval(t, scope).stringOption.getOrElse(""))
 
     // check the size of the data set
     case Term.Apply(Term.Select(t, Term.Name("flatten")), Nil) => Operators.flatten(eval(t, scope))

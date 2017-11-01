@@ -63,12 +63,14 @@ object AppConsole {
       new AppService(pf)
     else {
       val startPipeline = pf.pipelines.find(f => f.name == pf.defaultPipeline).get
-      val eventPipeline = pf.pipelines.find(f => f.name == "p_events").map(e => SimpleExecutor.getRunnable(e, None))
+      val eventPipeline = pf.pipelines.find(f => f.name == "p_events")
+        .map(e => (events: List[Event]) => SimpleExecutor.getRunnable(e, None)
+          .next(Dom() ~ Dom("start", Nil, config, DataNothing(), Nil) ~
+            Dom("event", Nil, DataArray(events.map(Event.toDataSet)), DataNothing(), Nil)))
 
       // send start event
       eventPipeline.foreach { ep =>
-        val startEvent = Event.toDataSet(Event(pipelineRunId, "run","INFO", "START", "Started DataPipes Runtime"))
-        ep.next(Dom() ~ Dom("start", Nil, DataArray(startEvent), DataNothing(), Nil))
+        ep(List(Event.runStarted()))
       }
 
       // run the main pipeline
@@ -76,8 +78,7 @@ object AppConsole {
 
       // send the finish event
       eventPipeline.foreach { ep =>
-        val startEvent = Event.toDataSet(Event(pipelineRunId, "run","INFO", "FINISH", "Finished DataPipes Runtime"))
-        ep.next(Dom() ~ Dom("start", Nil, DataArray(startEvent), DataNothing(), Nil))
+        ep(List(Event.runCompleted()))
       }
     }
 

@@ -71,6 +71,8 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
 
 
       dataSource.execute(config("dataSource"), DataString("create", query))
+
+      _observer.foreach(o => o.next(value))
     }
   }
 

@@ -4,7 +4,7 @@ import java.io.InputStream
 import java.security.{KeyStore, SecureRandom}
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
-import actio.common.Data.{DataNothing, DataSet, DataString, JsonXmlDataSet}
+import actio.common.Data._
 import actio.common.{Dom, Observer}
 import actio.datapipes.pipescript.Pipeline.PipeScript
 import actio.datapipes.pipeline.SimpleExecutor.TaskOperation
@@ -19,7 +19,7 @@ import com.typesafe.scalalogging.Logger
 import org.json4s.{DefaultFormats, JValue, native}
 import Directives._
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport._
-import akka.http.scaladsl.{ ConnectionContext, HttpsConnectionContext }
+import akka.http.scaladsl.{ConnectionContext, HttpsConnectionContext}
 
 class AppService(pipeScript: PipeScript) {
   val logger = Logger("AppService")
@@ -40,6 +40,11 @@ class AppService(pipeScript: PipeScript) {
     def error(exception: Throwable): Unit = ???
 
     def subscribe(observer: Observer[Dom]): Unit = ???
+
+    val totalProcessed = 0
+    val totalProcessedSize = 0
+    val totalError = 0
+    val totalErrorSize = 0
   }
 
   val pipeLine = (name: String) => pipeScript.pipelines.find(p => p.name == name).map(p => SimpleExecutor.getService(p, taskListen))
@@ -59,10 +64,11 @@ class AppService(pipeScript: PipeScript) {
         else
           reject
       } ~
-      post {
+        (post & extract(_.request.headers)) { headers =>
         entity(as[String]) { str =>
           logger.info(s"POST received, using text body.")
-          handle(DataString(str), name)
+          val dataSet = DataArray(DataRecord(DataString("body",str) :: headers.map(h => DataString(h.name(), h.value())).toList))
+          handle(dataSet, name)
         }
       }
     }

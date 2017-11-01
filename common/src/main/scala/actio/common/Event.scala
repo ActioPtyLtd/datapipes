@@ -9,24 +9,23 @@ import java.util.TimeZone
 case class Event(
   pipeInstanceId: String,
   taskInstanceId: String,
-  theType: String,
-  theAction: String,
-  msg: String,
+  eventType: String,
+  message: String,
   time: Long,
-  keyName: String = "",
-  counter: String = "",
-  theCount: Int = 0
+  totalError: Int = 0,
+  totalErrorSize: Int = 0,
+  totalProcessed: Int = 0,
+  totalProcessedSize: Int = 0
 )
 
 object Event {
   def apply(
     pipeInstanceId: String,
     taskInstanceId: String,
-    theType: String,
-    theAction: String,
-    msg: String
+    eventType: String,
+    message: String
   ) =
-    new Event(pipeInstanceId, taskInstanceId, theType, theAction, msg, System.currentTimeMillis())
+    new Event(pipeInstanceId, taskInstanceId, eventType, message, System.currentTimeMillis())
 
   import java.text.SimpleDateFormat
 
@@ -39,41 +38,41 @@ object Event {
       DataString("event_id", UUID.randomUUID().toString),
       DataString("pipeline_run_id", e.pipeInstanceId),
       DataString("task_run_id", e.taskInstanceId),
-      DataString("detail", e.taskInstanceId),
-      DataString("event_type", e.theType),
+      DataString("event_type", e.eventType),
       DataString("event_time", sdf.format(new java.util.Date(e.time))),
-      DataString("action_type", e.theAction),
-      DataString("message", e.msg),
-      DataString("counterValue", e.theCount.toString),
-      DataString("counterTotal", e.theCount.toString),
-      DataString("counterLabel", e.counter)
+      DataString("message", e.message),
+      DataNumeric("totalError", e.totalError),
+      DataNumeric("totalErrorSize", e.totalErrorSize),
+      DataNumeric("totalProcessed", e.totalProcessed),
+      DataNumeric("totalProcessedSize", e.totalProcessedSize)
     )
   }
 
-  def taskTotalError(
+  def taskCompleted(
     pipeInstanceId: String,
     taskInstanceId: String,
-    size: Int
-  ) = new Event(pipeInstanceId, taskInstanceId,
-    "TASK FINISH", "PARTIAL", "Some data for this Task failed to process.", System.currentTimeMillis(), "Total Error", "Total Error", size)
+    totalError: Int,
+    totalErrorSize: Int,
+    totalProcessed: Int,
+    totalProcessedSize: Int,
+    message: String
+  ) = new Event(pipeInstanceId, taskInstanceId, "Task Completed", "Task " + taskInstanceId + "completed.", System.currentTimeMillis(),
+    totalError, totalErrorSize, totalProcessed, totalProcessedSize)
 
-  def taskTotalSizeError(
-    pipeInstanceId: String,
-    taskInstanceId: String,
-    size: Int
-  ) = new Event(pipeInstanceId, taskInstanceId,
-    "TASK FINISH", "PARTIAL", "Some data for this Task failed to process.", System.currentTimeMillis(), "Total Size Error", "Total Size Error", size)
+  def taskError(pipeInstanceId: String,
+                taskInstanceId: String,
+                totalError: Int,
+                totalErrorSize: Int,
+                totalProcessed: Int,
+                totalProcessedSize: Int,
+                exception: Exception
+               ) = new Event(pipeInstanceId, taskInstanceId, "Task Error", exception.getMessage, System.currentTimeMillis(),
+    totalError, totalErrorSize, totalProcessed, totalProcessedSize)
 
-  def taskNoErrorTotal(pipeInstanceId: String,
-                  taskInstanceId: String,
-                  size: Int
-                 ) = new Event(pipeInstanceId, taskInstanceId,
-    "TASK FINISH", "COMPLETE", "All data has been processed successfully.", System.currentTimeMillis(), "Total Processed", "Total Processed", size)
+  def runStarted() =  new Event("", "", "Run Started", "Run Started.", System.currentTimeMillis(),
+    0, 0, 0, 0)
 
-  def taskNoErrorTotalSize(pipeInstanceId: String,
-                       taskInstanceId: String,
-                       size: Int
-                      ) = new Event(pipeInstanceId, taskInstanceId,
-    "TASK FINISH", "COMPLETE", "All data has been processed successfully.", System.currentTimeMillis(), "Total Size Processed", "Total Size Processed", size)
+  def runCompleted() = new Event("", "", "Run Completed", "Run Completed.", System.currentTimeMillis(),
+    0, 0, 0, 0)
 
 }

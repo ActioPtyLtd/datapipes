@@ -138,6 +138,10 @@ object Functions {
     DataString(new DecimalFormat(format).format(Try(BigDecimal(value)).getOrElse(BigDecimal(0))))
   }
 
+  def numericFormatWithDefault(value: String, format: String, defaultString: String) =  {
+    DataString(Try(new DecimalFormat(format).format(BigDecimal(value))).getOrElse(defaultString))
+  }
+
   def sign(value: String): DataSet = DataNumeric(Try(BigDecimal(value).signum).getOrElse(0))
 
   def integer(value: String): DataSet = DataNumeric(Try(BigDecimal(value.toInt)).getOrElse(BigDecimal(0)))
