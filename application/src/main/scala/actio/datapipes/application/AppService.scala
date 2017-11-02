@@ -65,58 +65,51 @@ class AppService(pipeScript: PipeScript) {
           reject
       } ~
         (post & extract(_.request.headers)) { headers =>
-        entity(as[String]) { str =>
-          logger.info(s"POST received, using text body.")
-          val dataSet = DataArray(DataRecord(DataString("body",str) :: headers.map(h => DataString(h.name(), h.value())).toList))
-          handle(dataSet, name)
+          entity(as[String]) { str =>
+            logger.info(s"POST received, using text body.")
+            val dataSet = DataArray(DataRecord(DataString("body", str), DataRecord("headers", headers.map(h => DataString(h.name(), h.value())).toList)))
+            handle(dataSet, name)
+          }
         }
-      }
     }
-
 
   val port = pipeScript.settings("port").intOption.getOrElse(8080)
   val https = pipeScript.settings("ssl").toOption.map(ssl =>
-    httpsContext(ssl("key-store-password").stringOption.get,
+    httpsContext(
+      ssl("key-store-password").stringOption.get,
       ssl("key-store").stringOption.get,
       ssl("key-store-type").stringOption.get
     ))
 
-  if(https.isDefined) {
+  if (https.isDefined) {
     Http().setDefaultServerHttpContext(https.get)
     Http().bindAndHandle(route, "0.0.0.0", sys.props.get("http.port").fold(port)(_.toInt), https.get)
-  }
-  else
+  } else
     Http().bindAndHandle(route, "0.0.0.0", sys.props.get("http.port").fold(port)(_.toInt))
-
 
   def handle(ds: DataSet, name: String) = {
     val call = pipeLine(name)
-      if(call.isEmpty)
-        reject
-      else {
-        call.get.start(ds)
+    if (call.isEmpty)
+      reject
+    else {
+      call.get.start(ds)
 
-        import JsonXmlDataSet.Extend
+      import JsonXmlDataSet.Extend
 
-        taskListen.response.headOption.map(_.success) match {
-          case Some(ds) =>
-            if(ds == DataNothing())
-              complete(StatusCodes.OK)
-            else {
-              ds match {
-                case DataString(_, str) =>
-                  complete(ds("status").intOption.getOrElse(200), str)
-                case _ => {
-                  implicit val serialization = native.Serialization
-                  implicit val formats = DefaultFormats
+      taskListen.response.success.headOption match {
+        case Some(DataNothing(_)) =>
+          complete(StatusCodes.OK)
+        case Some(DataString(_, str)) =>
+          complete(ds("status").intOption.getOrElse(200), str)
+        case Some(rts) => {
+          implicit val serialization = native.Serialization
+          implicit val formats = DefaultFormats
 
-                  complete(ds("status").intOption.getOrElse(200), ds.toJsonAST)
-                }
-              }
-            }
-          case _ => complete(StatusCodes.InternalServerError, "")
+          complete(ds("status").intOption.getOrElse(200), rts.toJsonAST)
         }
+        case _ => complete(StatusCodes.InternalServerError, "")
       }
+    }
   }
 
   def httpsContext(pword: String, keyStoreName: String, keyStoreType: String): HttpsConnectionContext = {

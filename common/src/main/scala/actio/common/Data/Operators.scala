@@ -21,6 +21,9 @@ object Operators {
           case (Some(f@DataRecord(_, _)), DataRecord(_, _)) =>
             mergeLeft(DataRecord(l.label, mergeLeft(f, head, newLabel)
               :: l.elems.filterNot(f => f.label == head.label).toList), DataRecord(r.label, tail), newLabel)
+          case (Some(f@DataArray(_,_)), DataArray(_,_)) =>
+            mergeLeft(DataRecord(l.label, DataArray(head.label, (head.elems ++ f.elems).toList)
+              :: l.elems.filterNot(f => f.label == head.label).toList), DataRecord(r.label, tail), newLabel)
           case _ =>
             mergeLeft(l, DataRecord(r.label, DataRecord(newLabel, List(head)) :: tail), newLabel)
         }
