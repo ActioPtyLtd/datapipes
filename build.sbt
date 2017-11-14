@@ -24,6 +24,7 @@ lazy val datasources = project
     //"org.scala-lang.modules" %% "scala-async" % "0.9.6",
     "ch.qos.logback" % "logback-classic" % "1.1.7",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.5.0",
+    "com.microsoft.sqlserver" % "mssql-jdbc" % "6.2.2.jre8",
     "org.postgresql" % "postgresql" % "42.1.1",
     "org.apache.httpcomponents" % "httpclient" % "4.5.2",
     "me.chrons" %% "boopickle" % "1.2.5",

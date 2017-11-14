@@ -47,7 +47,8 @@ object FunctionExecutor {
     case ((methodParameter, ds: DataSet) :: tail)
       if methodParameter.getType == classOf[DataSet] => getParamValues(tail, ds :: result)
     case ((methodParameter, ds: DataSet) :: tail)
-      if methodParameter.getType == classOf[Array[String]] => getParamValues(tail, ds.map(_.stringOption.getOrElse("")).toArray :: result)
+      if methodParameter.getType == classOf[Array[String]] =>
+      getParamValues(tail, ds.map(_.stringOption.getOrElse("")).toArray :: result)
     case ((methodParameter, ds: DataSet) :: tail)
       if methodParameter.getType == classOf[String] => getParamValues(tail, ds.stringOption.getOrElse("") :: result)
     case _ => None
@@ -65,6 +66,8 @@ object FunctionExecutor {
       if methodParameter.getType == classOf[java.util.Date] => Some(new java.util.Date(date))
     case ((methodParameter, ds: DataSet))
       if methodParameter.getType == classOf[DataSet] => Some(ds)
+    case ((methodParameter, ds: DataSet))
+      if methodParameter.getType == classOf[Array[String]] => Some(ds.map(_.stringOption.getOrElse("")).toArray)
     case ((methodParameter, ds: DataSet))
       if methodParameter.getType == classOf[String] => Some(ds.stringOption.getOrElse(""))
     case _ => None
