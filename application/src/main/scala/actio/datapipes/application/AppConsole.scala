@@ -3,7 +3,7 @@ package actio.datapipes.application
 import java.io.File
 import java.util.UUID
 
-import actio.common.Data.{DataArray, DataNothing}
+import actio.common.Data.{DataArray, DataNothing, DataSet}
 import actio.common.{Dom, Event}
 import actio.datapipes.pipescript.Pipeline._
 import actio.datapipes.pipeline.SimpleExecutor
@@ -27,7 +27,7 @@ object AppConsole {
     options.addOption("s", "service", false, "run as Service, as configured in Services section")
     //options.addOption("n", "return number of records processed in final task as the exit code")
     //options.addOption("help", "print this help message")
-    //options.addOption("L", "load config file into Admin Server")
+    options.addOption("R", "Read config from REST service")
     //options.addOption("S", "Supress event streaming to Admin Server")
     //options.addOption(Option.builder("D").argName("property=value").hasArgs.valueSeparator('=').build)
 
@@ -55,34 +55,52 @@ object AppConsole {
 
     val config = ConfigReader.read(configFile)
 
-    val pf = Builder.build(config)
+    val executeConfig =
+      if(line.hasOption("R"))
+        downloadConfig(config("actio_home"))
+          .stringOption
+          .map(r => ConfigReader.readfromString(r))
+          .getOrElse(DataNothing())
+      else
+        config
 
-    logger.info(s"Running pipe: ${pf.defaultPipeline}")
+    if(executeConfig.isDefined) {
 
-    if(line.hasOption("s"))
-      new AppService(pf)
-    else {
-      val startPipeline = pf.pipelines.find(f => f.name == pf.defaultPipeline).get
-      val eventPipeline = pf.pipelines.find(f => f.name == "p_events")
-        .map(e => (events: List[Event]) => SimpleExecutor.getRunnable(e, None)
-          .next(Dom() ~ Dom("start", Nil, config, DataNothing(), Nil) ~
-            Dom("event", Nil, DataArray(events.map(Event.toDataSet)), DataNothing(), Nil)))
+      val pf = Builder.build(executeConfig)
 
-      // send start event
-      eventPipeline.foreach { ep =>
-        ep(List(Event.runStarted()))
+      logger.info(s"Running pipe: ${pf.defaultPipeline}")
+
+      if (line.hasOption("s"))
+        new AppService(pf)
+      else {
+        val startPipeline = pf.pipelines.find(f => f.name == pf.defaultPipeline).get
+        val eventPipeline = pf.pipelines.find(f => f.name == "p_events")
+          .map(e => (events: List[Event]) => SimpleExecutor.getRunnable(e, None)
+            .next(Dom() ~ Dom("start", Nil, executeConfig, DataNothing(), Nil) ~
+              Dom("event", Nil, DataArray(events.map(Event.toDataSet)), DataNothing(), Nil)))
+
+        // send start event
+        eventPipeline.foreach { ep =>
+          ep(List(Event.runStarted()))
+        }
+
+        // run the main pipeline
+        SimpleExecutor.getRunnable(startPipeline, eventPipeline).start(executeConfig)
+
+        // send the finish event
+        eventPipeline.foreach { ep =>
+          ep(List(Event.runCompleted()))
+        }
       }
 
-      // run the main pipeline
-      SimpleExecutor.getRunnable(startPipeline, eventPipeline).start(config)
-
-      // send the finish event
-      eventPipeline.foreach { ep =>
-        ep(List(Event.runCompleted()))
-      }
+      logger.info(s"Pipe ${pf.defaultPipeline} completed successfully.")
     }
+  }
 
-    logger.info(s"Pipe ${pf.defaultPipeline} completed successfully.")
+  def downloadConfig(config: DataSet) : DataSet = {
+    import actio.datapipes.dataSources.RESTJsonDataSource
+
+    new RESTJsonDataSource().executeQuery(config, config("query")("read"))("body")
   }
 
 }

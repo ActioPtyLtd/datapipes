@@ -20,6 +20,14 @@ object ConfigReader {
       throw new FileNotFoundException(file)
   }
 
+  def readfromString(str: String): DataSet = {
+    convert(
+      ConfigFactory.parseProperties(System.getProperties)
+        .withFallback(ConfigFactory.parseString(str))
+        .resolve()
+    )
+  }
+
   def convert(config: Config): DataSet = convert("root", config.root())
 
   def convert(label: String, config: ConfigValue): DataSet =
