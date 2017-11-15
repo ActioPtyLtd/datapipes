@@ -36,11 +36,16 @@ class JDBCDataSource extends DataSource {
       val cols = JDBCDataSource.uniqueNames(ordinals.map(metaData.getColumnName).toList, Nil)
       val header = (ordinals zip cols).map(o => (o._1, metaData.getColumnType(o._1), o._2)).toList
 
+      var rowsRead = 0
+
       while (rs.next()) {
+        rowsRead = rowsRead + 1
         _observer.foreach(o => o.next(DataRecord("row", header.map(v =>
           if(rs.getObject(v._1) == null) DataNothing(v._3) else
           JDBCDataSource.typeMap.get(v._2).map(m => m(v._3, v._1, rs)).getOrElse(DataString(v._3, rs.getObject(v._1).toString))))))
       }
+
+      logger.info(s"Total rows read: ${rowsRead}")
     } else {
       stmt.execute()
     }
