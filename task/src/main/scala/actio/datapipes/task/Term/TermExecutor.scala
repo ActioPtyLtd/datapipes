@@ -398,6 +398,7 @@ class TermExecutor(nameSpace: String) {
       value match {
         case DataString(_, v) => DataString(key, v)
         case DataNumeric(_, v) => DataNumeric(key, v)
+        case DataBoolean(_,b) => DataBoolean(key, b)
         case DataRecord(_,v) => DataRecord(key, v)
         case DataArray(_,v) => DataArray(key, v)
         case DataDate(_,v) => DataDate(key, v)
@@ -412,6 +413,7 @@ class TermExecutor(nameSpace: String) {
       value match {
         case DataString(_, v) => DataString(key, v)
         case DataNumeric(_, v) => DataNumeric(key, v)
+        case DataBoolean(_,b) => DataBoolean(key, b)
         case DataRecord(_,v) => DataRecord(key, v)
         case DataArray(_,v) => DataArray(key, v)
         case DataDate(_,v) => DataDate(key, v)
