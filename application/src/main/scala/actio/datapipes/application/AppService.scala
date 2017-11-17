@@ -29,28 +29,17 @@ class AppService(pipeScript: PipeScript) {
 
   import system.dispatcher
 
-  val taskListen = new TaskOperation {
 
-    var response: Dom = Dom()
 
-    def next(value: Dom): Unit = response = value
-
-    def completed(): Unit = {}
-
-    def error(exception: Throwable): Unit = ???
-
-    def subscribe(observer: Observer[Dom]): Unit = ???
-
-    val totalProcessed = 0
-    val totalProcessedSize = 0
-    val totalError = 0
-    val totalErrorSize = 0
-  }
-
-  val pipeLine = (name: String) => pipeScript.pipelines.find(p => p.name == name).map(p => SimpleExecutor.getService(p, taskListen))
+  val pipeLine = (name: String, task: TaskOperation) => pipeScript.pipelines.find(p => p.name == name).map(p => SimpleExecutor.getService(p, task))
 
   val route: Route =
     path("datapipes" / ".*".r) { name =>
+      (get & extract(_.request.headers)) { headers =>
+        logger.info(s"GET received.")
+        val dataSet = DataArray(DataRecord(DataRecord("headers", headers.map(h => DataString(h.name(), h.value())).toList)))
+        handle(dataSet, name)
+      } ~
       (post & extract(_.request.entity.contentType.mediaType)) { ctype =>
 
         implicit val serialization = native.Serialization
@@ -88,7 +77,26 @@ class AppService(pipeScript: PipeScript) {
     Http().bindAndHandle(route, "0.0.0.0", sys.props.get("http.port").fold(port)(_.toInt))
 
   def handle(ds: DataSet, name: String) = {
-    val call = pipeLine(name)
+
+    val taskListen = new TaskOperation {
+
+      var response: Dom = Dom()
+
+      def next(value: Dom): Unit = response = value
+
+      def completed(): Unit = {}
+
+      def error(exception: Throwable): Unit = ???
+
+      def subscribe(observer: Observer[Dom]): Unit = ???
+
+      val totalProcessed = 0
+      val totalProcessedSize = 0
+      val totalError = 0
+      val totalErrorSize = 0
+    }
+
+    val call = pipeLine(name, taskListen)
     if (call.isEmpty)
       reject
     else {
@@ -96,18 +104,17 @@ class AppService(pipeScript: PipeScript) {
 
       import JsonXmlDataSet.Extend
 
-      taskListen.response.success.headOption match {
-        case Some(DataNothing(_)) =>
+      taskListen.response.success match {
+        case DataNothing(_) =>
           complete(StatusCodes.OK)
-        case Some(DataString(_, str)) =>
+        case DataString(_, str) =>
           complete(ds("status").intOption.getOrElse(200), str)
-        case Some(rts) => {
+        case rts => {
           implicit val serialization = native.Serialization
           implicit val formats = DefaultFormats
 
           complete(ds("status").intOption.getOrElse(200), rts.toJsonAST)
         }
-        case _ => complete(StatusCodes.InternalServerError, "")
       }
     }
   }
