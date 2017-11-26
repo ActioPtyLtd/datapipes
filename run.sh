@@ -19,6 +19,9 @@ while [ "$1" != "" ]; do
         -s | --service )        shift
                                 pipe_name="-s"
                                 ;;
+        -R | --Read )           shift
+                                pipe_name="-R"
+                                ;;
         -h | --help )           echo $USAGE
                                 exit 1
                                 ;;

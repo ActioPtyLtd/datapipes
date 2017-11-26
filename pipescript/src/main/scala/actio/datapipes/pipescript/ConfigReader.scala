@@ -20,10 +20,14 @@ object ConfigReader {
       throw new FileNotFoundException(file)
   }
 
-  def readfromString(str: String): DataSet = {
+  def readfromConfigList(config: Config, str: List[String]): Config = str match {
+    case Nil => config
+    case (h::t) => readfromConfigList(config.withFallback(ConfigFactory.parseString(h)), t)
+  }
+
+  def readfromConfigList(str: List[String]): DataSet = {
     convert(
-      ConfigFactory.parseProperties(System.getProperties)
-        .withFallback(ConfigFactory.parseString(str))
+      readfromConfigList(ConfigFactory.parseProperties(System.getProperties), str)
         .resolve()
     )
   }

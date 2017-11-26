@@ -56,11 +56,15 @@ object AppConsole {
     val config = ConfigReader.read(configFile)
 
     val executeConfig =
-      if(line.hasOption("R"))
-        downloadConfig(config("actio_home"))
-          .stringOption
-          .map(r => ConfigReader.readfromString(r))
-          .getOrElse(DataNothing())
+      if(line.hasOption("R")) {
+        val configs = downloadConfig(config("actio_home")).elems.toList
+          .flatMap(r => r("config").stringOption)
+
+        if (configs.isEmpty)
+          DataNothing()
+        else
+          ConfigReader.readfromConfigList(configs)
+      }
       else
         config
 
