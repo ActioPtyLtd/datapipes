@@ -41,7 +41,7 @@ object Functions {
 
   def split(str: String, s: String): Array[String] = str.split(s)
 
-  def concat(strArray: Array[String]): String = concat(strArray, ",")
+  //def concat(strArray: Array[String]): String = concat(strArray, ",")
 
   def concat(strArray: Array[String], separator: String): String = {
     strArray.mkString(separator)

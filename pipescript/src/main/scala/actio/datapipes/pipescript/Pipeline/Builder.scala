@@ -18,6 +18,7 @@ object Builder {
     val pipe = "pipe"
     val pipelines = "pipelines"
     val settings = "settings"
+    val service = "services"
 
     val defaultPipeName = ds(script)(startup)(exec).stringOption.getOrElse("")
 
@@ -29,7 +30,17 @@ object Builder {
     val pipes = ds(script)(pipelines).elems.toList.sortBy(s => s.label) // important to reverse so it can find pipe names
     val newpipes = topologySort(pipes)
 
-    PipeScript(ds(script)(settings), tasks.values.toList, getPipes(tasks, newpipes), defaultPipeName)
+    val piplist = getPipes(tasks, newpipes)
+
+    val services = ds(script)(service).elems.map(m => Service(
+      m("path").stringOption.getOrElse(""),
+      m("get").stringOption.map(g => piplist.find(f => f.name == g).get),
+      m("put").stringOption.map(g => piplist.find(f => f.name == g).get),
+      m("post").stringOption.map(g => piplist.find(f => f.name == g).get),
+      m("patch").stringOption.map(g => piplist.find(f => f.name == g).get)
+    )).toList
+
+    PipeScript(ds(script)(settings), services, tasks.values.toList, piplist, defaultPipeName)
 
   }
 

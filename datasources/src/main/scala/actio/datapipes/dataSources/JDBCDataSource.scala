@@ -16,8 +16,7 @@ class JDBCDataSource extends DataSource {
 
   def subscribe(observer: Observer[DataSet]): Unit = _observer.append(observer)
 
-  def execute(config: DataSet, statement: String, executeQuery: Boolean): Unit = {
-    val connectionString = config("connect").stringOption.getOrElse("")
+  def execute(connectionString: String, statement: String, executeQuery: Boolean): Unit = {
 
     val cn = DriverManager.getConnection(connectionString)
 
@@ -59,7 +58,16 @@ class JDBCDataSource extends DataSource {
 
   override def execute(config: DataSet, query: DataSet*): Unit = {
     val read = query.headOption.map(_.label).contains("read")
-    execute(config, query.flatMap(_.stringOption).mkString(";"), read)
+    val connection = query.headOption.map(q => q("connect").stringOption.getOrElse(config("connect").stringOption.getOrElse(""))).getOrElse("")
+    val hasSqlDefined = query.headOption.exists(f => f("sql").isDefined)
+
+    val qs =
+      if(hasSqlDefined)
+        query.flatMap(f => f("sql").stringOption).mkString(";")
+      else
+        query.flatMap(_.stringOption).mkString(";")
+
+    execute(connection, qs, read)
   }
 
   def getCreateTableStatement(config: DataSet, statement: String): String = {
