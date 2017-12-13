@@ -37,7 +37,8 @@ object Builder {
       m("get").stringOption.map(g => piplist.find(f => f.name == g).get),
       m("put").stringOption.map(g => piplist.find(f => f.name == g).get),
       m("post").stringOption.map(g => piplist.find(f => f.name == g).get),
-      m("patch").stringOption.map(g => piplist.find(f => f.name == g).get)
+      m("patch").stringOption.map(g => piplist.find(f => f.name == g).get),
+      m("proxyuri").stringOption.map((_,m("proxyport").intOption.getOrElse(80)))
     )).toList
 
     PipeScript(ds(script)(settings), services, tasks.values.toList, piplist, defaultPipeName)

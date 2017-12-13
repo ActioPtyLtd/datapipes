@@ -29,6 +29,7 @@ lazy val datasources = project
     "org.apache.httpcomponents" % "httpclient" % "4.5.2",
     "me.chrons" %% "boopickle" % "1.2.5",
     "com.amazonaws" % "aws-java-sdk-s3" % "1.11.184",
+      "org.apache.commons" % "commons-compress" % "1.15",
     "com.github.albfernandez" % "javadbf" % "1.2.1"))
   .dependsOn(pipescript)
 
@@ -51,7 +52,7 @@ lazy val task = project
 lazy val application = project
   .settings(libraryDependencies ++= Seq("commons-cli" % "commons-cli" % "1.3.1",
     "de.heikoseeberger" % "akka-http-json4s_2.11" % "1.16.1",
-    "com.typesafe.akka" %% "akka-http" % "10.0.1",
+    "com.typesafe.akka" %% "akka-http" % "10.0.11",
   "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.1"))
   .dependsOn(pipescript, datasources, common, task, pipeline)
 

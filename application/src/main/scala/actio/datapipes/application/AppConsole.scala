@@ -5,6 +5,7 @@ import java.util.UUID
 
 import actio.common.Data.{DataArray, DataNothing, DataSet}
 import actio.common.{Dom, Event}
+import actio.datapipes.dataSources.TusDataSource
 import actio.datapipes.pipescript.Pipeline._
 import actio.datapipes.pipeline.SimpleExecutor
 import actio.datapipes.pipeline.SimpleExecutor.pipelineRunId
@@ -28,6 +29,8 @@ object AppConsole {
     //options.addOption("n", "return number of records processed in final task as the exit code")
     //options.addOption("help", "print this help message")
     options.addOption("R", "Read config from REST service")
+    options.addOption("u", "Upload files only")
+    options.addOption("U", "Upload files after run")
     //options.addOption("S", "Supress event streaming to Admin Server")
     //options.addOption(Option.builder("D").argName("property=value").hasArgs.valueSeparator('=').build)
 
@@ -42,7 +45,8 @@ object AppConsole {
 
     if(line.hasOption("p"))
       System.setProperty("script.startup.exec",line.getOptionValue('p'))
-    System.setProperty("run.id", UUID.randomUUID().toString)
+    if(System.getProperty("run.id") == null)
+      System.setProperty("run.id", UUID.randomUUID().toString)
     System.setProperty("run.configName", FilenameUtils.removeExtension(new File(configFile).getName))
     System.setProperty("run.pipeName", if (line.hasOption("p")) line.getOptionValue('p') else "default")
 
@@ -52,6 +56,7 @@ object AppConsole {
     System.setProperty("run.startDate", dateFormat.format(new java.util.Date()))
 
     logger.info(configFile)
+    logger.info(s"run.id=${System.getProperty("run.id")}")
 
     val config = ConfigReader.read(configFile)
 
@@ -68,14 +73,23 @@ object AppConsole {
       else
         config
 
+    if(executeConfig.isDefined && line.hasOption("u")) {
+      syncFiles(executeConfig)
+      Runtime.getRuntime.exit(0)
+    }
+
     if(executeConfig.isDefined) {
 
       val pf = Builder.build(executeConfig)
 
       logger.info(s"Running pipe: ${pf.defaultPipeline}")
 
-      if (line.hasOption("s"))
+      if (line.hasOption("s")) {
+        logger.info(s"Runing data pipes as a service on port ${pf.settings("port").intOption.getOrElse(8080)}.")
+        // this is a workaround because HEAD requests were magically converted to GET requests
+        System.setProperty("akka.http.server.transparent-head-requests", "false")
         new AppService(pf)
+      }
       else {
         val startPipeline = pf.pipelines.find(f => f.name == pf.defaultPipeline).get
         val eventPipeline = pf.pipelines.find(f => f.name == "p_events")
@@ -91,6 +105,10 @@ object AppConsole {
         // run the main pipeline
         SimpleExecutor.getRunnable(startPipeline, eventPipeline).start(executeConfig)
 
+        if(line.hasOption("U")) {
+          syncFiles(executeConfig)
+        }
+
         // send the finish event
         eventPipeline.foreach { ep =>
           ep(List(Event.runCompleted()))
@@ -105,6 +123,10 @@ object AppConsole {
     import actio.datapipes.dataSources.RESTJsonDataSource
 
     new RESTJsonDataSource().executeQuery(config, config("query")("read"))("body")
+  }
+
+  def syncFiles(config: DataSet) = {
+    new TusDataSource().execute(config("actio_sync"), config("actio_sync")("query")("create"))
   }
 
 }

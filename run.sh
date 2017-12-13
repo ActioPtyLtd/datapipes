@@ -3,6 +3,7 @@ JARFILE=$(find ./application/target/scala-2.11/ -name 'datapipes-assembly*.jar')
 
 config_name="./application.conf"
 pipe_name=""
+upload = ""
 vmargs=""
 service=""
 
@@ -22,6 +23,12 @@ while [ "$1" != "" ]; do
         -R | --Read )           shift
                                 pipe_name="-R"
                                 ;;
+        -u | --upload-only )    shift
+                                upload="-u"
+                                ;;
+        -U | --upload )         shift
+                                upload="-U"
+                                ;;
         -h | --help )           echo $USAGE
                                 exit 1
                                 ;;
@@ -33,4 +40,4 @@ done
 
 echo "Running Java with VM Arguments: $vmargs"
 
-java $vmargs -cp $JARFILE actio.datapipes.application.AppConsole $config_name $pipe_name $service
+java $vmargs -cp $JARFILE actio.datapipes.application.AppConsole $config_name $pipe_name $upload $service

@@ -1,6 +1,7 @@
 package actio.datapipes.application
 
 import java.io.InputStream
+import java.net.URI
 import java.security.{KeyStore, SecureRandom}
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
@@ -12,14 +13,16 @@ import actio.datapipes.pipeline._
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.MediaTypes._
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model.{HttpHeader, HttpRequest, StatusCodes}
 import akka.http.scaladsl.server._
 import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.Logger
 import org.json4s.{DefaultFormats, JValue, native}
 import Directives._
+import akka.http.scaladsl.model.headers.RawHeader
 import de.heikoseeberger.akkahttpjson4s.Json4sSupport._
 import akka.http.scaladsl.{ConnectionContext, HttpsConnectionContext}
+import akka.stream.scaladsl.{Sink, Source}
 
 import scala.meta.Term
 
@@ -30,8 +33,6 @@ class AppService(pipeScript: PipeScript) {
   implicit val materializer = ActorMaterializer()
 
   import system.dispatcher
-
-
 
   val pipeLine = (name: String, task: TaskOperation) => pipeScript.pipelines.find(p => p.name == name).map(p => SimpleExecutor.getService(p, task))
 
@@ -136,16 +137,53 @@ class AppService(pipeScript: PipeScript) {
 
     val urlPath = service.path.split("/").toList
 
-    path(Segments) { segments =>
+    (path(Segments) | path(Segments /)) { segments =>
+      logger.info(segments.size.toString)
 
-      if(segments.size != urlPath.size)
+      if(segments.size != urlPath.size &&
+        (urlPath.last.endsWith("*") && segments.size < (urlPath.size))
+      )
         reject
       else {
 
         val zs = segments zip urlPath
 
-        if (zs.exists(z => !z._2.startsWith("$") && z._2 != z._1))
+        if (zs.exists(z => z._2 != "*" && !z._2.startsWith("$") && z._2 != z._1))
           reject
+        else if (service.proxy.isDefined) {
+          (ctx: RequestContext) => {
+            logger.info(ctx.request.method.toString())
+            logger.info("Proxy to: " + service.proxy.get._1 + "/" + segments.drop(zs.size - 1).mkString("/") +
+              (if(ctx.request.uri.toString.endsWith("/")) "/" else ""))
+            ctx.complete(Http().singleRequest(ctx.request
+              .withHeaders(ctx.request.headers :+
+                              RawHeader("X-Forwarded-Host", ctx.request.getUri.getHost.toString + ":" + ctx.request.getUri.getPort + "/" +
+                                zs.dropRight(1).map(_._1).mkString("/")) :+
+                              RawHeader("X-Forwarded-Proto", ctx.request.uri.scheme)
+                            )
+              //  .withUri("http://localhost:49160/files/3dbe65d656433f60f9891a929c6b6f30"))
+              .withUri(service.proxy.get._1 + "/" + segments.drop(zs.size - 1).mkString("/") +
+              (if(ctx.request.uri.toString.endsWith("/")) "/" else "")))
+            )
+          }
+        }
+//        else if(service.proxy.isDefined) {
+//          (ctx: RequestContext) =>
+//            logger.info("Proxy to: " + service.proxy.get._1 + "/" + segments.drop(zs.size - 1).mkString("/") + (if(ctx.request.uri.toString.endsWith("/")) "/" else ""))
+//            Source.single(ctx.request
+//              .withHeaders(ctx.request.headers :+
+//                                            RawHeader("X-Forwarded-Host", ctx.request.getUri.getHost.toString + ":" + ctx.request.getUri.getPort + "/" +
+//                                              zs.dropRight(1).map(_._1).mkString("/")) :+
+//                                            RawHeader("X-Forwarded-Proto", ctx.request.uri.scheme)
+//                                          )
+//              .withUri(service.proxy.get._1 + "/" + segments.drop(zs.size - 1).mkString("/") +
+//                (if(ctx.request.uri.toString.endsWith("/")) "/" else ""))
+//              )
+//              .via(Http(system).outgoingConnection(new URI(service.proxy.get._1).getHost,service.proxy.get._2))
+//              .runWith(Sink.head)
+//              .flatMap(ctx.complete(_))
+//
+//        }
         else {
           extract(_.request.headers) { headers =>
             (get & extract(_.request.uri.query().toSeq)) { params =>

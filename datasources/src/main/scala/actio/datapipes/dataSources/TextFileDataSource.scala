@@ -23,7 +23,8 @@ class TextFileDataSource extends DataSource {
     logger.info(s"Reading file: ${filePath}...")
 
     val send = for {
-      line <- io.Source.fromFile(filePath).getLines()
+
+      line <- scala.io.Source.fromFile(filePath).getLines()
       o <- _observer
     } yield (o, line)
 
