@@ -24,8 +24,8 @@ class TusDataSource extends DataSource {
 
   def execute(config: DataSet, query: DataSet*): Unit = {
 
-    val uri = query.head("uri").stringOption.getOrElse("")
-    val source = config("directory").stringOption.getOrElse("")
+    val uri = query.head("uri").toString
+    val source = config("directory").toString
     val folder = new java.io.File(source)
     val filePaths = Option(folder.listFiles)
 

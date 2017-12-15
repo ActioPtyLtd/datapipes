@@ -5,6 +5,8 @@ case class DataArray(label: String, arrayElems: List[DataSet]) extends DataBase 
   override def apply(ord: Int): DataSet = arrayElems.lift(ord).getOrElse(DataNothing())
 
   override def elems: Seq[DataSet] = arrayElems
+
+  override def toString: String = ""
 }
 
 object DataArray {

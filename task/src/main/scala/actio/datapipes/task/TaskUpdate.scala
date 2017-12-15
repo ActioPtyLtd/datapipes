@@ -54,8 +54,8 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
 
         override def next(value: DataSet): Unit = {
           Cache.dim.put(
-            termExecutor.eval(value, keyRightTerm).stringOption.getOrElse(""),
-            termExecutor.eval(value, changeRightTerm).stringOption.getOrElse("")
+            termExecutor.eval(value, keyRightTerm).toString,
+            termExecutor.eval(value, changeRightTerm).toString
           )
         }
       }
@@ -70,8 +70,8 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
 
     val incoming = value.success.map(m => (
         m,
-        termExecutor.eval(m, keyLeftTerm).stringOption.getOrElse(""),
-        termExecutor.eval(m, changeLeftTerm).stringOption.getOrElse("")
+        termExecutor.eval(m, keyLeftTerm).toString,
+        termExecutor.eval(m, changeLeftTerm).toString
       )).toList
         .groupBy(g => g._2)
         .map(f => f._2.head)

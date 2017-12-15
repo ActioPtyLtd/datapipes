@@ -26,9 +26,9 @@ class TaskMergeLoad(val name: String, val config: DataSet) extends Task {
 
   def next(value: Dom): Unit = {
 
-    val entity = config("entity").stringOption.getOrElse("")
-    val key = if (config("key").stringOption.isDefined) List(config("key").stringOption.getOrElse("")) else
-      config("keys").map(_.stringOption.getOrElse("")).toList
+    val entity = config("entity").toString
+    val key = if (config("key").stringOption.isDefined) List(config("key").toString) else
+      config("keys").map(_.toString).toList
     val doUpdate = !config("update").stringOption.contains("false") && key.nonEmpty
 
     val rows = value.success.elems.groupBy(g => key.map(k => g(k).stringOption.getOrElse(g(k).toString)).mkString("/")).map(_._2.head)

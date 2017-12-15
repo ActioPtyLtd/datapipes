@@ -23,17 +23,17 @@ class AWSS3DataSource extends DataSource {
   def execute(config: DataSet, query: DataSet*): Unit = {
 
     val yourAWSCredentials = new BasicAWSCredentials(
-      config("credentials")("accessKey").stringOption.getOrElse(""),
-      config("credentials")("accessSecret").stringOption.getOrElse(""))
+      config("credentials")("accessKey").toString,
+      config("credentials")("accessSecret").toString)
 
     logger.info("Connecting to Amazon S3...")
 
     val changeEndpoint = (b: AmazonS3ClientBuilder) =>
     config("uri").stringOption.map(u =>
       b
-        .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(u,config("region").stringOption.getOrElse("")))
+        .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(u,config("region").toString))
         .withPathStyleAccessEnabled(true))
-      .getOrElse(b.withRegion(config("region").stringOption.getOrElse("")))
+      .getOrElse(b.withRegion(config("region").toString))
 
     val amazonS3Client = changeEndpoint(AmazonS3ClientBuilder
       .standard)
@@ -43,16 +43,16 @@ class AWSS3DataSource extends DataSource {
     logger.info("Successfully connected to Amazon S3.")
 
     val stream = new ByteArrayOutputStream()
-    FileDataSource.writeData(stream, config("behavior").stringOption.getOrElse(""),config("compression").stringOption, query)
+    FileDataSource.writeData(stream, config("behavior").toString,config("compression").stringOption, query)
     val output = stream.toString
 
-    val bucketName = config("bucketName").stringOption.getOrElse("")
+    val bucketName = config("bucketName").toString
 
     if(!amazonS3Client.doesBucketExist(bucketName))
       amazonS3Client.createBucket(bucketName)
 
     query.foreach { q =>
-      amazonS3Client.putObject(bucketName, q("key").stringOption.getOrElse(""), output)
+      amazonS3Client.putObject(bucketName, q("key").toString, output)
     }
   }
 }

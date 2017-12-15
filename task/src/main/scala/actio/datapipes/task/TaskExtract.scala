@@ -29,7 +29,7 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
       def completed(): Unit = {
         if (buffer.nonEmpty) {
           logger.info("Sending remaining buffered data...")
-          responseAdjust(start)
+          responseAdjust()
           buffer.clear()
           _observer.foreach(o => o.completed())
         }
@@ -41,7 +41,7 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
         buffer.enqueue(value)
 
         if (buffer.size == size) {
-          responseAdjust(start)
+          responseAdjust()
           buffer.clear()
         }
       }
@@ -50,9 +50,12 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
 
     dataSource.subscribe(dsObserver)
 
-    if (config("dataSource")("query")("read").toOption.isDefined)
-      dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, termRead,
-        start.success))
+    if (config("dataSource")("query")("read").toOption.isDefined) {
+      start.success.elems.foreach{ e =>
+        dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, termRead,
+          e))
+      }
+    }
     else
       dataSource.execute(config("dataSource"))
   }
@@ -60,7 +63,7 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
 
 
   // dont send an array for rest data source if v1
-  def responseAdjust(start: Dom): Unit = {
+  def responseAdjust(): Unit = {
     if (config("dataSource")("type").stringOption.contains("rest") && version == "v1") {
       val send = for {
         o <- _observer

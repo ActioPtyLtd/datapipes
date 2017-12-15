@@ -71,7 +71,7 @@ class JDBCDataSource extends DataSource {
   }
 
   def getCreateTableStatement(config: DataSet, statement: String): String = {
-    val connectionString = config("connect").stringOption.getOrElse("")
+    val connectionString = config("connect").toString
 
     val cn = DriverManager.getConnection(connectionString)
 

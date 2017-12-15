@@ -57,7 +57,7 @@ class TermExecutor(nameSpace: String) {
     case Term.Tuple(Term.Name(label) +: tail) => DataRecord(label,
       tail.map(e => eval(e, scope)).toList)
 
-    case Term.Tuple(s) => DataRecord(eval(s.head, scope).stringOption.getOrElse(""),
+    case Term.Tuple(s) => DataRecord(eval(s.head, scope).toString,
       s.tail.map(e => eval(e, scope)).toList)
 
     // for when you want to reference original top level dataset
@@ -323,8 +323,8 @@ class TermExecutor(nameSpace: String) {
     // string concat and numeric addition
     case Term.ApplyInfix(l, Term.Name("+"), Nil, Seq(r: AnyRef)) => (eval(l, scope), eval(r, scope)) match {
       case (left: DataNumeric, right: DataNumeric) => DataNumeric(left.num + right.num)
-      case (left, right) => DataString(left.stringOption.getOrElse("") +
-        right.stringOption.getOrElse(""))
+      case (left, right) => DataString(left.toString +
+        right.toString)
     }
 
     // subtract numeric
@@ -408,7 +408,7 @@ class TermExecutor(nameSpace: String) {
     }
 
     case Term.ApplyInfix(l, Term.Name("->"), Nil, Seq(r: AnyRef)) => {
-      val key = eval(l, scope).stringOption.getOrElse("")
+      val key = eval(l, scope).toString
       val value = eval(r, scope)
       value match {
         case DataString(_, v) => DataString(key, v)

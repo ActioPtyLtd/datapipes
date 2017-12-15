@@ -46,5 +46,6 @@ object DumpDataSource {
 
     val bytes = Pickle.intoBytes(queries.headOption.getOrElse(DataNothing())).array()
     stream.write(bytes)
+    stream.flush()
   }
 }

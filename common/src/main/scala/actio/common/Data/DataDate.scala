@@ -4,7 +4,9 @@ import java.text.SimpleDateFormat
 
 case class DataDate(label: String, date: Long) extends DataBase {
 
-  override def stringOption: Option[String] = Some(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(date))
+  override def stringOption: Option[String] = Some(this.toString)
+
+  override def toString: String = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").format(date)
 }
 
 object DataDate {

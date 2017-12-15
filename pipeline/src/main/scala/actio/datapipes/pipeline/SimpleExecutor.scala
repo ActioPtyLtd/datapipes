@@ -43,6 +43,8 @@ object SimpleExecutor {
         val sel = value.children.find(f => f.label == select).getOrElse(throw new Exception(s"Dom with name $select does not exist"))
 
         t.next(sel)
+        _totalError = _totalError + t.totalError
+
       }
 
       override def completed(): Unit = {
@@ -53,9 +55,11 @@ object SimpleExecutor {
 
       override def subscribe(observer: Observer[Dom]): Unit = t.subscribe(observer)
 
+      var _totalError = 0
+
       val totalProcessed = 0
       val totalProcessedSize = 0
-      val totalError = 0
+      def totalError = _totalError
       val totalErrorSize = 0
     }
 
@@ -125,9 +129,15 @@ object SimpleExecutor {
 
         def setNewDom(newDom: Dom) = parentDom = newDom
 
-        override def next(value: Dom): Unit = _observer.foreach(o =>
-          o.next(parentDom ~ value)
-        )
+        override def next(value: Dom): Unit = _observer.foreach { o =>
+          try {
+            o.next(parentDom ~ value)
+          } catch {
+            case e: Exception => {
+              _totalError = _totalError + 1
+            }
+          }
+        }
 
         override def completed(): Unit = _observer.foreach(o => o.completed())
 
@@ -135,9 +145,11 @@ object SimpleExecutor {
 
         override def subscribe(observer: Observer[Dom]): Unit = _observer.append(observer)
 
+        var _totalError = 0
+
         val totalProcessed = 0
         val totalProcessedSize = 0
-        val totalError = 0
+        def totalError =  _totalError
         val totalErrorSize = 0
       }
 
@@ -147,6 +159,7 @@ object SimpleExecutor {
       def next(value: Dom): Unit = {
         i.setNewDom(value)
         l.next(value)
+        _totalError = _totalError + l.totalError
       }
 
       def completed(): Unit = {
@@ -162,10 +175,53 @@ object SimpleExecutor {
 
       def subscribe(observer: Observer[Dom]): Unit = r.subscribe(observer)
 
+      var _totalError = 0
+
       val totalProcessed = 0
       val totalProcessedSize = 0
-      val totalError = 0
+      def totalError = _totalError
       val totalErrorSize = 0
+    }
+
+    case t: actio.datapipes.pipescript.Pipeline.Sequence => new TaskOperation {
+
+      val l = getRunnable(t.left, eventOperation)
+      val r = getRunnable(t.right, eventOperation)
+
+      val totalProcessed: Int = 0
+      val totalProcessedSize: Int = 0
+      val totalError: Int = 0
+      val totalErrorSize: Int = 0
+
+      override def completed(): Unit = {
+        l.completed()
+        r.completed()
+      }
+
+      override def error(exception: Throwable): Unit = {
+        l.error(exception)
+        r.error(exception)
+      }
+
+      override def next(value: Dom): Unit = {
+          logger.info(s"Commencing operation ${t.left.name}...")
+          l.next(value) // not checking if any errors were raised
+
+          t match {
+            case actio.datapipes.pipescript.Pipeline.SequenceOnSuccess(_,_,_) if l.totalError>0  => {
+              logger.info(s"Operation ${t.left.name} has reported an error. Operation ${t.right.name} will not be executed.")
+            }
+            case _ => {
+              logger.info(s"Operation ${t.left.name} has completed. Commencing operation ${t.right.name}...")
+              r.next(value)
+              logger.info(s"Operation ${t.right.name} has completed.")
+            }
+          }
+      }
+
+      override def subscribe(observer: Observer[Dom]): Unit = {
+
+      }
     }
   }
 

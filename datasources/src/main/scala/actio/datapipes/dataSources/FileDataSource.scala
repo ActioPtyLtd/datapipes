@@ -48,6 +48,10 @@ object FileDataSource {
     } else if(format == "dump") {
       DumpDataSource.write(writeStream, queries)
     }
+
+    if (compression.isDefined) {
+      writeStream.close()
+    }
   }
 
 }

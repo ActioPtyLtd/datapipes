@@ -9,6 +9,8 @@ case class DataRecord(label: String, fields: List[DataSet]) extends DataBase {
   override def apply(ord: Int): DataSet = fields.lift(ord).getOrElse(DataNothing())
 
   override def elems: Seq[DataSet] = fields
+
+  override def toString: String = ""
 }
 
 object DataRecord {

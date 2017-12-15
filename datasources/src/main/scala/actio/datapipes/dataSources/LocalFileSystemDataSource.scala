@@ -15,7 +15,7 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
   private val _observer: ListBuffer[Observer[DataSet]] = ListBuffer()
 
   def executeQuery(config: DataSet, query: DataSet): Unit = {
-    val dir = config("directory").stringOption.getOrElse("")
+    val dir = config("directory").toString
     val cleanupAfterRead = !config("cleanupAfterRead").stringOption.contains("false")
 
     val filePaths = new File(dir)
@@ -25,11 +25,11 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
     val files = FileDataSource.getFilePaths(config, query, filePaths)
 
     logger.info(s"Cleanup files after reading: ${cleanupAfterRead}")
-    if(filePaths.isEmpty)
+    if(files.isEmpty)
       logger.warn("No files matched regex expression.")
     else {
       logger.info(s"Files matching regex expression:")
-      logger.info(filePaths.mkString(","))
+      logger.info(files.mkString(","))
     }
 
     files.foreach { f =>
@@ -50,7 +50,7 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
   }
 
   def executeWrite(config: DataSet, queries: Seq[DataSet]): Unit = {
-    val dir = config("directory").stringOption.getOrElse("")
+    val dir = config("directory").toString
     val filePath = dir + "/" + queries.head("regex").stringOption
       .getOrElse(config("regex").stringOption.getOrElse(queries.head("filenameTemplate").stringOption
         .getOrElse(config("filenameTemplate").stringOption.getOrElse(""))))

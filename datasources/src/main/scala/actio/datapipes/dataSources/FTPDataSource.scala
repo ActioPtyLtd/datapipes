@@ -13,7 +13,7 @@ class FTPDataSource(format: String) extends DataSource {
   private val _observer: ListBuffer[Observer[DataSet]] = ListBuffer()
 
   def executeQuery(connection: FTPClient,config: DataSet, query: DataSet): Unit = {
-    val dir = config("directory").stringOption.getOrElse("")
+    val dir = config("directory").toString
 
     logger.info(s"Changing working directory to: $dir...")
     connection.changeWorkingDirectory(dir)
@@ -40,9 +40,9 @@ class FTPDataSource(format: String) extends DataSource {
   }
 
   def connect(config: DataSet): FTPClient = {
-    val connect = config("connect").stringOption.getOrElse("")
-    val username = config("credential")("username").stringOption.getOrElse("")
-    val password = config("credential")("password").stringOption.getOrElse("")
+    val connect = config("connect").toString
+    val username = config("credential")("username").toString
+    val password = config("credential")("password").toString
     val port = config("port").intOption
 
     val ftp: FTPClient = new FTPClient()

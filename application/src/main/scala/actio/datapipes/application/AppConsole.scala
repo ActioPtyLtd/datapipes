@@ -103,7 +103,7 @@ object AppConsole {
         }
 
         // run the main pipeline
-        SimpleExecutor.getRunnable(startPipeline, eventPipeline).start(executeConfig)
+        SimpleExecutor.getRunnable(startPipeline, eventPipeline).start(DataArray(executeConfig))
 
         if(line.hasOption("U")) {
           syncFiles(executeConfig)

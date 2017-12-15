@@ -50,7 +50,7 @@ object FunctionExecutor {
       if methodParameter.getType == classOf[Array[String]] =>
       getParamValues(tail, ds.map(_.stringOption.getOrElse("")).toArray :: result)
     case ((methodParameter, ds: DataSet) :: tail)
-      if methodParameter.getType == classOf[String] => getParamValues(tail, ds.stringOption.getOrElse("") :: result)
+      if methodParameter.getType == classOf[String] => getParamValues(tail, ds.toString :: result)
     case _ => None
   }
 

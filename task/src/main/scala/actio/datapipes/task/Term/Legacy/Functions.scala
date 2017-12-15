@@ -16,7 +16,7 @@ object Functions {
 
   def sortByDate(items: List[DataSet], property: String, dateFormat: String, direction: String): List[DataSet] = {
     implicit val localDateOrdering: Ordering[LocalDate] = Ordering.by(_.toEpochDay)
-    val sortedItems = items.sortBy(x => LocalDate.parse(x(property).stringOption.getOrElse(""), DateTimeFormatter.ofPattern(dateFormat)).toEpochDay)(Ordering[Long])
+    val sortedItems = items.sortBy(x => LocalDate.parse(x(property).toString, DateTimeFormatter.ofPattern(dateFormat)).toEpochDay)(Ordering[Long])
     if(direction.equalsIgnoreCase("desc"))
       sortedItems.reverse
     else
@@ -81,7 +81,7 @@ object Functions {
 
   def today(dateOffset: Int): DataSet = DataDate(DateUtils.addDays(new java.util.Date(), dateOffset))
 
-  def convertDateFormat(ds: DataSet, in: String, out: String): DataSet = DataString(convDateValue(ds.stringOption.getOrElse(""), in, out))
+  def convertDateFormat(ds: DataSet, in: String, out: String): DataSet = DataString(convDateValue(ds.toString, in, out))
 
   def ifNotBlankOrElse(ds: DataSet, other: String): DataSet = ds.stringOption.map(s => if (s.trim().isEmpty) DataString(other) else DataString(s)).getOrElse(DataString(other))
 
@@ -172,7 +172,7 @@ object Functions {
 
   def csvWithHeader(ds: DataSet, delim: String): DataSet = {
     val csvSplit = delim + "(?=([^\\\"]*\\\"[^\\\"]*\\\")*[^\\\"]*$)" // TODO: should allow encapsulation to be paramaterised
-    val rows = ds.map(r => r(0).stringOption.getOrElse("").split(csvSplit, -1).map(c => c.replaceAll("^\"|\"$", ""))).toList
+    val rows = ds.map(r => r(0).toString.split(csvSplit, -1).map(c => c.replaceAll("^\"|\"$", ""))).toList
     if(rows.length == 0)
       DataNothing()
     else

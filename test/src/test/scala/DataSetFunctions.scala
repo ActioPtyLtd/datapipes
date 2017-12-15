@@ -1,5 +1,5 @@
 
-import actio.common.Data.{DataNothing, DataRecord, DataString}
+import actio.common.Data.{DataNothing, DataNumeric, DataRecord, DataString}
 import actio.common.Dom
 import org.scalatest.FunSuite
 
@@ -11,7 +11,8 @@ class DataSetFunctions extends FunSuite {
       DataNothing("nothing"),
       DataRecord(
         DataString("str2", "val2")
-      )
+      ),
+      DataNumeric("num1", 10.5)
     )
 
 
@@ -42,6 +43,19 @@ class DataSetFunctions extends FunSuite {
     )
   }
 
-
+  test("if toString works") {
+    assert(
+      ds1("str1").toString == "val1"
+    )
+    assert(
+      ds1("nothing").toString == ""
+    )
+    assert(
+      ds1("record").toString == ""
+    )
+    assert(
+      ds1("num1").toString == "10.5"
+    )
+  }
 
 }
