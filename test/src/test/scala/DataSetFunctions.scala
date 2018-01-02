@@ -1,5 +1,5 @@
 
-import actio.common.Data.{DataNothing, DataNumeric, DataRecord, DataString}
+import actio.common.Data._
 import actio.common.Dom
 import org.scalatest.FunSuite
 
@@ -13,6 +13,16 @@ class DataSetFunctions extends FunSuite {
         DataString("str2", "val2")
       ),
       DataNumeric("num1", 10.5)
+    )
+
+  val ds2 =
+    DataRecord(
+      DataString("str1","val2"),
+      DataNothing("nothing"),
+      DataRecord(
+        DataString("str2", "val2")
+      ),
+      DataNumeric("num2", 10.5)
     )
 
 
@@ -55,6 +65,20 @@ class DataSetFunctions extends FunSuite {
     )
     assert(
       ds1("num1").toString == "10.5"
+    )
+  }
+
+  test("if minus works") {
+    assert(
+      Operators.minus(ds1,ds1).isEmpty
+    )
+    assert(
+      Operators.minus(ds1,ds2).contains(
+        DataRecord(
+          DataString("str1","val1"),
+          DataNumeric("num1", 10.5)
+        )
+      )
     )
   }
 

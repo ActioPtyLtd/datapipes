@@ -1,7 +1,7 @@
 package actio.datapipes.dataSources
 
 import java.io.{File, FileInputStream, FileOutputStream}
-import java.nio.file.Files
+import java.nio.file.{Files, Path}
 
 import actio.common.Data.{DataNothing, DataSet}
 import actio.common.{DataSource, Observer}
@@ -39,11 +39,11 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
 
       stream.close()
 
-      /*if(cleanupAfterRead) {
-        logger.info(s"Deleting file: ${filePath}...")
-        Files.delete(path)
-        logger.info(s"Successfully deleted file: ${filePath}...")
-      } */
+      if(cleanupAfterRead) {
+        logger.info(s"Deleting file: ${f}...")
+        Files.delete(new File(f).toPath)
+        logger.info(s"Successfully deleted file: ${f}...")
+      }
     }
 
     _observer.foreach(o => o.completed())

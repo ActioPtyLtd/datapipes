@@ -49,4 +49,16 @@ object Operators {
     case DataArray(_, a) => DataArray(key, a)
     case _ => DataString(key, "")
   }
+
+  def minus(ds1: DataSet, ds2: DataSet): Option[DataSet] = (ds1,ds2) match {
+    case (r1 @ DataRecord(l1,f1),r2 @ DataRecord(l2,f2)) if l1 == l2 => {
+      val list = f1.flatMap(f => minus(f,r2(f.label)))
+      if(list.isEmpty)
+        None
+      else
+        Some(DataRecord(l1, list))
+    }
+    case _ if ds1 == ds2 => None
+    case _ => Some(ds1)
+  }
 }
