@@ -16,7 +16,7 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
 
   def executeQuery(config: DataSet, query: DataSet): Unit = {
     val dir = config("directory").toString
-    val cleanupAfterRead = !config("cleanupAfterRead").stringOption.contains("false")
+    val cleanupAfterRead = config("cleanupAfterRead").stringOption.contains("true")
 
     val filePaths = new File(dir)
       .listFiles.toList
