@@ -3,7 +3,7 @@ package actio.datapipes.application
 import java.io.File
 import java.util.UUID
 
-import actio.common.Data.{DataArray, DataNothing, DataSet}
+import actio.common.Data._
 import actio.common.{Dom, Event}
 import actio.datapipes.dataSources.TusDataSource
 import actio.datapipes.pipescript.Pipeline._
@@ -126,6 +126,17 @@ object AppConsole {
   }
 
   def syncFiles(config: DataSet) = {
+    import actio.datapipes.dataSources.RESTJsonDataSource
+
+    logger.info("Authenticating Agent...")
+    val response = new RESTJsonDataSource().executeQuery(config("actio_auth"), config("actio_auth")("query")("read"))
+    val token = response("body")("access_token").toString
+    logger.info(s"Token received: ${token}")
+
+    val query = Operators.mergeLeft(
+      config("actio_sync")("query")("create"),
+      DataRecord(DataRecord("headers", DataString("access_token", token))))
+
     new TusDataSource().execute(config("actio_sync"), config("actio_sync")("query")("create"))
   }
 

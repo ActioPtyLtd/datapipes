@@ -153,6 +153,7 @@ class AppService(pipeScript: PipeScript) {
         else if (service.proxy.isDefined) {
           (ctx: RequestContext) => {
             logger.info(ctx.request.method.toString())
+
             logger.info("Proxy to: " + service.proxy.get._1 + "/" + segments.drop(zs.size - 1).mkString("/") +
               (if(ctx.request.uri.toString.endsWith("/")) "/" else ""))
             ctx.complete(Http().singleRequest(ctx.request
