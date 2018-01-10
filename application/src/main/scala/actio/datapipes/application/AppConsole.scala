@@ -137,7 +137,7 @@ object AppConsole {
       config("actio_sync")("query")("create"),
       DataRecord(DataRecord("headers", DataString("access_token", token))))
 
-    new TusDataSource().execute(config("actio_sync"), config("actio_sync")("query")("create"))
+    new TusDataSource().execute(config("actio_sync"), query)
   }
 
 }
