@@ -25,6 +25,7 @@ class TusDataSource extends DataSource {
   def execute(config: DataSet, query: DataSet*): Unit = {
 
     val uri = query.head("uri").toString
+    val headers = query.head("headers").elems.map(x => x.label -> x.toString).toMap
     val source = config("directory").toString
     val folder = new java.io.File(source)
     val filePaths = Option(folder.listFiles)
@@ -72,22 +73,23 @@ class TusDataSource extends DataSource {
       logger.info("Iterating through tar files and sync...")
 
     tars.foreach { t=>
-      upload_uri(t.getPath, uri, delays, true)
+      upload_uri(t.getPath, uri, delays, true, headers)
     }
 
   }
 
 
-  def upload_uri(source:String, uri: String, delays: Array[Int], deleteAfter: Boolean): Unit = {
+  def upload_uri(source:String, uri: String, delays: Array[Int], deleteAfter: Boolean, headers: Map[String,String]): Unit = {
     val client = new TusClient()
     val store = new TusLocalFileStore
 
     client.setUploadCreationURL(new URL(uri))
 
     import collection.JavaConversions._
-    val addActioKey = Map("actio_key" -> "hello")
 
-    client.setHeaders(addActioKey)
+    if(headers.nonEmpty)
+      client.setHeaders(headers)
+
     client.enableResuming(store)
 
     val file = new File(source)
