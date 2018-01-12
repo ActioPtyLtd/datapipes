@@ -37,7 +37,8 @@ class TusDataSource extends DataSource {
       logger.info(s"${filePaths.get.size} files found. Compressing files...")
 
       val fos = new FileOutputStream(source.concat(".tar.gz"))
-      val tarOs = new TarArchiveOutputStream(fos)
+      val gzipOs = new GZIPOutputStream(fos)
+      val tarOs = new TarArchiveOutputStream(gzipOs)
 
       for (file <- filePaths.get) {
         if (file.isFile) {
@@ -52,6 +53,8 @@ class TusDataSource extends DataSource {
       }
 
       tarOs.close()
+      gzipOs.close()
+      fos.close()
 
       logger.info(s"File ${source.concat(".tar.gz")} successfully generated.")
     } else {
