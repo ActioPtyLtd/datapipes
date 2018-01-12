@@ -30,6 +30,7 @@ object DataSource {
       else
         new TextFileDataSource()
     }),
+    "zip" -> ((_: DataSet) => new ZipDataSource()),
     "ftp" -> ((config: DataSet) => {
       val behavior = config("behavior").stringOption
         new FTPDataSource(behavior.getOrElse(throw new UnsupportedOperationException(s"behavior required for data source.")))
