@@ -131,6 +131,10 @@ object SimpleExecutor {
 
         override def next(value: Dom): Unit = _observer.foreach { o =>
           try {
+            if(value.events.nonEmpty) {
+              eventOperation.foreach(eo => eo(value.events))
+            }
+
             o.next(parentDom ~ value)
           } catch {
             case e: Exception => {

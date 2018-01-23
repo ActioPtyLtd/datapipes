@@ -2,12 +2,12 @@ package actio.datapipes.task
 
 import actio.common.Data.DataSet
 import actio.common.Data.JsonXmlDataSet.Extend
-import actio.common.{Dom, Observer, Task}
+import actio.common.{Dom, Observer}
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.ListBuffer
 
-class TaskPrint(val name: String, config: DataSet) extends Task {
+class TaskPrint(val name: String, config: DataSet) extends actio.common.Task {
 
   private val logger = Logger("TaskPrint")
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()

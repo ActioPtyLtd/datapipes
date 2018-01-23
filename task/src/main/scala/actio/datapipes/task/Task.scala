@@ -1,19 +1,20 @@
 package actio.datapipes.task
 
 import actio.common.Data.DataSet
-import actio.common.Task
 import actio.datapipes.task.Legacy.TaskFunctionFold
 
 
 object Task {
 
-  private lazy val tasks = Map[String, (String, DataSet, String) => Task](
+  private lazy val tasks = Map[String, (String, DataSet, String) => actio.common.Task](
     "extract" -> ((name, config, version) =>
       new TaskExtract(name, config, version)),
     "load" -> ((name, config, version) =>
       new TaskLoad(name, config, version)),
     "transformTerm" -> ((name, config, version) =>
       new TaskTerm(name, config, version)),
+    "assert" -> ((name, config, _) =>
+      new TaskAssert(name, config)),
     "transform" -> ((name, config, _) =>
       new TaskFunctionFold(name, config)),
     "mergeTemplate" -> ((name, config, version) =>
@@ -35,6 +36,6 @@ object Task {
     "dump" -> ((name, config, _) =>
       new TaskPrint(name, config)))
 
-  def apply(name: String, taskType: String, config: DataSet): Task =
+  def apply(name: String, taskType: String, config: DataSet): actio.common.Task =
     tasks(taskType)(name, config, config("version").stringOption.getOrElse("v1") )
 }
