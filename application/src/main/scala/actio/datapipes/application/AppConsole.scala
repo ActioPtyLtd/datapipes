@@ -129,11 +129,10 @@ object AppConsole {
         eventPipeline.foreach { ep =>
           ep(List(Event.runCompleted()))
         }
+
+        logger.info(s"Pipe ${pf.defaultPipeline} completed successfully.")
+        Runtime.getRuntime.exit(statusCode)
       }
-
-      logger.info(s"Pipe ${pf.defaultPipeline} completed successfully.")
-
-      Runtime.getRuntime.exit(statusCode)
     }
   }
 

@@ -15,7 +15,7 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
   private val _observer: ListBuffer[Observer[DataSet]] = ListBuffer()
 
   def executeQuery(config: DataSet, query: DataSet): Unit = {
-    val dir = config("directory").toString
+    val dir = config("directory").toOption.orElse(query("directory").toOption).get.toString
     val cleanupAfterRead = config("cleanupAfterRead").stringOption.contains("true")
 
     val filePaths = new File(dir)
@@ -50,7 +50,7 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
   }
 
   def executeWrite(config: DataSet, queries: Seq[DataSet]): Unit = {
-    val dir = config("directory").toString
+    val dir = config("directory").toOption.orElse(queries.head("directory").toOption).get.toString
     val filePath = dir + "/" + queries.head("regex").stringOption
       .getOrElse(config("regex").stringOption.getOrElse(queries.head("filenameTemplate").stringOption
         .getOrElse(config("filenameTemplate").stringOption.getOrElse(""))))

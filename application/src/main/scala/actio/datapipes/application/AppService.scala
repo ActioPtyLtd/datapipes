@@ -140,8 +140,8 @@ class AppService(pipeScript: PipeScript) {
     (path(Segments) | path(Segments /)) { segments =>
       logger.info(segments.size.toString)
 
-      if(segments.size != urlPath.size &&
-        (urlPath.last.endsWith("*") && segments.size < (urlPath.size))
+      if(segments.size != urlPath.size ||
+        (urlPath.last.endsWith("*") && segments.size > (urlPath.size))
       )
         reject
       else {

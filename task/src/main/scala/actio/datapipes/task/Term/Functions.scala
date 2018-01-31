@@ -64,6 +64,8 @@ object Functions {
 
   def sha256(str: String): String = org.apache.commons.codec.digest.DigestUtils.sha256Hex(str)
 
+  def randomString(size: Int): String = scala.util.Random.alphanumeric.take(size).mkString
+
   /* === numeric === */
 
   def numeric(str: String, default: BigDecimal): BigDecimal = Try(BigDecimal(str)).getOrElse(default)
