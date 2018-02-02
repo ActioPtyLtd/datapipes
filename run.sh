@@ -3,7 +3,7 @@ JARFILE=$(find ./application/target/scala-2.11/ -name 'datapipes-assembly*.jar')
 
 config_name="./application.conf"
 pipe_name=""
-upload = ""
+upload=""
 vmargs=""
 service=""
 

@@ -1,10 +1,17 @@
 package actio.datapipes.dataSources
 
-import java.io.{BufferedWriter, OutputStream, OutputStreamWriter}
+import java.io._
 
-import actio.common.Data.{DataNothing, DataSet}
+import actio.common.Data.{DataNothing, DataRecord, DataSet, DataString}
+import actio.common.Observer
 
 object TxtDataSource {
+
+  def read(stream: InputStream, observer: Observer[DataSet]): Unit = {
+    scala.io.Source.fromInputStream(stream).getLines().foreach{ line =>
+      observer.next(DataRecord(DataString("line", line)))
+    }
+  }
 
   def write(stream: OutputStream, queries: Seq[DataSet]): Unit = {
     val osw = new OutputStreamWriter(stream)

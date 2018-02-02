@@ -17,6 +17,7 @@ class ZipDataSource extends DataSource {
 
   def executeQuery(config: DataSet, query: DataSet): Unit = {
     val file = new File(query("path").toString)
+    val extractPath = new File(query("extractPath").toString).toString
 
     val tis = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(file)))
 
@@ -24,7 +25,7 @@ class ZipDataSource extends DataSource {
 
     while( {te = tis.getNextTarEntry; te != null} ) {
       if (!te.isDirectory) {
-        val curfile = new File(file.toPath.getParent.toString + "/" + te.getName)
+        val curfile = new File(extractPath + "/" + te.getName)
         val parent = curfile.getParentFile
 
         if (!parent.exists)

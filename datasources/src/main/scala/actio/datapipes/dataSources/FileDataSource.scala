@@ -31,6 +31,9 @@ object FileDataSource {
     } else if (format == "json") {
       JsonDataSource.read(stream, observer)
     }
+    else if(format == "txt") {
+      TxtDataSource.read(stream, observer)
+    }
   }
 
   def writeData(stream: OutputStream, format: String, compression: Option[String], queries: Seq[DataSet]): Unit = {

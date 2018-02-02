@@ -34,6 +34,7 @@ class TaskLookup(name: String, config: DataSet, version: String) extends Task {
         val nds = singleBuffer.headOption match {
           case Some(_: DataArray) => DataArray(singleBuffer.flatMap(m => m.elems).toList)
           case Some(ds: DataSet) if singleBuffer.size == 1 => ds
+          case Some(ds: DataSet) => DataRecord(DataArray(singleBuffer.toList))
         }
         ret.append(nds)
         singleBuffer.clear()
