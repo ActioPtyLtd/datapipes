@@ -17,7 +17,7 @@ while [ "$1" != "" ]; do
         -p | --pipe )           shift
                                 pipe_name="-p $1"
                                 ;;
-        -s | --service )        shift
+        -s | --service )        #shift
                                 pipe_name="-s"
                                 ;;
         -R | --Read )           shift
@@ -26,7 +26,7 @@ while [ "$1" != "" ]; do
         -u | --upload-only )    shift
                                 upload="-u"
                                 ;;
-        -U | --upload )         shift
+        -U | --upload )         #shift
                                 upload="-U"
                                 ;;
         -h | --help )           echo $USAGE
