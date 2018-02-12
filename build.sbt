@@ -12,7 +12,8 @@ lazy val common = project
   .settings(libraryDependencies += "org.json4s" %% "json4s-native" % "3.5.1")
 
 lazy val pipescript = project
-  .settings(libraryDependencies ++= Seq("com.typesafe" % "config" % "1.3.1", "org.scalameta" %% "scalameta" % "1.0.0"))
+  .settings(libraryDependencies ++= Seq("com.typesafe" % "config" % "1.3.1",
+      "org.scalameta" %% "scalameta" % "1.0.0"))
   .dependsOn(common)
 
 lazy val datasources = project
@@ -53,7 +54,9 @@ lazy val application = project
   .settings(libraryDependencies ++= Seq("commons-cli" % "commons-cli" % "1.3.1",
     "de.heikoseeberger" % "akka-http-json4s_2.11" % "1.16.1",
     "com.typesafe.akka" %% "akka-http" % "10.0.11",
-  "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.1"))
+    "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.1",
+    "org.quartz-scheduler" % "quartz" % "2.3.0"
+  ))
   .dependsOn(pipescript, datasources, common, task, pipeline)
 
 lazy val root =
