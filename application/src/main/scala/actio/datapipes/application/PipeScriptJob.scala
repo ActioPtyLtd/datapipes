@@ -12,15 +12,18 @@ class PipeScriptJob extends Job {
   lazy val logger = Logger("PipeScriptJob")
 
   override def execute(context: JobExecutionContext): Unit = {
-    logger.info("Job triggered...")
-
-    val data = context.getMergedJobDataMap()
+    val data = context.getMergedJobDataMap
 
     val pipescript = data.get("pipescript").asInstanceOf[PipeScript]
     val executePipe = data.getString("pipename")
+    val jobName = context.getJobDetail.getKey.getName
 
+    logger.info(s"Triggering job: ${jobName}...")
     logger.info(s"Executing pipe: ${executePipe}")
 
     Executor.run(pipescript, executePipe, DataArray(DataNothing()))
+
+    logger.info(s"Execution completed for job: ${jobName}")
+    logger.info(s"Next scheduled run: ${context.getNextFireTime}")
   }
 }

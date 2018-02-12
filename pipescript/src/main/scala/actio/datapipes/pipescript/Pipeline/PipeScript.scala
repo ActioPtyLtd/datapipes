@@ -8,6 +8,6 @@ case class PipeScript(
   services: List[Service],
   tasks: List[Operation],
   pipelines: List[Pipeline],
-  schedule: Option[Schedule],
+  schedule: Option[ConfigMonitorSchedule],
   defaultPipeline: String
 )

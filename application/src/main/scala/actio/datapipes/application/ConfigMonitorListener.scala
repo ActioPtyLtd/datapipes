@@ -21,9 +21,15 @@ class ConfigMonitorListener(scheduler: Scheduler) extends FileAlterationListener
     val jobList = actio.datapipes.application.Scheduler.getJobSchedule(pipeScript)
 
     jobList.foreach(j => {
-      if(scheduler.checkExists(j._1.getKey))
+      if(scheduler.checkExists(j._1.getKey)) {
+        logger.info(s"Updating job: ${j._1.getKey.getName}...")
         scheduler.deleteJob(j._1.getKey)
+      } else {
+        logger.info(s"Creating job: ${j._1.getKey.getName}...")
+      }
+
       scheduler.scheduleJob(j._1, j._2)
+      logger.info(s"Next scheduled run: ${j._2.getNextFireTime}")
     })
 
   }

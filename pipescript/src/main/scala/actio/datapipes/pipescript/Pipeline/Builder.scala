@@ -43,8 +43,8 @@ object Builder {
       m("proxyuri").stringOption.map((_,m("proxyport").intOption.getOrElse(80)))
     )).toList
 
-    val scheduleSection = ds(script)(schedule)("cron").stringOption.map(m => {
-      Schedule(m)
+    val scheduleSection = ds(script)(schedule)("directory").stringOption.map(m => {
+      ConfigMonitorSchedule(m, ds(script)(schedule)("poll").intOption.getOrElse(10))
     })
 
 
