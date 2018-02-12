@@ -8,7 +8,7 @@ import scala.meta.Term
 
 object Builder {
 
-  def build(ds: DataSet): PipeScript = {
+  def build(name:String, ds: DataSet): PipeScript = {
 
     val startup = "startup"
     val exec = "exec"
@@ -19,6 +19,8 @@ object Builder {
     val pipelines = "pipelines"
     val settings = "settings"
     val service = "services"
+    val bootstrap = "bootstrap"
+    val schedule = "schedule"
 
     val defaultPipeName = ds(script)(startup)(exec).toString
 
@@ -41,7 +43,12 @@ object Builder {
       m("proxyuri").stringOption.map((_,m("proxyport").intOption.getOrElse(80)))
     )).toList
 
-    PipeScript(ds(script)(settings), services, tasks.values.toList, piplist, defaultPipeName)
+    val scheduleSection = ds(script)(schedule)("cron").stringOption.map(m => {
+      Schedule(m)
+    })
+
+
+    PipeScript(name, ds(script)(settings), services, tasks.values.toList, getPipeLines(piplist, newpipes), scheduleSection, defaultPipeName)
 
   }
 
@@ -130,5 +137,11 @@ object Builder {
         getPipes(pipe, t)
       }
     }
+
+  def getPipeLines(operations: List[Operation], pipes: List[DataSet]): List[Pipeline] = {
+    operations.flatMap(o => pipes.find(f => f.label == o.name).map(p => (o, p))).map(m => Pipeline(m._1.name, m._1, getScheduleFromPipe(m._2))  )
+  }
+
+  def getScheduleFromPipe(config: DataSet) = config("schedule")("cron").stringOption.map(m => Schedule(m))
 
 }

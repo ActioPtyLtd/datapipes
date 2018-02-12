@@ -60,6 +60,9 @@ object AppConsole {
 
     val config = ConfigReader.read(configFile)
 
+    Scheduler.boot(configFile, config, DataArray(config))
+    Runtime.getRuntime.exit(0)
+
     val executeConfig =
       if (line.hasOption("R")) {
         val configs = downloadConfig(config("actio_home")).elems.toList
@@ -81,7 +84,7 @@ object AppConsole {
 
     if (executeConfig.isDefined) {
 
-      val pf = Builder.build(executeConfig)
+      val pf = Builder.build(configFile, executeConfig)
 
       logger.info(s"Running pipe: ${pf.defaultPipeline}")
 
@@ -91,6 +94,9 @@ object AppConsole {
         System.setProperty("akka.http.server.transparent-head-requests", "false")
         new AppService(pf)
       } else {
+
+
+
         val startPipeline = pf.pipelines.find(f => f.name == pf.defaultPipeline).get
         val eventPipeline = pf.pipelines.find(f => f.name == "p_events")
           .map(e => (events: List[Event]) => {
@@ -108,7 +114,7 @@ object AppConsole {
               }
             }
 
-            SimpleExecutor.getRunnable(e, None)
+            SimpleExecutor.getRunnable(e.pipe, None)
               .next(Dom() ~ Dom("start", Nil, executeConfig, DataNothing(), Nil) ~
                 Dom("event", Nil, DataArray(events.map(Event.toDataSet)), DataNothing(), Nil))
           })
@@ -119,7 +125,7 @@ object AppConsole {
         }
 
         // run the main pipeline
-        SimpleExecutor.getRunnable(startPipeline, eventPipeline).start(DataArray(executeConfig))
+        SimpleExecutor.getRunnable(startPipeline.pipe, eventPipeline).start(DataArray(executeConfig))
 
         if (line.hasOption("U")) {
           syncFiles(executeConfig)

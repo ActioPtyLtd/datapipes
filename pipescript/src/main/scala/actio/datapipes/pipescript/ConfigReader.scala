@@ -9,15 +9,19 @@ import scala.collection.JavaConversions._
 
 object ConfigReader {
 
-  def read(file: String): DataSet = {
-    val f = new File(file)
-    if(f.canRead)
+  def read(file: File): DataSet = {
+    if(file.canRead)
       convert(
         ConfigFactory.parseProperties(System.getProperties)
-          .withFallback(ConfigFactory.parseFile(f))
+          .withFallback(ConfigFactory.parseFile(file))
           .resolve())
     else
-      throw new FileNotFoundException(file)
+      throw new FileNotFoundException(file.toString)
+  }
+
+  def read(file: String): DataSet = {
+    val f = new File(file)
+    read(f)
   }
 
   def readfromConfigList(config: Config, str: List[String]): Config = str match {

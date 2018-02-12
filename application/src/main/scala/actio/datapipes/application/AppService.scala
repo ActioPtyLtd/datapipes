@@ -34,7 +34,7 @@ class AppService(pipeScript: PipeScript) {
 
   import system.dispatcher
 
-  val pipeLine = (name: String, task: TaskOperation) => pipeScript.pipelines.find(p => p.name == name).map(p => SimpleExecutor.getService(p, task))
+  val pipeLine = (name: String, task: TaskOperation) => pipeScript.pipelines.find(p => p.name == name).map(p => SimpleExecutor.getService(p.pipe, task))
 
   val route: Route = getRoute(pipeScript)
 //    path("datapipes" / pipeScript.services.head.path.r) { name =>
