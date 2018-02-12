@@ -18,7 +18,7 @@ class ConfigMonitorListener(scheduler: Scheduler) extends FileAlterationListener
     val config = ConfigReader.read(file)
     val pipeScript = Builder.build(file.toString, config)
 
-    val jobList = Scheduler.getJobSchedule(pipeScript)
+    val jobList = actio.datapipes.application.Scheduler.getJobSchedule(pipeScript)
 
     jobList.foreach(j => {
       if(scheduler.checkExists(j._1.getKey))

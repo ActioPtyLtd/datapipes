@@ -4,6 +4,7 @@ import java.io.{File, FileFilter}
 import java.time.{LocalDateTime, OffsetDateTime}
 
 import actio.common.Data.DataSet
+import actio.d.getCanonicalPathatapipes.application.ConfigMonitorListener
 import actio.datapipes.pipeline.SimpleExecutor
 import actio.datapipes.pipescript.Pipeline.{Builder, PipeScript}
 import org.quartz._
@@ -26,36 +27,48 @@ object Scheduler {
   }
 
   def boot(pipeScript: PipeScript, start: DataSet): Unit = {
-    import org.quartz.impl.StdSchedulerFactory
-    val sf = new StdSchedulerFactory
-    val sched = sf.getScheduler
+    val schedules = getJobSchedule(pipeScript)
 
-    // get any schedules in system conf
-    getJobSchedule(pipeScript).foreach { s =>
-      sched.scheduleJob(s._1, s._2)
+    if(schedules.nonEmpty || pipeScript.schedule.isDefined) {
+      import org.quartz.impl.StdSchedulerFactory
+      val sf = new StdSchedulerFactory
+      val sched = sf.getScheduler
+
+      // get any schedules in system conf
+      schedules.foreach { s =>
+        sched.scheduleJob(s._1, s._2)
+      }
+
+      if(pipeScript.schedule.isDefined) {
+        // get schedule to refresh config folder
+        import org.apache.commons.io.monitor.FileAlterationObserver
+        val observer = new FileAlterationObserver("./", new FileFilter {
+          override def accept(file: File): Boolean = file.getName.endsWith(".conf")
+        })
+        observer.initialize()
+        observer.addListener(new ConfigMonitorListener(sched))
+
+        val data = new JobDataMap()
+        data.put("observer", observer)
+
+        sched.scheduleJob(
+          JobBuilder.newJob(classOf[ConfigMonitorJob]).setJobData(data).withIdentity(new JobKey("observer")).build,
+          TriggerBuilder.newTrigger.startNow().withSchedule(DailyTimeIntervalScheduleBuilder.dailyTimeIntervalSchedule().withIntervalInSeconds(5)).build
+        )
+      }
+
+      if(schedules.nonEmpty) {
+        sched.start()
+
+        System.in.read()
+
+        sched.shutdown(true)
+      }
+    } else  {
+      Executor.run(pipeScript, start)
     }
 
-    // get schedule to refresh config folder
-    import org.apache.commons.io.monitor.FileAlterationObserver
-    val observer = new FileAlterationObserver("./", new FileFilter {
-      override def accept(file: File): Boolean = file.getName.endsWith(".conf")
-    })
-    observer.initialize()
-    observer.addListener(new ConfigMonitorListener(sched))
 
-    val data = new JobDataMap()
-    data.put("observer", observer)
-
-    sched.scheduleJob(
-      JobBuilder.newJob(classOf[ConfigMonitorJob]).setJobData(data).withIdentity(new JobKey("observer")).build,
-      TriggerBuilder.newTrigger.startNow().withSchedule(DailyTimeIntervalScheduleBuilder.dailyTimeIntervalSchedule().withIntervalInSeconds(5)).build
-    )
-
-    sched.start()
-
-    System.in.read()
-
-    sched.shutdown(true)
   }
 
   def boot(name: String, config: DataSet, start: DataSet): Unit = {
