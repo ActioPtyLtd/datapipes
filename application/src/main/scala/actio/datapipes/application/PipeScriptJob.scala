@@ -16,7 +16,7 @@ class PipeScriptJob extends Job {
 
     val pipescript = data.get("pipescript").asInstanceOf[PipeScript]
     val executePipe = data.getString("pipename")
-    val jobName = context.getJobDetail.getKey.getName
+    val jobName = context.getJobDetail.getKey.toString
 
     logger.info(s"Triggering job: ${jobName}...")
     logger.info(s"Executing pipe: ${executePipe}")

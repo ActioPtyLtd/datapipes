@@ -23,7 +23,7 @@ object Scheduler {
       data.put("pipename", p._2.name)
 
       (
-        JobBuilder.newJob(classOf[PipeScriptJob]).setJobData(data).withIdentity(new JobKey(pipeScript.name + "(" + p._2.pipe.name + ")")).build,
+        JobBuilder.newJob(classOf[PipeScriptJob]).setJobData(data).withIdentity(new JobKey(p._2.pipe.name, pipeScript.name)).build,
         TriggerBuilder.newTrigger.withIdentity(p._2.pipe.name).withSchedule(
           CronScheduleBuilder.cronSchedule(p._1.cron).withMisfireHandlingInstructionDoNothing
         ).build
