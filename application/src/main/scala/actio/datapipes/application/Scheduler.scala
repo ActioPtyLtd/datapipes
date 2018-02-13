@@ -6,12 +6,15 @@ import java.time.{LocalDateTime, OffsetDateTime}
 import actio.common.Data.DataSet
 import actio.d.getCanonicalPathatapipes.application.ConfigMonitorListener
 import actio.datapipes.pipeline.SimpleExecutor
-import actio.datapipes.pipescript.Pipeline.{Builder, PipeScript}
+import actio.datapipes.pipescript.Pipeline.{PipeScript, PipeScriptBuilder}
+import com.typesafe.scalalogging.Logger
+import org.apache.commons.io.FileUtils
 import org.quartz._
 import org.apache.commons.io.monitor.FileAlterationObserver
 import org.quartz.impl.StdSchedulerFactory
 
 object Scheduler {
+  lazy val logger = Logger("Scheduler")
 
   def getJobSchedule(pipeScript: PipeScript): List[(JobDetail, Trigger)] = {
     pipeScript.pipelines.flatMap(p => p.schedule.map(m => (m, p))).map(p => {
@@ -60,26 +63,42 @@ object Scheduler {
 
       // get schedule to refresh config folder
       if (pipeScript.schedule.isDefined) {
+
+        // find any confs to start with and create jobs if necessary
+        import collection.JavaConverters._
+        val confFiles = FileUtils.listFiles(new File(pipeScript.schedule.get.directory), Array("conf"), true).asScala.toList
+        val builtConfigs = PipeScriptBuilder.build(confFiles)
+
+        builtConfigs._1.foreach { p =>
+          logger.info(s"Successfully parsed PipeScript: ${p.name}")
+          val addSchedule = getJobSchedule(p)
+          addSchedule.foreach(s => sched.scheduleJob(s._1, s._2))
+          logger.info(s"${addSchedule.size} jobs found.")
+        }
+        builtConfigs._2.foreach { f =>
+          logger.warn(s"Failed to parse file: ${f._1}")
+          logger.warn(s"Error: ${f._2.getMessage}")
+        }
+
         val configMonitorJobSchedule = getConfigMonitorJobSchedule(pipeScript)
         configMonitorJobSchedule._3.addListener(new ConfigMonitorListener(sched))
 
         sched.scheduleJob(configMonitorJobSchedule._1, configMonitorJobSchedule._2)
       }
 
-      if (schedules.nonEmpty) {
-        sched.start()
+      sched.start()
 
-        System.in.read()
+      System.in.read()
 
-        sched.shutdown(true)
-      }
+      sched.shutdown(true)
+
     } else {
       Executor.run(pipeScript, start)
     }
   }
 
   def boot(name: String, config: DataSet, start: DataSet): Unit = {
-    val pipeScript = Builder.build(name, config)
+    val pipeScript = PipeScriptBuilder.build(name, config)
 
     boot(pipeScript, start)
   }

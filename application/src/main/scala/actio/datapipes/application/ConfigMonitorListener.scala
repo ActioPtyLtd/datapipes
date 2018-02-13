@@ -3,7 +3,7 @@ package actio.d.getCanonicalPathatapipes.application
 import java.io.File
 
 import actio.datapipes.pipescript.ConfigReader
-import actio.datapipes.pipescript.Pipeline.Builder
+import actio.datapipes.pipescript.Pipeline.PipeScriptBuilder
 import com.typesafe.scalalogging.Logger
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor
 import org.quartz.Scheduler
@@ -16,7 +16,7 @@ class ConfigMonitorListener(scheduler: Scheduler) extends FileAlterationListener
     logger.info(s"Change detected for file: ${file.toString}")
 
     val config = ConfigReader.read(file)
-    val pipeScript = Builder.build(file.toString, config)
+    val pipeScript = PipeScriptBuilder.build(file.toString, config)
 
     val jobList = actio.datapipes.application.Scheduler.getJobSchedule(pipeScript)
 

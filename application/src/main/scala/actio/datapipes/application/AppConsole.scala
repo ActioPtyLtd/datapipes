@@ -84,7 +84,7 @@ object AppConsole {
 
     if (executeConfig.isDefined) {
 
-      val pf = Builder.build(configFile, executeConfig)
+      val pf = PipeScriptBuilder.build(configFile, executeConfig)
 
       logger.info(s"Running pipe: ${pf.defaultPipeline}")
 

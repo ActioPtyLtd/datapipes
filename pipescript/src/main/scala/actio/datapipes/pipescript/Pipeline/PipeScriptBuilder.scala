@@ -1,12 +1,28 @@
 package actio.datapipes.pipescript.Pipeline
 
-import actio.common.Data.{DataNothing, DataSet, Operators}
+import java.io.File
+
+import actio.common.Data.{DataSet, Operators}
+import actio.datapipes.pipescript.ConfigReader
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.meta.Term
+import scala.util.{Try}
 
-object Builder {
+object PipeScriptBuilder {
+
+  def build(files: Seq[File]): (List[PipeScript],List[(File,Throwable)]) = {
+    val result = files.map(f => (f,build(f))).toList
+    val success = result.filter(f => f._2.isSuccess).map(m => m._2.get)
+    val failure = result.filter(f => f._2.isFailure).map(m => (m._1, m._2.failed.get))
+
+    (success,failure)
+  }
+
+  def build(file: File): Try[PipeScript] = {
+    Try(build(file.toString, ConfigReader.read(file)))
+  }
 
   def build(name:String, ds: DataSet): PipeScript = {
 
