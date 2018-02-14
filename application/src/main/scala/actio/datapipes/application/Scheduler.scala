@@ -24,7 +24,7 @@ object Scheduler {
 
       (
         JobBuilder.newJob(classOf[PipeScriptJob]).setJobData(data).withIdentity(new JobKey(p._2.pipe.name, pipeScript.name)).build,
-        TriggerBuilder.newTrigger.withIdentity(p._2.pipe.name).withSchedule(
+        TriggerBuilder.newTrigger.withIdentity(p._2.pipe.name,pipeScript.name).withSchedule(
           CronScheduleBuilder.cronSchedule(p._1.cron).withMisfireHandlingInstructionDoNothing
         ).build
       )
@@ -72,7 +72,10 @@ object Scheduler {
         builtConfigs._1.foreach { p =>
           logger.info(s"Successfully parsed PipeScript: ${p.name}")
           val addSchedule = getJobSchedule(p)
-          addSchedule.foreach(s => sched.scheduleJob(s._1, s._2))
+          addSchedule.foreach { s =>
+            sched.scheduleJob(s._1, s._2)
+            logger.info(s"Job ${s._1.getKey.toString} added. Next run: ${s._2.getNextFireTime}.")
+          }
           logger.info(s"${addSchedule.size} jobs found.")
         }
         builtConfigs._2.foreach { f =>
