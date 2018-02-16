@@ -86,7 +86,7 @@ object TaskMergeLoad {
   def dataSetToInsertValue(ds: DataSet): String = ds match {
     case DataNumeric(_,num) => num.toString
     case DataBoolean(_,bool) => bool.toString
-    case DataDate(_,date) => "'" + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date(date)) + "'"
+    case DataDate(_,date) => "'" + new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(date)) + "'"
     case DataNothing(_) => "null"
     case str => "'" + Functions.sq(str.stringOption.getOrElse("")) + "'"
   }
