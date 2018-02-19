@@ -1,6 +1,7 @@
 package actio.datapipes.pipescript.Pipeline
 
 import java.io.File
+import java.text.SimpleDateFormat
 
 import actio.common.Data.{DataSet, Operators}
 import actio.datapipes.pipescript.ConfigReader
@@ -8,23 +9,23 @@ import actio.datapipes.pipescript.ConfigReader
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.meta.Term
-import scala.util.{Try}
+import scala.util.Try
 
 object PipeScriptBuilder {
 
-  def build(files: Seq[File]): (List[PipeScript],List[(File,Throwable)]) = {
-    val result = files.map(f => (f,build(f))).toList
+  def build(files: Seq[File]): (List[PipeScript], List[(File, Throwable)]) = {
+    val result = files.map(f => (f, build(f))).toList
     val success = result.filter(f => f._2.isSuccess).map(m => m._2.get)
     val failure = result.filter(f => f._2.isFailure).map(m => (m._1, m._2.failed.get))
 
-    (success,failure)
+    (success, failure)
   }
 
   def build(file: File): Try[PipeScript] = {
     Try(build(file.toString, ConfigReader.read(file)))
   }
 
-  def build(name:String, ds: DataSet): PipeScript = {
+  def build(name: String, ds: DataSet): PipeScript = {
 
     val startup = "startup"
     val exec = "exec"
@@ -56,13 +57,12 @@ object PipeScriptBuilder {
       m("put").stringOption.map(g => piplist.find(f => f.name == g).get),
       m("post").stringOption.map(g => piplist.find(f => f.name == g).get),
       m("patch").stringOption.map(g => piplist.find(f => f.name == g).get),
-      m("proxyuri").stringOption.map((_,m("proxyport").intOption.getOrElse(80)))
+      m("proxyuri").stringOption.map((_, m("proxyport").intOption.getOrElse(80)))
     )).toList
 
     val scheduleSection = ds(script)(schedule)("directory").stringOption.map(m => {
       ConfigMonitorSchedule(m, ds(script)(schedule)("poll").intOption.getOrElse(10))
     })
-
 
     PipeScript(name, ds(script)(settings), services, tasks.values.toList, getPipeLines(piplist, newpipes), scheduleSection, defaultPipeName)
 
@@ -121,11 +121,12 @@ object PipeScriptBuilder {
     case Term.Name(name) => ({
       val task = operations(name.replace(" ", ""))
       task match {
-        case Task(_, "stage_load", _) => task   // if the task is a stage task, don't select, i.e. send root Dom
-        case Task(_, "event", _) => task        // if the task is a event task, don't select, i.e. send root Dom
-        case Task(_,_,_) => Select(task, prevOpName)      // in all other cases get specific Dom
+        case Task(_, "stage_load", _) => task // if the task is a stage task, don't select, i.e. send root Dom
+        case Task(_, "event", _) => task // if the task is a event task, don't select, i.e. send root Dom
+        case Task(_, _, _) => Select(task, prevOpName) // in all other cases get specific Dom
         case _ => task
-      }}, name)
+      }
+    }, name)
   }
 
   def getPipeOperation(pipeName: String, str: String, operations: Map[String, Operation]): Operation = {
@@ -155,9 +156,11 @@ object PipeScriptBuilder {
     }
 
   def getPipeLines(operations: List[Operation], pipes: List[DataSet]): List[Pipeline] = {
-    operations.flatMap(o => pipes.find(f => f.label == o.name).map(p => (o, p))).map(m => Pipeline(m._1.name, m._1, getScheduleFromPipe(m._2))  )
+    operations.flatMap(o => pipes.find(f => f.label == o.name).map(p => (o, p))).map(m => Pipeline(m._1.name, m._1, getScheduleFromPipe(m._2)))
   }
 
-  def getScheduleFromPipe(config: DataSet) = config("schedule")("cron").stringOption.map(m => Schedule(m))
+  def getScheduleFromPipe(config: DataSet) =
+    config("schedule")("cron").stringOption.map(m =>
+      Schedule(config("schedule")("start_time").stringOption.map(s => new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(s)), m))
 
 }

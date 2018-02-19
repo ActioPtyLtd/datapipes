@@ -22,11 +22,18 @@ object Scheduler {
       data.put("pipescript", pipeScript)
       data.put("pipename", p._2.name)
 
+      val addStartTime = (t: TriggerBuilder[CronTrigger]) => {
+        if(p._1.startTime.isDefined)
+          t.startAt(p._1.startTime.get)
+        else
+          t
+      }
+
       (
         JobBuilder.newJob(classOf[PipeScriptJob]).setJobData(data).withIdentity(new JobKey(p._2.pipe.name, pipeScript.name)).build,
-        TriggerBuilder.newTrigger.withIdentity(p._2.pipe.name,pipeScript.name).withSchedule(
+        addStartTime(TriggerBuilder.newTrigger.withIdentity(p._2.pipe.name,pipeScript.name).withSchedule(
           CronScheduleBuilder.cronSchedule(p._1.cron).withMisfireHandlingInstructionDoNothing
-        ).build
+        )).build
       )
     })
   }
