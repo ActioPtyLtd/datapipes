@@ -6,7 +6,6 @@ import actio.common.{DataSource, Dom, Observer, Task}
 
 import scala.collection.mutable.ListBuffer
 import scala.meta._
-import scala.meta.Term
 
 class TaskLookup(name: String, config: DataSet, version: String) extends Task {
 
@@ -23,7 +22,7 @@ class TaskLookup(name: String, config: DataSet, version: String) extends Task {
 
   def next(value: Dom): Unit = {
 
-    val dataSource: DataSource = DataSource(config("dataSource"))
+    val dataSource: DataSource = DataSourceFactory(config("dataSource"))
     val ret = ListBuffer[DataSet]()
 
     val localObserver = new Observer[DataSet] {

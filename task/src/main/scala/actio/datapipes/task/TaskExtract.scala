@@ -12,7 +12,7 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
 
   private val logger = Logger("TaskExtract")
   private val size: Int = config("size").stringOption.flatMap(m => Try(m.toInt).toOption).getOrElse(100)
-  private val dataSource: DataSource = DataSource(config("dataSource"))
+  private val dataSource: DataSource = DataSourceFactory(config("dataSource"))
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
   private val buffer = Queue[DataSet]()
   private val namespace = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Legacy.Functions")

@@ -5,7 +5,7 @@ import java.util.UUID
 import actio.common.Data.{DataArray, DataNothing, DataSet}
 import actio.common.{Dom, Event, Observable, Observer}
 import actio.datapipes.pipescript.Pipeline.Operation
-import actio.datapipes.task.Task
+import actio.datapipes.task.TaskFactory
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.ListBuffer
@@ -65,7 +65,7 @@ object SimpleExecutor {
 
     case t: actio.datapipes.pipescript.Pipeline.Task => new TaskOperation {
 
-      val myTask = Task(t.name, t.taskType, t.config)
+      val myTask = TaskFactory(t.name, t.taskType, t.config)
 
       var totalProcessed = 0
       var totalProcessedSize = 0

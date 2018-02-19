@@ -4,7 +4,7 @@ import actio.common.Data.DataSet
 import actio.datapipes.task.Legacy.TaskFunctionFold
 
 
-object Task {
+object TaskFactory {
 
   private lazy val tasks = Map[String, (String, DataSet, String) => actio.common.Task](
     "extract" -> ((name, config, version) =>

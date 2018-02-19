@@ -11,8 +11,8 @@ import scala.collection.mutable.ListBuffer
 
 class TaskStage(val name: String, val config: DataSet) extends Task {
 
-  private val dataSource: DataSource = DataSource(config("dataSource"))
-  private lazy val runDataSource: DataSource = DataSource(config("run_dataSource"))
+  private val dataSource: DataSource = DataSourceFactory(config("dataSource"))
+  private lazy val runDataSource: DataSource = DataSourceFactory(config("run_dataSource"))
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
 
   private val termCreate: TermLinkedTree = TaskLookup.getTermTree(config("dataSource")("query")("create"))

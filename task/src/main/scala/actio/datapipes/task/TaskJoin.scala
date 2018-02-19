@@ -34,7 +34,7 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
       val query = termRead.map(r => TaskLookup.interpolate(termExecutor, r,
         value.success)).getOrElse(DataNothing())
 
-      val src = DataSource(config("dataSource"))
+      val src = DataSourceFactory(config("dataSource"))
 
       val localObserver = new Observer[DataSet] {
 

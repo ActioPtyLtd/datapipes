@@ -9,7 +9,7 @@ import scala.meta.Term
 import scala.meta._
 
 
-object DataSource {
+object DataSourceFactory {
 
   private lazy val sources = Map(
     "stdin" -> ((_: DataSet) =>

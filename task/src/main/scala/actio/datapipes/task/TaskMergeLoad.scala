@@ -14,7 +14,7 @@ import scala.collection.mutable.ListBuffer
 
 class TaskMergeLoad(val name: String, val config: DataSet) extends actio.common.Task {
   private val logger = Logger("TaskMergeLoad")
-  private val dataSource: DataSource = DataSource(config("dataSource"))
+  private val dataSource: DataSource = DataSourceFactory(config("dataSource"))
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
   var retrievedSchema = ""
 

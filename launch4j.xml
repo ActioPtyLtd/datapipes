@@ -3,7 +3,7 @@
   <dontWrapJar>false</dontWrapJar>
   <headerType>console</headerType>
   <jar>/home/maurice/bitbucket/datapipes/application/target/scala-2.11/datapipes-assembly-1.4.3.jar</jar>
-  <outfile>mytest.exe</outfile>
+  <outfile>datapipes.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>

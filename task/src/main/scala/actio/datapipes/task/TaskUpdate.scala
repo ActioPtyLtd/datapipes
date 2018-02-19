@@ -42,7 +42,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
       val query = TaskLookup.interpolate(termExecutor, termRead,
         value.success)
 
-      val src = DataSource(config("dataSource"))
+      val src = DataSourceFactory(config("dataSource"))
 
       val localObserver = new Observer[DataSet] {
 
@@ -82,7 +82,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
       .filterNot(d => Cache.dim.get(d._2).contains(d._3))
 
     if (config("dataSource")("query")("create").toOption.isDefined && inserts.nonEmpty) {
-      val src = DataSource(config("dataSource"))
+      val src = DataSourceFactory(config("dataSource"))
 
       val query = inserts
         .map(i => TaskLookup.interpolate(termExecutor, termCreate, i._1))
@@ -93,7 +93,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
     }
 
     if (config("dataSource")("query")("update").toOption.isDefined && updates.nonEmpty) {
-      val src = DataSource(config("dataSource"))
+      val src = DataSourceFactory(config("dataSource"))
 
       val query = updates
         .map(i => TaskLookup.interpolate(termExecutor, termUpdate, i._1))
