@@ -6,11 +6,9 @@ import java.util.UUID
 import actio.common.Data.{DataString, _}
 import actio.datapipes.pipescript.Pipeline.PipeScript
 import com.typesafe.scalalogging.Logger
-import org.apache.commons.io.FilenameUtils
-import org.quartz.Job
-import org.quartz.JobExecutionContext
-import org.quartz.JobExecutionException
+import org.quartz.{DisallowConcurrentExecution, Job, JobExecutionContext, JobExecutionException}
 
+@DisallowConcurrentExecution
 class PipeScriptJob extends Job {
   lazy val logger = Logger("PipeScriptJob")
 

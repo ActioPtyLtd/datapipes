@@ -1,7 +1,10 @@
 package actio.datapipes.application
 
 import java.io.{File, FileFilter}
+import java.text.SimpleDateFormat
+import java.time.temporal.TemporalField
 import java.time.{LocalDateTime, OffsetDateTime}
+import java.util.Date
 
 import actio.common.Data.DataSet
 import actio.d.getCanonicalPathatapipes.application.ConfigMonitorListener
@@ -12,6 +15,7 @@ import org.apache.commons.io.FileUtils
 import org.quartz._
 import org.apache.commons.io.monitor.FileAlterationObserver
 import org.quartz.impl.StdSchedulerFactory
+import java.text.SimpleDateFormat
 
 object Scheduler {
   lazy val logger = Logger("Scheduler")
@@ -22,9 +26,12 @@ object Scheduler {
       data.put("pipescript", pipeScript)
       data.put("pipename", p._2.name)
 
+      val now = new Date()
+
       val addStartTime = (t: TriggerBuilder[CronTrigger]) => {
-        if(p._1.startTime.isDefined)
+        if(p._1.startTime.isDefined && p._1.startTime.get.after(now)) {
           t.startAt(p._1.startTime.get)
+        }
         else
           t
       }
@@ -63,9 +70,10 @@ object Scheduler {
     if (schedules.nonEmpty || pipeScript.schedule.isDefined) {
       val sched = new StdSchedulerFactory().getScheduler
 
-      // get any schedules in system conf
+      // get any schedules in current conf
       schedules.foreach { s =>
         sched.scheduleJob(s._1, s._2)
+        logger.info(s"Job ${s._1.getKey.toString} added. Next run: ${s._2.getNextFireTime}.")
       }
 
       // get schedule to refresh config folder
