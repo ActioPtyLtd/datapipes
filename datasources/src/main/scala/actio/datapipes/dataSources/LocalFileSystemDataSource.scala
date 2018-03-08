@@ -50,21 +50,30 @@ class LocalFileSystemDataSource(format: String) extends DataSource {
   }
 
   def executeWrite(config: DataSet, queries: Seq[DataSet]): Unit = {
-    val dir = config("directory").toOption.orElse(queries.head("directory").toOption).get.toString
-    val filePath = dir + "/" + queries.head("regex").stringOption
-      .getOrElse(config("regex").stringOption.getOrElse(queries.head("filenameTemplate").stringOption
-        .getOrElse(config("filenameTemplate").stringOption.getOrElse(""))))
 
-    FileUtils.forceMkdir(new File(dir))
+    val fileGroups = queries.groupBy(q => (
+      q("directory").stringOption.getOrElse(config("directory").toString),
+      q("regex").stringOption.orElse(q("filenameTemplate").stringOption).orElse(config("regex").stringOption).getOrElse(q("filenameTemplate").toString)
+    ))
 
-    logger.info(s"Writing to file: ${filePath}...")
+    fileGroups.foreach { fileGroup =>
 
-    val stream = new FileOutputStream(filePath, true)
+      // create folder if required
+      FileUtils.forceMkdir(new File(fileGroup._1._1))
 
-    FileDataSource.writeData(stream, format, config("compression").stringOption, queries)
-    stream.close()
+      val filePath = fileGroup._1._1 + "/" + fileGroup._1._2
 
-    logger.info(s"Completed writing to file: ${filePath}.")
+      logger.info(s"Writing to file: ${filePath}...")
+
+      val append = !fileGroup._2.exists(f => f("append").stringOption.contains("false"))
+      val stream = new FileOutputStream(filePath, append)
+
+      // write all lines to the appropriate file
+      FileDataSource.writeData(stream, format, config("compression").stringOption, fileGroup._2)
+      stream.close()
+
+      logger.info(s"Completed writing to file: ${filePath}.")
+    }
 
     _observer.foreach(o => o.completed())
   }

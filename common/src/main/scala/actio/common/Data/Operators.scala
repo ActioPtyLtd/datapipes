@@ -31,6 +31,10 @@ object Operators {
     }
   }
 
+  //def append(l: DataSet, r: DataSet): DataSet = {
+
+  //}
+
   def flatten(ds: DataSet): DataSet = {
     val children = ds match {
       case DataRecord(_,r) => r.flatMap(e => flatten(e).elems)
