@@ -20,10 +20,10 @@ import java.text.SimpleDateFormat
 object Scheduler {
   lazy val logger = Logger("Scheduler")
 
-  def getJobSchedule(pipeScript: PipeScript): List[(JobDetail, Trigger)] = {
+  def getJobSchedule(pipeScript: PipeScript, file: File): List[(JobDetail, Trigger)] = {
     pipeScript.pipelines.flatMap(p => p.schedule.map(m => (m, p))).map(p => {
       val data = new JobDataMap()
-      data.put("pipescript", pipeScript)
+      data.put("pipescript", file.getAbsolutePath)
       data.put("pipename", p._2.name)
 
       val now = new Date()
@@ -64,8 +64,8 @@ object Scheduler {
     )
   }
 
-  def boot(pipeScript: PipeScript, start: DataSet): Unit = {
-    val schedules = getJobSchedule(pipeScript)
+  def boot(pipeScript: PipeScript, file: File, start: DataSet): Unit = {
+    val schedules = getJobSchedule(pipeScript, file)
 
     if (schedules.nonEmpty || pipeScript.schedule.isDefined) {
       val sched = new StdSchedulerFactory().getScheduler
@@ -85,8 +85,8 @@ object Scheduler {
         val builtConfigs = PipeScriptBuilder.build(confFiles)
 
         builtConfigs._1.foreach { p =>
-          logger.info(s"Successfully parsed PipeScript: ${p.name}")
-          val addSchedule = getJobSchedule(p)
+          logger.info(s"Successfully parsed PipeScript: ${p._2.name}")
+          val addSchedule = getJobSchedule(p._2, p._1)
           addSchedule.foreach { s =>
             sched.scheduleJob(s._1, s._2)
             logger.info(s"Job ${s._1.getKey.toString} added. Next run: ${s._2.getNextFireTime}.")
@@ -115,10 +115,11 @@ object Scheduler {
     }
   }
 
-  def boot(name: String, config: DataSet, start: DataSet): Unit = {
-    val pipeScript = PipeScriptBuilder.build(name, config)
-
-    boot(pipeScript, start)
+  def boot(fileName: String, start: DataSet): Unit = {
+    val file = new File(fileName)
+    val pipeScript = PipeScriptBuilder.build(file)
+    boot(pipeScript.get, file, start)
   }
+
 
 }

@@ -32,7 +32,7 @@ class ConfigMonitorListener(scheduler: Scheduler) extends FileAlterationListener
     val config = ConfigReader.read(file)
     val pipeScript = PipeScriptBuilder.build(file.toString, config)
 
-    val jobList = actio.datapipes.application.Scheduler.getJobSchedule(pipeScript)
+    val jobList = actio.datapipes.application.Scheduler.getJobSchedule(pipeScript, file)
 
     import collection.JavaConverters._
     val currentJobsForFile = scheduler.getJobKeys(GroupMatcher.groupEquals(file.toString)).asScala

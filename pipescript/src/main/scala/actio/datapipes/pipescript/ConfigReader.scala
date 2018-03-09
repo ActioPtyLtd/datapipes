@@ -24,6 +24,21 @@ object ConfigReader {
     read(f)
   }
 
+  def parse(content: String): DataSet = {
+    convert(
+      ConfigFactory.parseProperties(System.getProperties)
+        .withFallback(ConfigFactory.parseString(content))
+        .resolve())
+  }
+
+  def read(file: File, run: String): DataSet = {
+    convert(
+      ConfigFactory
+        .parseString(run)
+        .withFallback(ConfigFactory.parseFile(file))
+        .resolve())
+  }
+
   def readfromConfigList(config: Config, str: List[String]): Config = str match {
     case Nil => config
     case (h::t) => readfromConfigList(config.withFallback(ConfigFactory.parseString(h)), t)

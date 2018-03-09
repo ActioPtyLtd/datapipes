@@ -71,7 +71,7 @@ object AppConsole {
       new AppService(pipeScript)
     }
 
-    Scheduler.boot(configFile, config, DataArray(config))
+    Scheduler.boot(configFile, DataArray(config))
 
     if (line.hasOption("U")) {
       syncFiles(config)

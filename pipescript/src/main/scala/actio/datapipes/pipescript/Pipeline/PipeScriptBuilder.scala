@@ -3,7 +3,7 @@ package actio.datapipes.pipescript.Pipeline
 import java.io.File
 import java.text.SimpleDateFormat
 
-import actio.common.Data.{DataSet, Operators}
+import actio.common.Data.{DataSet, DataString, Operators}
 import actio.datapipes.pipescript.ConfigReader
 
 import scala.annotation.tailrec
@@ -13,9 +13,9 @@ import scala.util.Try
 
 object PipeScriptBuilder {
 
-  def build(files: Seq[File]): (List[PipeScript], List[(File, Throwable)]) = {
+  def build(files: Seq[File]): (List[(File,PipeScript)], List[(File, Throwable)]) = {
     val result = files.map(f => (f, build(f))).toList
-    val success = result.filter(f => f._2.isSuccess).map(m => m._2.get)
+    val success = result.filter(f => f._2.isSuccess).map(m => (m._1, m._2.get))
     val failure = result.filter(f => f._2.isFailure).map(m => (m._1, m._2.failed.get))
 
     (success, failure)
@@ -23,6 +23,12 @@ object PipeScriptBuilder {
 
   def build(file: File): Try[PipeScript] = {
     Try(build(file.toString, ConfigReader.read(file)))
+  }
+
+  def build(file: File, mergeConfig: String): Try[(PipeScript,List[DataString])] = {
+    val config = ConfigReader.read(file, mergeConfig)
+    val parameters = config.elems.collect { case s: DataString => s }.toList
+    Try((build(file.toString, config), parameters))
   }
 
   def build(name: String, ds: DataSet): PipeScript = {
