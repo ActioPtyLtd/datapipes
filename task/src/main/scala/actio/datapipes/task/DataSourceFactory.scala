@@ -41,6 +41,8 @@ object DataSourceFactory {
       new RESTJsonDataSource()),
     "s3" -> ((_: DataSet) =>
       new AWSS3DataSource()),
+    "tusd" -> ((_: DataSet) =>
+      new TusDataSource()),
     "sql" -> ((_: DataSet) =>
       new JDBCDataSource())
   )
