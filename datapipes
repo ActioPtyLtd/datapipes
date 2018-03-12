@@ -1,0 +1,43 @@
+#!/bin/bash
+JARFILE=$(find ./ -name 'datapipes*.jar')
+
+config_name="-c ./datapipes.conf"
+pipe_name=""
+upload=""
+vmargs=""
+service=""
+
+USAGE="Usage: $0 [-c configFile] [-p pipeName] -Dkey1=val1 -Dkey2=val2 ..."
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -c | --config )         shift
+                                config_name="-c $1"
+                                ;;
+        -p | --pipe )           shift
+                                pipe_name="-p $1"
+                                ;;
+        -s | --service )        shift
+                                pipe_name="-s"
+                                ;;
+        -R | --Read )           shift
+                                pipe_name="-R"
+                                ;;
+        -u | --upload-only )    shift
+                                upload="-u"
+                                ;;
+        -U | --upload )         shift
+                                upload="-U"
+                                ;;
+        -h | --help )           echo $USAGE
+                                exit 1
+                                ;;
+        *)                      vmargs="$vmargs $1"
+                                ;;
+    esac
+    shift
+done
+
+echo "Running Java with VM Arguments: $vmargs"
+
+java $vmargs -cp $JARFILE actio.datapipes.application.AppConsole $config_name $pipe_name $upload $service
