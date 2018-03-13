@@ -17,7 +17,7 @@ while [ "$1" != "" ]; do
         -p | --pipe )           shift
                                 pipe_name="-p $1"
                                 ;;
-        -s | --service )        shift
+        -s | --service )
                                 pipe_name="-s"
                                 ;;
         -R | --Read )           shift
