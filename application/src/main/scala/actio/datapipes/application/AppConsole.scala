@@ -70,14 +70,15 @@ object AppConsole {
       System.setProperty("akka.http.server.transparent-head-requests", "false")
       new AppService(pipeScript)
     }
+    else {
+      Scheduler.boot(configFile, DataArray(config))
 
-    Scheduler.boot(configFile, DataArray(config))
+      if (line.hasOption("U")) {
+        syncFiles(config)
+      }
 
-    if (line.hasOption("U")) {
-      syncFiles(config)
+      Runtime.getRuntime.exit(0)
     }
-
-    Runtime.getRuntime.exit(0)
   }
 
   def syncFiles(config: DataSet): Unit = {
