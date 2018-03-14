@@ -39,7 +39,8 @@ class TaskStage(val name: String, val config: DataSet) extends Task {
       Dom.dom2DataSet(value.headOption.get),
       DataRecord(
         value("start").success(0)("run"),
-        DataRecord("parameters", value("start").success(0).elems.collect { case s: DataString => s }.toList),
+        Operators.mergeLeft(config("parameters").toOption.getOrElse(DataRecord("parameters")),
+        DataRecord("parameters", value("start").success(0).elems.collect { case s: DataString => s }.toList)),
         DataString("batchId", batchNum.toString.reverse.padTo(4, '0').reverse)
       )
     )

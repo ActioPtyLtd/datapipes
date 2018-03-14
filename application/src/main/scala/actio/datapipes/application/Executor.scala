@@ -41,24 +41,27 @@ object Executor {
     var statusCode = 0
 
     pipeScript.pipelines.find(f => f.name == "p_events")
-      .map(e => (events: List[Event]) => {
+      .map(e => {
+        val run = SimpleExecutor.getRunnable(e.pipe, None)
+        (events: List[Event]) => {
 
-        val assertEvents = events.collect {
-          case exit: EventAssertionFailed => exit
-        }
-
-        if (assertEvents.nonEmpty) {
-          statusCode = assertEvents.last.statusCode
-          assertEvents.foreach(ex => logger.warn(s"Validation failed: ${ex.message}"))
-          if (assertEvents.exists(event => event.abort)) {
-            logger.warn(s"Abort event detected, exiting with statuscode: $statusCode")
-            Runtime.getRuntime.exit(statusCode)
+          val assertEvents = events.collect {
+            case exit: EventAssertionFailed => exit
           }
-        }
 
-        SimpleExecutor.getRunnable(e.pipe, None)
-          .next(Dom() ~ Dom("start", Nil, start, DataNothing(), Nil) ~
-            Dom("event", Nil, DataArray(events.map(Event.toDataSet)), DataNothing(), Nil))
+          if (assertEvents.nonEmpty) {
+            statusCode = assertEvents.last.statusCode
+            assertEvents.foreach(ex => logger.warn(s"Validation failed: ${ex.message}"))
+            if (assertEvents.exists(event => event.abort)) {
+              logger.warn(s"Abort event detected, exiting with statuscode: $statusCode")
+              Runtime.getRuntime.exit(statusCode)
+            }
+          }
+
+          run
+            .next(Dom() ~ Dom("start", Nil, start, DataNothing(), Nil) ~
+              Dom("event", Nil, DataArray(events.map(Event.toDataSet)), DataNothing(), Nil))
+        }
       })
   }
 }

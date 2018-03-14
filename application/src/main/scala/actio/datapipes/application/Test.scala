@@ -1,5 +1,6 @@
 package actio.datapipes.application
 
+import actio.datapipes.dataSources.OSDataSource
 import com.typesafe.config.{Config, ConfigFactory}
 
 object Test {
@@ -21,7 +22,9 @@ test {
 
 
 
-    config.resolve()
+    //config.resolve()
+
+    new OSDataSource().test()
 
     Console.println(config)
 
