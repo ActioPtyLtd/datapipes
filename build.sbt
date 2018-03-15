@@ -31,6 +31,7 @@ lazy val datasources = project
     "me.chrons" %% "boopickle" % "1.2.5",
     "com.amazonaws" % "aws-java-sdk-s3" % "1.11.184",
       "org.apache.commons" % "commons-compress" % "1.15",
+    "com.github.oshi" % "oshi-core" % "3.4.4",
     "com.github.albfernandez" % "javadbf" % "1.2.1"))
   .dependsOn(pipescript)
 
