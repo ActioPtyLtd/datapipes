@@ -2,6 +2,7 @@ package actio.datapipes.pipescript.Pipeline
 
 import java.io.File
 import java.text.SimpleDateFormat
+import java.util.Date
 
 import actio.common.Data.{DataSet, DataString, Operators}
 import actio.datapipes.pipescript.ConfigReader
@@ -12,6 +13,18 @@ import scala.meta.Term
 import scala.util.Try
 
 object PipeScriptBuilder {
+
+  object Lang {
+    val schedule = (c: DataSet) => c("schedule")
+    object Schedule {
+      val start = (c: DataSet) => schedule(c)("start_time")
+      val end = (c: DataSet) => schedule(c)("end_time")
+      val cron = (c: DataSet) => schedule(c)("cron")
+      val interval = (c: DataSet) => schedule(c)("interval")
+    }
+
+  }
+
 
   def build(files: Seq[File]): (List[(File,PipeScript)], List[(File, Throwable)]) = {
     val result = files.map(f => (f, build(f))).toList
@@ -165,8 +178,22 @@ object PipeScriptBuilder {
     operations.flatMap(o => pipes.find(f => f.label == o.name).map(p => (o, p))).map(m => Pipeline(m._1.name, m._1, getScheduleFromPipe(m._2)))
   }
 
-  def getScheduleFromPipe(config: DataSet) =
-    config("schedule")("cron").stringOption.map(m =>
-      Schedule(config("schedule")("start_time").stringOption.map(s => new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(s)), m))
+  val yyyyMMdd = "yyyy-MM-dd HH:mm:ss"
+  val d1900 = "1900-01-01 00:00:00"
+  val d2999 = "2999-01-01 00:00:00"
 
+  def getScheduleFromPipe(config: DataSet): Schedule =
+    if(Lang.Schedule.cron(config).stringOption.isDefined)
+      RunWithCronSchedule(
+        new SimpleDateFormat(yyyyMMdd).parse(Lang.Schedule.start(config).stringOption.getOrElse(d1900)),
+        new SimpleDateFormat(yyyyMMdd).parse(Lang.Schedule.end(config).stringOption.getOrElse(d2999)),
+        Lang.Schedule.cron(config).toString)
+    else if(Lang.Schedule.interval(config).intOption.isDefined)
+      RunWithInterval(new SimpleDateFormat(yyyyMMdd).parse(Lang.Schedule.start(config).stringOption.getOrElse(d1900)),
+        new SimpleDateFormat(yyyyMMdd).parse(Lang.Schedule.end(config).stringOption.getOrElse(d2999)),
+        Lang.Schedule.interval(config).intOption.get)
+    else if(Lang.schedule(config).isDefined)
+      RunOnce(new SimpleDateFormat(yyyyMMdd).parse(Lang.Schedule.end(config).stringOption.getOrElse(d2999)))
+    else
+      RunNever()
 }

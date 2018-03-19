@@ -9,7 +9,7 @@ import java.util.Date
 import actio.common.Data.DataSet
 import actio.d.getCanonicalPathatapipes.application.ConfigMonitorListener
 import actio.datapipes.pipeline.SimpleExecutor
-import actio.datapipes.pipescript.Pipeline.{PipeScript, PipeScriptBuilder}
+import actio.datapipes.pipescript.Pipeline._
 import com.typesafe.scalalogging.Logger
 import org.apache.commons.io.FileUtils
 import org.quartz._
@@ -21,26 +21,39 @@ object Scheduler {
   lazy val logger = Logger("Scheduler")
 
   def getJobSchedule(pipeScript: PipeScript, file: File): List[(JobDetail, Trigger)] = {
-    pipeScript.pipelines.flatMap(p => p.schedule.map(m => (m, p))).map(p => {
+    pipeScript.pipelines.map(p => (p.schedule,p)).filterNot(f => f._1.isInstanceOf[RunNever]).map(p => {
       val data = new JobDataMap()
       data.put("pipescript", file.getAbsolutePath)
       data.put("pipename", p._2.name)
 
       val now = new Date()
 
-      val addStartTime = (t: TriggerBuilder[CronTrigger]) => {
-        if(p._1.startTime.isDefined && p._1.startTime.get.after(now)) {
-          t.startAt(p._1.startTime.get)
+      val trigger = p._2.schedule match {
+        case cron:RunWithCronSchedule => (t: TriggerBuilder[Trigger]) => {
+          val ret = t.withSchedule(
+            CronScheduleBuilder.cronSchedule(cron.cron).withMisfireHandlingInstructionDoNothing
+          ).endAt(cron.endTime)
+          if(cron.startTime.after(new Date()))
+            ret.startAt(cron.startTime)
+          else
+            ret
         }
-        else
-          t
+        case interval:RunWithInterval => (t: TriggerBuilder[Trigger]) => {
+          val ret = t.withSchedule(
+            SimpleScheduleBuilder.repeatSecondlyForever(interval.seconds).withMisfireHandlingInstructionIgnoreMisfires()
+          ).endAt(interval.endTime)
+          if(interval.startTime.after(new Date()))
+            ret.startAt(interval.startTime)
+          else
+            ret
+        }
+        case once:RunOnce => (t: TriggerBuilder[Trigger]) =>
+          t.startNow()
       }
 
       (
         JobBuilder.newJob(classOf[PipeScriptJob]).setJobData(data).withIdentity(new JobKey(p._2.pipe.name, pipeScript.name)).build,
-        addStartTime(TriggerBuilder.newTrigger.withIdentity(p._2.pipe.name,pipeScript.name).withSchedule(
-          CronScheduleBuilder.cronSchedule(p._1.cron).withMisfireHandlingInstructionDoNothing
-        )).build
+        trigger(TriggerBuilder.newTrigger.withIdentity(p._2.pipe.name,pipeScript.name)).build
       )
     })
   }

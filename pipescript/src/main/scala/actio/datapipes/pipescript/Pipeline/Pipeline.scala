@@ -1,3 +1,3 @@
 package actio.datapipes.pipescript.Pipeline
 
-case class Pipeline(name: String, pipe: Operation, schedule: Option[Schedule])
+case class Pipeline(name: String, pipe: Operation, schedule: Schedule)
