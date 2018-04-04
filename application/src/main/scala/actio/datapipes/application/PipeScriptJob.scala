@@ -5,11 +5,10 @@ import java.text.SimpleDateFormat
 import java.util.UUID
 
 import actio.common.Data.{DataString, _}
-import actio.datapipes.pipescript.ConfigReader
-import actio.datapipes.pipescript.Pipeline.{PipeScript, PipeScriptBuilder}
-import com.typesafe.config.{Config, ConfigFactory}
 import com.typesafe.scalalogging.Logger
 import org.quartz.{DisallowConcurrentExecution, Job, JobExecutionContext, JobExecutionException}
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 @DisallowConcurrentExecution
 class PipeScriptJob extends Job {
@@ -27,17 +26,38 @@ class PipeScriptJob extends Job {
     val rundate = dateFormat.format(new java.util.Date())
 
     val mergeConfig = initConfig(executePipe, runid, "", rundate, UUID.randomUUID().toString)
-    val pipescript = PipeScriptBuilder.build(new File(file), mergeConfig).get
+    //val pipescript = PipeScriptBuilder.build(new File(file), mergeConfig).get
 
     logger.info(s"Triggering job: ${jobName}...")
     logger.info(s"Executing pipe: ${executePipe}")
 
+    val pb = new ProcessBuilder("java", "-cp","datapipes-1.4.4.jar","actio.datapipes.application.AppConsole", "-c", file, "-p", executePipe)
 
+    val env = pb.environment()
+    env.put("run.scheduledRunId", UUID.nameUUIDFromBytes(jobName.getBytes).toString)
 
-    Executor.run(pipescript._1, executePipe, DataArray(startDataSet(executePipe, runid, pipescript._1.name, rundate, UUID.randomUUID().toString, pipescript._2)))
+    logger.info("Forking process...")
+    logger.info(s"Next scheduled run: ${context.getNextFireTime}")
+
+    val process = pb.start()
+
+    val br = new BufferedReader(new InputStreamReader(process.getInputStream))
+    while (br.readLine() != null) {
+      // just consume the output, so there's no deadlock on the buffer
+    }
+    br.close()
+    process.waitFor()
+
+    import java.io.BufferedReader
+    import java.io.InputStreamReader
+    //val br = new BufferedReader(new InputStreamReader(process.getErrorStream))
+
+    //Console.println(br.readLine())
+
+    //Executor.run(pipescript._1, executePipe, DataArray(startDataSet(executePipe, runid, pipescript._1.name, rundate, UUID.randomUUID().toString, pipescript._2)))
     
     logger.info(s"Execution completed for job: ${jobName}")
-    logger.info(s"Next scheduled run: ${context.getNextFireTime}")
+
   }
 
   def initConfig(pipeName: String, runid: String, configName: String, rundate: String, scheduledRunId: String): String = {

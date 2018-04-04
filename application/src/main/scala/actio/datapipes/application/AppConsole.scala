@@ -70,6 +70,12 @@ object AppConsole {
       System.setProperty("akka.http.server.transparent-head-requests", "false")
       new AppService(pipeScript)
     }
+    else if(line.hasOption("p")) {
+      logger.info("Run Once...")
+      Executor.run(pipeScript, DataArray(config))
+      logger.info("Done.")
+      Runtime.getRuntime.exit(0)
+    }
     else {
       Scheduler.boot(configFile, DataArray(config))
 
