@@ -37,7 +37,7 @@ project/build.properties
 
 # Logback
 .idea/modules/log*.txt
-log*.txt
+log
 
 # IntelliJ library config
 .idea/libraries/*.xml
@@ -66,3 +66,4 @@ src/test/
 
 # Common.Data.Data Set Dump Files
 *.ds
+data
