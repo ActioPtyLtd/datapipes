@@ -2,7 +2,7 @@ package actio.datapipes.application
 
 import java.io.File
 import java.text.SimpleDateFormat
-import java.util.UUID
+import java.util.{TimeZone, UUID}
 
 import actio.common.Data.{DataString, _}
 import com.typesafe.scalalogging.Logger
@@ -23,6 +23,8 @@ class PipeScriptJob extends Job {
     val jobName = context.getJobDetail.getKey.toString
     val runid = UUID.randomUUID().toString
     val dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss")
+    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
+    
     val rundate = dateFormat.format(new java.util.Date())
 
     val mergeConfig = initConfig(executePipe, runid, "", rundate, UUID.randomUUID().toString)

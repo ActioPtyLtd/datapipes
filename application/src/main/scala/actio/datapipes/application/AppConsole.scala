@@ -1,7 +1,7 @@
 package actio.datapipes.application
 
 import java.io.File
-import java.util.UUID
+import java.util.{TimeZone, UUID}
 
 import actio.common.Data._
 import actio.common.{Dom, Event, EventAssertionFailed}
@@ -52,6 +52,7 @@ object AppConsole {
 
     import java.text.SimpleDateFormat
     val dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss")
+    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
 
     System.setProperty("run.startDate", dateFormat.format(new java.util.Date()))
 
