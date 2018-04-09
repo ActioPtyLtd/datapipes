@@ -17,7 +17,7 @@ class TaskStage(val name: String, val config: DataSet) extends Task {
 
   private val termCreate: TermLinkedTree = TaskLookup.getTermTree(config("dataSource")("query")("create"))
   private val termInitialise: TermLinkedTree = TaskLookup.getTermTree(config("dataSource")("query")("initialise"))
-  private val termComplete: TermLinkedTree = TaskLookup.getTermTree(config("dataSource")("query")("complete"))
+  private val termComplete: TermLinkedTree = TaskLookup.getTermTree(config("dataSource")("query")("finalise"))
 
   private val namespace: String = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Legacy.Functions")
   private val termExecutor = new TermExecutor(namespace)
@@ -27,7 +27,8 @@ class TaskStage(val name: String, val config: DataSet) extends Task {
 
   def completed(): Unit = {
     if(config("dataSource")("query")("finalise").isDefined)
-      dataSource.execute(config("dataSource"),config("dataSource")("query")("finalise"))
+      dataSource.execute(config("dataSource"), config("dataSource")("query")("finalise"))
+    
     _observer.foreach(o => o.completed())
   }
 

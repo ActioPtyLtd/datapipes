@@ -24,7 +24,7 @@ class PipeScriptJob extends Job {
     val runid = UUID.randomUUID().toString
     val dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss")
     dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"))
-    
+
     val rundate = dateFormat.format(new java.util.Date())
 
     val mergeConfig = initConfig(executePipe, runid, "", rundate, UUID.randomUUID().toString)

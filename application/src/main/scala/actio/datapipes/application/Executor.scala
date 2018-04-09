@@ -28,6 +28,12 @@ object Executor {
       ep(List(Event.runCompleted()))
     }
 
+    pipeScript.pipelines.find(f => f.name == "p_datalake").toList.foreach{ p =>
+      logger.info("Datalake pipeline detected. Running now...")
+      val runnableUpload = SimpleExecutor.getRunnable(p.pipe, None)
+      runnableUpload.start(start)
+    }
+
     logger.info(s"Pipe ${pipeScript.defaultPipeline} completed successfully.")
 
     // TODO: return the statusCode

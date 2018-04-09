@@ -19,36 +19,38 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
   private val termExecutor = new TermExecutor(namespace)
   private val termRead = TaskLookup.getTermTree(config("dataSource")("query")("read"))
 
-  def completed(): Unit = { Unit }
+  def completed(): Unit = {
+    _observer.foreach(o => o.completed())
+  }
 
   def error(exception: Throwable): Unit = ???
 
-  def next(start: Dom): Unit = {
-
-    lazy val dsObserver = new Observer[DataSet] {
-      def completed(): Unit = {
-        if (buffer.nonEmpty) {
-          logger.info("Sending remaining buffered data...")
-          responseAdjust()
-          buffer.clear()
-          _observer.foreach(o => o.completed())
-        }
+  lazy val dsObserver = new Observer[DataSet] {
+    def completed(): Unit = {
+      if (buffer.nonEmpty) {
+        logger.info("Sending remaining buffered data...")
+        responseAdjust()
+        buffer.clear()
+        _observer.foreach(o => o.completed())
       }
-
-      def error(exception: Throwable): Unit = _observer.foreach(o => o.error(exception))
-
-      def next(value: DataSet): Unit = {
-        buffer.enqueue(value)
-
-        if (buffer.size == size) {
-          responseAdjust()
-          buffer.clear()
-        }
-      }
-
     }
 
-    dataSource.subscribe(dsObserver)
+    def error(exception: Throwable): Unit = _observer.foreach(o => o.error(exception))
+
+    def next(value: DataSet): Unit = {
+      buffer.enqueue(value)
+
+      if (buffer.size == size) {
+        responseAdjust()
+        buffer.clear()
+      }
+    }
+
+  }
+
+  dataSource.subscribe(dsObserver)
+
+  def next(start: Dom): Unit = {
 
     if (config("dataSource")("query")("read").toOption.isDefined) {
       start.success.elems.foreach{ e =>
