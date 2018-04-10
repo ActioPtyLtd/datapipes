@@ -40,7 +40,7 @@ object AppConsole {
       if (line.hasOption("c")) { // print the value of config
         line.getOptionValue('c')
       } else {
-        "./application.conf"
+        "./datapipes.conf"
       }
 
     if (line.hasOption("p"))

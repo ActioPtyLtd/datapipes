@@ -5,7 +5,6 @@ scalaVersion := "2.11.1"
 
 resolvers += Resolver.bintrayRepo("hseeberger", "maven")
 
-
 lazy val common = project
   .settings(
     assemblyJarName in assembly := "commons.jar")
@@ -58,6 +57,7 @@ lazy val application = project
     "com.typesafe.akka" %% "akka-http-spray-json" % "10.0.1",
     "org.quartz-scheduler" % "quartz" % "2.3.0"
   ))
+  .settings(mainClass in assembly := Some("actio.datapipes.application.AppConsole"))
   .dependsOn(pipescript, datasources, common, task, pipeline)
 
 lazy val root =

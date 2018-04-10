@@ -2,7 +2,7 @@ package actio.datapipes.application
 
 import actio.datapipes.dataSources.OSDataSource
 import com.typesafe.config.{Config, ConfigFactory}
-
+/*
 object Test {
   def main(args: Array[String]): Unit = {
     val config = ConfigFactory.parseString(
@@ -34,3 +34,4 @@ test {
 
   }
 }
+*/
