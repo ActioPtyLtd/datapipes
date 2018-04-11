@@ -1,7 +1,7 @@
 #!/bin/bash
 JARFILE=$(find ./application/target/scala-2.11/ -name 'datapipes-assembly*.jar')
 
-config_name="./application.conf"
+config_name=""
 pipe_name=""
 upload=""
 vmargs=""
@@ -40,4 +40,4 @@ done
 
 echo "Running Java with VM Arguments: $vmargs"
 
-java $vmargs -cp $JARFILE actio.datapipes.application.AppConsole $config_name $pipe_name $upload $service
+java $vmargs -jar $JARFILE $config_name $pipe_name $upload $service
