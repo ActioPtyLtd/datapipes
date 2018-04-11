@@ -107,8 +107,7 @@ object Scheduler {
           logger.info(s"${addSchedule.size} jobs found.")
         }
         builtConfigs._2.foreach { f =>
-          logger.warn(s"Failed to parse file: ${f._1}")
-          logger.warn(s"Error: ${f._2.getMessage}")
+          logger.info(s"Skipping over file: ${f._1}...")
         }
 
         val configMonitorJobSchedule = getConfigMonitorJobSchedule(pipeScript)
