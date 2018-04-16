@@ -33,7 +33,7 @@ class PipeScriptJob extends Job {
     logger.info(s"Triggering job: ${jobName}...")
     logger.info(s"Executing pipe: ${executePipe}")
 
-    val pb = new ProcessBuilder("java", "-cp","datapipes-1.4.4.jar","actio.datapipes.application.AppConsole", "-c", file, "-p", executePipe)
+    val pb = new ProcessBuilder("java", "-jar","datapipes-assembly.jar", "-c", file, "-p", executePipe)
 
     val env = pb.environment()
     env.put("run.scheduledRunId", UUID.nameUUIDFromBytes(jobName.getBytes).toString)
