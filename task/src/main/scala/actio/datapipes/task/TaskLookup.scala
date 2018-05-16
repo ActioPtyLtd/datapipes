@@ -50,7 +50,9 @@ class TaskLookup(name: String, config: DataSet, version: String) extends Task {
 
     value.success.elems.foreach { e =>
       config("waiting").intOption.foreach(t => Thread.sleep(t))
-      dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, terms, e))
+      // if there is paging doesn't evaluate the query, hack!
+      val q = if(config("dataSource")("iterate").isDefined) e else TaskLookup.interpolate(termExecutor, terms, e)
+      dataSource.execute(config("dataSource"), q)
     }
 
 

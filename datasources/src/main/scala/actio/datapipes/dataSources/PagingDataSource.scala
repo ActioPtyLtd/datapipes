@@ -40,7 +40,7 @@ class PagingDataSource(config: DataSet, dataSource: DataSource, evalQuery: DataS
 
     dataSource.subscribe(dsObserver)
 
-    executeRecursive(0, config("query")("read"))
+    executeRecursive(0, query.head)
 
     _observer.foreach(o => o.completed())
   }

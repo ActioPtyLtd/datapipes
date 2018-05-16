@@ -95,7 +95,7 @@ object PipeScriptBuilder {
       val pname: String = p.label
       val p1: Array[String] = p("pipe")
         .stringOption
-        .map(s => s.split("&|\\|")).get
+        .map(s => s.split("&|\\||\\(|\\)")).get
       val p2 = p1.map(name => name.replace(" ", "")).filter(
         name => pipeMap.contains(name)
       )

@@ -17,6 +17,8 @@ object TaskFactory {
       new TaskAssert(name, config)),
     "transform" -> ((name, config, _) =>
       new TaskFunctionFold(name, config)),
+    "chunk" -> ((name, config, _) =>
+      new TaskChunk(name, config)),
     "mergeTemplate" -> ((name, config, version) =>
       new TaskTemplate(name, config, version)),
     "each" -> ((name, config, _) =>

@@ -118,7 +118,7 @@ object Scheduler {
 
       sched.start()
 
-      System.in.read()
+      Thread.currentThread.join()
 
       sched.shutdown(true)
 

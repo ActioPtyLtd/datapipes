@@ -54,8 +54,9 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
 
     if (config("dataSource")("query")("read").toOption.isDefined) {
       start.success.elems.foreach{ e =>
-        dataSource.execute(config("dataSource"), TaskLookup.interpolate(termExecutor, termRead,
-          e))
+        // if there is paging doesn't evaluate the query, hack!
+        val q = if(config("dataSource")("iterate").isDefined) e else TaskLookup.interpolate(termExecutor, termRead, e)
+        dataSource.execute(config("dataSource"), q)
       }
     }
     else
