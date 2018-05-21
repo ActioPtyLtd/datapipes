@@ -1,5 +1,7 @@
 #!/bin/bash
-JARFILE=$(find ./ -name 'datapipes*.jar')
+JARFILE=$(find . | grep -i "datapipes-assembly" | sort -nr)
+ln -sf $JARFILE datapipes-assembly.jar
+mkdir -p configs
 
 config_name=""
 pipe_name=""
@@ -37,6 +39,8 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
+
+JARFILE="datapipes-assembly.jar"
 
 echo "Running Java with VM Arguments: $vmargs"
 
