@@ -67,3 +67,4 @@ src/test/
 # Common.Data.Data Set Dump Files
 *.ds
 data
+datapipes-assembly.jar
