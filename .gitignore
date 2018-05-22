@@ -68,3 +68,4 @@ src/test/
 *.ds
 data
 datapipes-assembly.jar
+scripts/
