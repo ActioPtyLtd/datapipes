@@ -1,5 +1,5 @@
 #!/bin/bash
-JARFILE=$(find . | grep -i "datapipes-assembly" | sort -nr)
+JARFILE=$(find . | grep -i "datapipes-assembly-" | sort -nr)
 ln -sf $JARFILE datapipes-assembly.jar
 mkdir -p configs
 
