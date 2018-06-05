@@ -9,6 +9,15 @@ Data Pipes version 2 is not backwards compatible with Version 1.  This was due t
 ## How does Data Pipes work?
 Data Pipes is written in Scala and runs on the JVM, allowing for it to be deployed on Windows, Linux and macOS systems. [PipeScript&reg;](https://github.com/ActioPtyLtd/datapipes-pipescript) is a human readable DSL (domain specific language) that captures how to orchestrate the flow of data between systems. Data Pipes interprets and executes [PipeScript&reg;](https://github.com/ActioPtyLtd/datapipes-pipescript) which can be read from your local file system or retrieved via an API call to get up-to-date instructions.
 
+## Build Data Pipes
+To build Data Pipes you will need sbt. Run the following command:
+
+```shell
+$ sbt assembly
+```
+
+This will generate a fat jar.
+
 ## Command Line Interface
 The command line options for Data Pipes are as follows:
 
