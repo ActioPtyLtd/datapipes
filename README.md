@@ -19,11 +19,15 @@ $ sbt assembly
 This will generate a fat jar.
 
 ## Command Line Interface
-The command line options for Data Pipes are as follows:
+To run Data Pipes, execute it with the following command:
 
-```shell
+```
+$ java -jar datapipes-assembly.jar -c <filename> [options]... [vmargs]...
+```
+OR you can use the shell script:
+
+```
 $ datapipes -c <filename> [options]... [vmargs]...
-
 ```
 
 options:
