@@ -22,7 +22,7 @@ This will generate a fat jar.
 To run Data Pipes, execute it with the following command:
 
 ```
-$ java -jar datapipes-assembly.jar -c <filename> [options]... [vmargs]...
+$ java -jar datapipes-assembly.jar -c <filename> [options]...
 ```
 OR you can use the shell script:
 
