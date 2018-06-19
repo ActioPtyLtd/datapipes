@@ -2,11 +2,12 @@ package actio.datapipes.task.Term
 
 
 import actio.common.Data._
+import actio.datapipes.task.TaskSetting
 import com.typesafe.scalalogging.Logger
 
 import scala.meta._
 
-class TermExecutor(nameSpace: String) {
+class TermExecutor(taskSetting: TaskSetting) {
 
   val logger = Logger("Meta")
 
@@ -115,7 +116,13 @@ class TermExecutor(nameSpace: String) {
       DataArray(eval(q, scope).map(i => i(n)).toList)
 
     // Look for the DataSet with label
-    case Term.Select(q, Term.Name(n)) => eval(q, scope)(n)
+    case Term.Select(q, Term.Name(n)) => {
+      val res = eval(q, scope)
+      if(!taskSetting.strictTraversal || res(n).isDefined)
+        res(n)
+      else
+        throw new Exception(s"The field $n does not exist under the element ${res.label}.")
+    }
   }
 
   def evalApply(t: Term.Apply, scope: Map[String, AnyRef]): DataSet = t match {
@@ -131,7 +138,7 @@ class TermExecutor(nameSpace: String) {
     // dynamically call function, evaluating parameters before execution
     case Term.Apply(Term.Name(fName), args)
       if !scope.contains(fName) =>
-        FunctionExecutor.execute(nameSpace, fName, args.map(eval(_, scope)).toList)
+        FunctionExecutor.execute(taskSetting.nameSpace, fName, args.map(eval(_, scope)).toList)
 
     // get DataSet by ordinal
     case Term.Apply(q, Seq(Lit(num: Int))) => eval(q, scope)(num)

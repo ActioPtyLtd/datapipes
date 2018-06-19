@@ -39,3 +39,35 @@ options:
 vmargs:
 * **-Dkey=val**
     Command-line arguments used to substitue values in the configuration file.
+
+
+## Hello World
+This example is a simple Hello World introduction to Data Pipes. Ensure you have downloaded the latest release and example file (rest_to_csv.conf) included in this repo.
+
+```
+$ java -jar datapipes-assembly.jar -c ./examples/rest_to_csv.conf
+```
+
+This will generate the following output on the console:
+```
+[main] INFO  AppConsole - ./examples/rest_to_csv.conf
+[main] INFO  AppConsole - run.id=ea8e2d50-ff88-4685-9d03-db652735316b
+[main] INFO  AppConsole - Running pipe: rest_to_csv
+[main] INFO  RESTJsonDataSource - Calling GET https://randomuser.me/api?results=100
+[main] INFO  RESTJsonDataSource - Response size: 103032
+[main] INFO  RESTJsonDataSource - Response body:
+[main] INFO  RESTJsonDataSource - {"results":[{"gender":"male","name":{"title":"mr","first":"arno","last":"krah"},"location":{"street"...
+[main] INFO  RESTJsonDataSource - Status code 200 returned.
+[main] INFO  TaskExtract - Sending remaining buffered data...
+[main] INFO  LocalFileSystemDataSource - Writing to file: ./examples/users-female.csv...
+[main] INFO  LocalFileSystemDataSource - Completed writing to file: ./examples/users-female.csv.
+[main] INFO  LocalFileSystemDataSource - Writing to file: ./examples/users-male.csv...
+[main] INFO  LocalFileSystemDataSource - Completed writing to file: ./examples/users-male.csv.
+[main] INFO  SimpleExecutor - === Operation get_each_user completed ===
+[main] INFO  SimpleExecutor - === Operation save_to_csv completed ===
+[main] INFO  AppConsole - Pipe rest_to_csv completed successfully.
+```
+
+Congratulations! You have run your first script using Data Pipes. 
+
+As suggested by the logs, you should see two csv files generated. These files have been populated with sample data from a public Restful service. Some of the data has been transformed to demonstrate some of the expression capability. Feel free to make changes to the script and remember to have fun!

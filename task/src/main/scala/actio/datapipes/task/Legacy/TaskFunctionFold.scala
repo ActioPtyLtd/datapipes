@@ -2,13 +2,12 @@ package actio.datapipes.task.Legacy
 
 import actio.common.Data.{DataNothing, DataSet, DataString}
 import actio.common.Dom
-import actio.datapipes.task.Term.{FunctionExecutor}
+import actio.datapipes.task.Term.FunctionExecutor
 import actio.datapipes.task.TaskTransform
+import org.apache.http.annotation.Obsolete
 
-
+@Obsolete
 class TaskFunctionFold(name: String, config: DataSet) extends TaskTransform(name) {
-
-  val namespace = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Functions")
 
   val batch = config("batch").map(m => m.stringOption.map(_.split("\\s*,\\s*").toList).getOrElse(List()))
 
@@ -18,7 +17,7 @@ class TaskFunctionFold(name: String, config: DataSet) extends TaskTransform(name
       .foldLeft[DataSet](dom.headOption.map(_.success).getOrElse(DataNothing()))((dataSet, funcList) =>
         funcList
           .headOption
-          .map(h => FunctionExecutor.execute(namespace, h, dataSet :: funcList.tail.map(DataString(_))))
+          .map(h => FunctionExecutor.execute("", h, dataSet :: funcList.tail.map(DataString(_))))
           .getOrElse(DataNothing())))
 
 

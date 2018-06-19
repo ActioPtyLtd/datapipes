@@ -16,7 +16,7 @@ import org.apache.commons.io.FilenameUtils
 
 object AppConsole {
 
-  lazy val logger = Logger("AppTest")
+  lazy val logger = Logger("AppConsole")
 
   def main(args: Array[String]): Unit = {
 

@@ -6,13 +6,13 @@ import actio.common.{DataSource, Dom, Observer, Task}
 
 import scala.collection.mutable.{ListBuffer}
 
-class TaskLoad(val name: String, val config: DataSet, version: String) extends Task {
+class TaskLoad(val name: String, val config: DataSet, taskSetting: TaskSetting) extends Task {
 
-  private val dataSource: DataSource = DataSourceFactory(config("dataSource"))
+  private val dataSource: DataSource = DataSourceFactory(config("dataSource"), taskSetting)
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
-  private val terms: TermLinkedTree = TaskLookup.getTermTree(TaskLookup.queryAdjust(config("dataSource")("query")("create"), version))
+  private val terms: TermLinkedTree = TaskLookup.getTermTree(TaskLookup.queryAdjust(config("dataSource")("query")("create"), taskSetting.version))
   private val namespace: String = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Legacy.Functions")
-  private val termExecutor = new TermExecutor(namespace)
+  private val termExecutor = new TermExecutor(taskSetting)
 
   def completed(): Unit = {
     _observer.foreach(o => o.completed())

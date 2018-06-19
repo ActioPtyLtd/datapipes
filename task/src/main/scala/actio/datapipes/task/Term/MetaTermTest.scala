@@ -2,6 +2,7 @@ package actio.datapipes.task.Term
 
 import scala.meta._
 import actio.common.Data._
+import actio.datapipes.task.TaskSetting
 /**
   * Created by mauri on 31/08/2016.
   */
@@ -14,7 +15,7 @@ object MetaTermTest extends App {
 
   println(term.get.structure)
 
-  val res = new TermExecutor("").eval(ds, term.get)
+  val res = new TermExecutor(TaskSetting("","",false)).eval(ds, term.get)
 
   println(res)
 }

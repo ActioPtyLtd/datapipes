@@ -8,11 +8,10 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.ListBuffer
 import scala.meta._
 
-class TaskJoin(val name: String, val config: DataSet, version: String) extends Task {
+class TaskJoin(val name: String, val config: DataSet, taskSetting: TaskSetting) extends Task {
 
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
-  private val namespace = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Functions")
-  private val termExecutor = new TermExecutor(namespace)
+  private val termExecutor = new TermExecutor(taskSetting)
   private val keyRightTerm = termExecutor.getTemplateTerm(config("keyR").stringOption.getOrElse(""))
   private val keyLeftTerm = termExecutor.getTemplateTerm(config("keyL").stringOption.getOrElse(""))
   private val iterateRightTerm: Option[Term] = config("iterateR").stringOption.map(m => m.parse[Term].get)
@@ -34,7 +33,7 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
       val query = termRead.map(r => TaskLookup.interpolate(termExecutor, r,
         value.success)).getOrElse(DataNothing())
 
-      val src = DataSourceFactory(config("dataSource"))
+      val src = DataSourceFactory(config("dataSource"), taskSetting)
 
       val localObserver = new Observer[DataSet] {
 
@@ -46,7 +45,7 @@ class TaskJoin(val name: String, val config: DataSet, version: String) extends T
 
         // total hack
         val adjustForREST: Boolean = (config("dataSource")("type").stringOption.contains("rest") ||
-          config("dataSource")("type").stringOption.contains("file") ) && version == "v1"
+          config("dataSource")("type").stringOption.contains("file") ) && taskSetting.version == "v1"
 
         override def next(value: DataSet): Unit = {
 

@@ -7,12 +7,12 @@ import actio.common.{DataSource, Dom, Observer, Task}
 import scala.collection.mutable.ListBuffer
 import scala.meta._
 
-class TaskLookup(name: String, config: DataSet, version: String) extends Task {
+class TaskLookup(name: String, config: DataSet, taskSetting: TaskSetting) extends Task {
 
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
-  private val terms = TaskLookup.getTermTree(TaskLookup.queryAdjust(config("dataSource")("query")("read"), version))
+  private val terms = TaskLookup.getTermTree(TaskLookup.queryAdjust(config("dataSource")("query")("read"), taskSetting.version))
   private val namespace = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Legacy.Functions")
-  private val termExecutor = new TermExecutor(namespace)
+  private val termExecutor = new TermExecutor(taskSetting)
 
   def completed(): Unit = {
     _observer.foreach(o => o.completed())
@@ -22,7 +22,7 @@ class TaskLookup(name: String, config: DataSet, version: String) extends Task {
 
   def next(value: Dom): Unit = {
 
-    val dataSource: DataSource = DataSourceFactory(config("dataSource"))
+    val dataSource: DataSource = DataSourceFactory(config("dataSource"), taskSetting)
     val ret = ListBuffer[DataSet]()
 
     val localObserver = new Observer[DataSet] {
@@ -59,7 +59,7 @@ class TaskLookup(name: String, config: DataSet, version: String) extends Task {
     // TODO: check old code for merge logic
     val merge = DataArray((value.success.elems zip ret).map(z =>
 
-      if(version == "v1")
+      if(taskSetting.version == "v1")
         DataRecord(DataArray(name,z._2.elems.toList) :: z._1.elems.toList)
       else
         Operators.mergeLeft(z._1, z._2)

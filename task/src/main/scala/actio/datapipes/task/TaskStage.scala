@@ -9,10 +9,10 @@ import actio.datapipes.task.Term.TermExecutor
 
 import scala.collection.mutable.ListBuffer
 
-class TaskStage(val name: String, val config: DataSet) extends Task {
+class TaskStage(val name: String, val config: DataSet, taskSetting: TaskSetting) extends Task {
 
-  private val dataSource: DataSource = DataSourceFactory(config("dataSource"))
-  private lazy val runDataSource: DataSource = DataSourceFactory(config("run_dataSource"))
+  private val dataSource: DataSource = DataSourceFactory(config("dataSource"), taskSetting)
+  private lazy val runDataSource: DataSource = DataSourceFactory(config("run_dataSource"), taskSetting)
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
 
   private val termCreate: TermLinkedTree = TaskLookup.getTermTree(config("dataSource")("query")("create"))
@@ -20,7 +20,7 @@ class TaskStage(val name: String, val config: DataSet) extends Task {
   private val termComplete: TermLinkedTree = TaskLookup.getTermTree(config("dataSource")("query")("finalise"))
 
   private val namespace: String = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Legacy.Functions")
-  private val termExecutor = new TermExecutor(namespace)
+  private val termExecutor = new TermExecutor(taskSetting)
 
   private var initialised = false
   private var batchNum = 1

@@ -48,13 +48,13 @@ object DataSourceFactory {
   )
 
 
-  def apply(parameters: DataSet): DataSource = {
+  def apply(parameters: DataSet, taskSetting: TaskSetting): DataSource = {
 
     val iterateOption = parameters("iterate")("until").stringOption
 
     val dataSource = sources(parameters("type").stringOption.get)(parameters)
 
-    lazy val termExecutor = new TermExecutor("actio.datapipes.task.Term.Functions")
+    lazy val termExecutor = new TermExecutor(taskSetting)
     lazy val termRead = TaskLookup.getTermTree(parameters("query")("read"))
     lazy val termUntil = parameters("iterate")("until").stringOption.get.parse[Term].get
 

@@ -13,16 +13,15 @@ object Cache {
   def clear(): Unit = { dim.clear() }
 }
 
-class TaskUpdate(val name: String, val config: DataSet, version: String) extends actio.common.Task {
+class TaskUpdate(val name: String, val config: DataSet, taskSetting: TaskSetting) extends actio.common.Task {
 
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
-  private val namespace = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Functions")
-  private val termExecutor = new TermExecutor(namespace)
+  private val termExecutor = new TermExecutor(taskSetting)
   private val keyRightTerm = termExecutor.getTemplateTerm(config("keyR").stringOption.getOrElse(""))
   private val changeRightTerm = termExecutor.getTemplateTerm(config("changeR").stringOption.getOrElse(""))
   private val keyLeftTerm = termExecutor.getTemplateTerm(config("keyL").stringOption.getOrElse(""))
   private val changeLeftTerm = termExecutor.getTemplateTerm(config("changeL").stringOption.getOrElse(""))
-  private val queryDataSet = TaskLookup.queryAdjust(config("dataSource")("query"), version)
+  private val queryDataSet = TaskLookup.queryAdjust(config("dataSource")("query"), taskSetting.version)
   private val termRead = TaskLookup.getTermTree(queryDataSet("read"))
   private val termCreate = TaskLookup.getTermTree(queryDataSet("create"))
   private val termUpdate = TaskLookup.getTermTree(queryDataSet("update"))
@@ -42,7 +41,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
       val query = TaskLookup.interpolate(termExecutor, termRead,
         value.success)
 
-      val src = DataSourceFactory(config("dataSource"))
+      val src = DataSourceFactory(config("dataSource"), taskSetting)
 
       val localObserver = new Observer[DataSet] {
 
@@ -82,7 +81,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
       .filterNot(d => Cache.dim.get(d._2).contains(d._3))
 
     if (config("dataSource")("query")("create").toOption.isDefined && inserts.nonEmpty) {
-      val src = DataSourceFactory(config("dataSource"))
+      val src = DataSourceFactory(config("dataSource"), taskSetting)
 
       val query = inserts
         .map(i => TaskLookup.interpolate(termExecutor, termCreate, i._1))
@@ -93,7 +92,7 @@ class TaskUpdate(val name: String, val config: DataSet, version: String) extends
     }
 
     if (config("dataSource")("query")("update").toOption.isDefined && updates.nonEmpty) {
-      val src = DataSourceFactory(config("dataSource"))
+      val src = DataSourceFactory(config("dataSource"), taskSetting)
 
       val query = updates
         .map(i => TaskLookup.interpolate(termExecutor, termUpdate, i._1))

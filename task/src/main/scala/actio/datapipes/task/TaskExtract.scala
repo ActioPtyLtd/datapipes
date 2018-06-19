@@ -8,15 +8,14 @@ import com.typesafe.scalalogging.Logger
 import scala.util.Try
 import scala.collection.mutable.{ListBuffer, Queue}
 
-class TaskExtract(val name: String, val config: DataSet, val version: String) extends Task {
+class TaskExtract(val name: String, val config: DataSet, val taskSetting: TaskSetting) extends Task {
 
   private val logger = Logger("TaskExtract")
   private val size: Int = config("size").stringOption.flatMap(m => Try(m.toInt).toOption).getOrElse(100)
-  private val dataSource: DataSource = DataSourceFactory(config("dataSource"))
+  private val dataSource: DataSource = DataSourceFactory(config("dataSource"), taskSetting)
   private val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
   private val buffer = Queue[DataSet]()
-  private val namespace = config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Legacy.Functions")
-  private val termExecutor = new TermExecutor(namespace)
+  private val termExecutor = new TermExecutor(taskSetting)
   private val termRead = TaskLookup.getTermTree(config("dataSource")("query")("read"))
 
   def completed(): Unit = {
@@ -67,7 +66,7 @@ class TaskExtract(val name: String, val config: DataSet, val version: String) ex
 
   // dont send an array for rest data source if v1
   def responseAdjust(): Unit = {
-    if (config("dataSource")("type").stringOption.contains("rest") && version == "v1") {
+    if (config("dataSource")("type").stringOption.contains("rest") && taskSetting.version == "v1") {
       val send = for {
         o <- _observer
         b <- buffer

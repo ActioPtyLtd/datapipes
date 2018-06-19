@@ -7,10 +7,10 @@ import actio.datapipes.task.Term.TermExecutor
 import scala.collection.mutable.ListBuffer
 import scala.meta._
 
-class TaskAssert(name: String, config: DataSet) extends actio.common.Task {
+class TaskAssert(name: String, config: DataSet, taskSetting: TaskSetting) extends actio.common.Task {
   val _observer: ListBuffer[Observer[Dom]] = ListBuffer()
   val term: Term = config("term").toString.parse[Term].get
-  val executor = new TermExecutor(config("namespace").stringOption.getOrElse("actio.datapipes.task.Term.Legacy.Functions"))
+  val executor = new TermExecutor(taskSetting)
   val message: String = config("message").toString
   val abort: Boolean = config("abort").stringOption.contains("true")
   val statusCode: Int = config("statuscode").intOption.getOrElse(1)
