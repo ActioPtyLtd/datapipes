@@ -94,6 +94,10 @@ object SimpleExecutor {
                 0, 0, e)))
             }
 
+            if(t.config("onError").stringOption.contains("exit")) {
+              Runtime.getRuntime.exit(1)
+            }
+
             totalError = totalError + 1
             totalErrorSize = totalErrorSize + size
           }
