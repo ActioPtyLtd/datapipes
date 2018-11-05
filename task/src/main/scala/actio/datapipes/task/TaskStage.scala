@@ -1,10 +1,7 @@
 package actio.datapipes.task
 
-import java.util.UUID
-
-import actio.common.Data._
+import actio.common.Data.{DataRecord, _}
 import actio.common.{DataSource, Dom, Observer, Task}
-import actio.datapipes.dataSources.LocalFileSystemDataSource
 import actio.datapipes.task.Term.TermExecutor
 
 import scala.collection.mutable.ListBuffer
@@ -41,7 +38,7 @@ class TaskStage(val name: String, val config: DataSet, taskSetting: TaskSetting)
       DataRecord(
         value("start").success(0)("run"),
         Operators.mergeLeft(config("parameters").toOption.getOrElse(DataRecord("parameters")),
-        DataRecord("parameters", value("start").success(0)("lineage").elems.collect { case s: DataString => s }.toList)),
+        DataRecord("parameters", value("start").success(0).elems.collect { case s: DataString => s }.toList)),
         DataString("batchId", batchNum.toString.reverse.padTo(4, '0').reverse)
       )
     )
